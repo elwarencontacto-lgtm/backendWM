@@ -12,7 +12,7 @@ app = FastAPI()
 # ✅ CORS (para GitHub Pages)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # luego lo puedes restringir a tu dominio
+    allow_origins=["*"],  # luego puedes restringir a tu dominio
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -28,10 +28,7 @@ def run_capture(cmd: list[str]) -> str:
     return p.stderr + "\n" + (p.stdout or "")
 
 def detect_volume(input_path: str) -> dict:
-    """
-    Analiza volumen con ffmpeg volumedetect.
-    Devuelve mean_volume y max_volume en dB (ej: -18.3)
-    """
+    """Analiza volumen con ffmpeg volumedetect."""
     cmd = [
         "ffmpeg", "-hide_banner", "-nostats",
         "-i", input_path,
@@ -39,53 +36,73 @@ def detect_volume(input_path: str) -> dict:
         "-f", "null", "-"
     ]
     out = run_capture(cmd)
-
     mean_m = re.search(r"mean_volume:\s*(-?\d+(\.\d+)?)\s*dB", out)
     max_m  = re.search(r"max_volume:\s*(-?\d+(\.\d+)?)\s*dB", out)
-
     mean_db = float(mean_m.group(1)) if mean_m else None
     max_db  = float(max_m.group(1)) if max_m else None
-
     return {"mean_db": mean_db, "max_db": max_db}
 
 def choose_mastering(mean_db, max_db):
-    """
-    “IA simple”: decide intensidad y target según el audio.
-    """
-    # Defaults
+    """IA simple: decide intensidad/target según el audio."""
     intensity = "medium"
-    target = "streaming"  # -14
+    target = "streaming"
     width = "normal"
 
-    # Si no hay datos, devolvemos defaults
     if mean_db is None or max_db is None:
         return intensity, target, width
 
-    # Si el audio ya viene muy alto y cerca del 0 dB, usamos más suave
     if max_db > -1.5:
         intensity = "soft"
         target = "streaming"
-        width = "normal"
-    # Si el audio viene muy bajo, lo empujamos más
     elif mean_db < -23:
         intensity = "hard"
-        target = "radio"   # -11 aprox
-        width = "normal"
-    # Medio-bajo: un poco más fuerte que streaming
+        target = "radio"
     elif mean_db < -19:
         intensity = "medium"
         target = "radio"
-        width = "normal"
     else:
         intensity = "medium"
         target = "streaming"
-        width = "normal"
 
     return intensity, target, width
 
-def build_filter_chain(intensity: str, target: str, width: str):
+def build_eq_filters(bands):
+    """
+    bands: lista de hasta 6 objetos:
+      {"freq":80,"gain":2.0,"q":1.0,"on":true}
+    Usa ffmpeg equalizer (peaking) aproximando Q -> w.
+    """
+    eq_filters = []
+    if not isinstance(bands, list):
+        return eq_filters
+
+    for b in bands[:6]:
+        try:
+            if not b.get("on", True):
+                continue
+            f = float(b.get("freq", 1000))
+            g = float(b.get("gain", 0))
+            q = float(b.get("q", 1.0))
+
+            # convertir Q a "w" (ancho en octavas aprox)
+            w = max(0.1, min(4.0, 1.6 / max(0.2, q)))
+
+            # rango seguro
+            f = max(20.0, min(20000.0, f))
+            g = max(-24.0, min(24.0, g))
+
+            eq_filters.append(f"equalizer=f={f}:t=q:w={w}:g={g}")
+        except Exception:
+            continue
+
+    return eq_filters
+
+def build_filter_chain(intensity: str, target: str, width: str, bands):
     # Targets LUFS
     target_lufs = {"streaming": -14, "radio": -11, "club": -9}.get(target, -14)
+
+    # EQ (6 bandas) al inicio
+    eq = build_eq_filters(bands)
 
     # Comp/limit según intensidad
     if intensity == "soft":
@@ -105,7 +122,8 @@ def build_filter_chain(intensity: str, target: str, width: str):
     # Loudness normalization
     loud = f"loudnorm=I={target_lufs}:TP=-1.0:LRA=11"
 
-    return ",".join([comp, stereo, loud, limit])
+    # orden: EQ -> comp -> stereo -> loudnorm -> limiter
+    return ",".join(eq + [comp, stereo, loud, limit])
 
 @app.get("/")
 def root():
@@ -123,27 +141,23 @@ async def export_wav(audio: UploadFile = File(...), settings: str = Form("{}")):
         with open(input_path, "wb") as f:
             f.write(data)
 
-        # Leer settings (si vienen)
         cfg = json.loads(settings or "{}")
 
-        # Si el usuario manda intensity/target/width, se usan.
-        # Si NO manda, activamos “IA auto”.
         intensity = cfg.get("intensity")
         target = cfg.get("target")
         width = cfg.get("width")
+        bands = cfg.get("bands", [])
 
-        # AUTO: si falta algo, lo decidimos con análisis
+        # IA: si falta intensity/target/width, el backend decide solo
         if not intensity or not target or not width:
             vol = detect_volume(input_path)
-            auto_intensity, auto_target, auto_width = choose_mastering(vol["mean_db"], vol["max_db"])
+            ai_int, ai_target, ai_width = choose_mastering(vol["mean_db"], vol["max_db"])
+            intensity = intensity or ai_int
+            target = target or ai_target
+            width = width or ai_width
 
-            intensity = intensity or auto_intensity
-            target = target or auto_target
-            width = width or auto_width
+        filter_chain = build_filter_chain(intensity, target, width, bands)
 
-        filter_chain = build_filter_chain(intensity, target, width)
-
-        # Export WAV real (44.1k, stereo, 16-bit)
         cmd = [
             "ffmpeg", "-y",
             "-i", input_path,
@@ -163,11 +177,8 @@ async def export_wav(audio: UploadFile = File(...), settings: str = Form("{}")):
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": "Server error", "details": str(e)})
     finally:
-        # limpieza básica
         try:
             if os.path.exists(input_path):
                 os.remove(input_path)
         except:
             pass
-        # output lo borraremos después de servir; si quieres, lo borramos en otro endpoint o cron.
-        
