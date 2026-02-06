@@ -25,7 +25,7 @@ def run_capture(cmd: list[str]) -> str:
     p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     if p.returncode != 0:
         raise RuntimeError(p.stderr[-2000:])
-    return p.stderr + "\n" + (p.stdout or "")
+    return (p.stderr or "") + "\n" + (p.stdout or "")
 
 def detect_volume(input_path: str) -> dict:
     """Analiza volumen con ffmpeg volumedetect."""
@@ -70,7 +70,9 @@ def build_eq_filters(bands):
     """
     bands: lista de hasta 6 objetos:
       {"freq":80,"gain":2.0,"q":1.0,"on":true}
-    Usa ffmpeg equalizer (peaking) aproximando Q -> w.
+
+    ✅ FFmpeg correcto:
+      equalizer=f=1000:width_type=q:width=1.0:g=3
     """
     eq_filters = []
     if not isinstance(bands, list):
@@ -80,18 +82,19 @@ def build_eq_filters(bands):
         try:
             if not b.get("on", True):
                 continue
+
             f = float(b.get("freq", 1000))
             g = float(b.get("gain", 0))
             q = float(b.get("q", 1.0))
 
-            # convertir Q a "w" (ancho en octavas aprox)
-            w = max(0.1, min(4.0, 1.6 / max(0.2, q)))
-
-            # rango seguro
+            # rangos seguros
             f = max(20.0, min(20000.0, f))
             g = max(-24.0, min(24.0, g))
+            q = max(0.2, min(12.0, q))
 
-            eq_filters.append(f"equalizer=f={f}:t=q:w={w}:g={g}")
+            # ✅ Sintaxis correcta para ffmpeg
+            eq_filters.append(f"equalizer=f={f}:width_type=q:width={q}:g={g}")
+
         except Exception:
             continue
 
