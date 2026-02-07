@@ -5,9 +5,17 @@ import subprocess, uuid, os, json
 
 app = FastAPI()
 
+# ✅ CORS correcto para GitHub Pages (y opcional localhost)
+ALLOWED_ORIGINS = [
+    "https://elwarencontacto-lgtm.github.io",
+    "http://localhost:5173",
+    "http://localhost:5500"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=False,  # ✅ IMPORTANTE
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -18,6 +26,10 @@ os.makedirs(TMP, exist_ok=True)
 @app.get("/")
 def root():
     return {"ok": True, "service": "master-backend"}
+
+@app.get("/health")
+def health():
+    return {"ok": True}
 
 def safe(v, d):
     try: return float(v)
@@ -37,10 +49,8 @@ def build_eq(bands):
         g = max(-18, min(18, g))
         q = max(0.3, min(10, q))
 
-        # ✅ BIQUAD paramétrico (peak)
-        filters.append(
-            f"biquad=type=peaking:frequency={f}:gain={g}:width={q}"
-        )
+        # ✅ BIQUAD (viene habilitado en Render)
+        filters.append(f"biquad=type=peaking:frequency={f}:gain={g}:width={q}")
 
     return filters
 
@@ -71,7 +81,7 @@ def chain(cfg):
     return ",".join(eq + [comp, stereo, loud, limit])
 
 @app.post("/export-wav")
-async def export(audio: UploadFile = File(...), settings: str = Form("{}")):
+async def export_wav(audio: UploadFile = File(...), settings: str = Form("{}")):
     uid = str(uuid.uuid4())
     inp = f"{TMP}/{uid}_in"
     out = f"{TMP}/{uid}.wav"
@@ -95,7 +105,6 @@ async def export(audio: UploadFile = File(...), settings: str = Form("{}")):
         ]
 
         subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
         return FileResponse(out, media_type="audio/wav", filename="master.wav")
 
     except subprocess.CalledProcessError as e:
@@ -103,7 +112,8 @@ async def export(audio: UploadFile = File(...), settings: str = Form("{}")):
             "error": "FFmpeg failed",
             "details": e.stderr.decode() if hasattr(e.stderr, "decode") else str(e)
         })
-
+    except Exception as e:
+        return JSONResponse(500, {"error": "Server error", "details": str(e)})
     finally:
         for f in (inp, out):
             try:
