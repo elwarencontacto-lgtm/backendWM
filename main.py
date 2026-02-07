@@ -82,7 +82,6 @@ async def master(file: UploadFile = File(...)):
 
         audio, sr, channels = read_wav_pcm(data)
 
-        # Ajuste simple: normaliza para que quede fuerte sin saturar
         peak = float(np.max(np.abs(audio))) if audio.size else 0.0
         if peak > 0:
             audio = (audio / peak) * 0.95
