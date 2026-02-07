@@ -5,19 +5,18 @@ import subprocess, uuid, os, json
 
 app = FastAPI()
 
-# ✅ CORS correcto para GitHub Pages (y opcional localhost)
+# ✅ Cambia SOLO si tu dominio de GitHub Pages es distinto
 ALLOWED_ORIGINS = [
     "https://elwarencontacto-lgtm.github.io",
-    "http://localhost:5173",
-    "http://localhost:5500"
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
-    allow_credentials=False,  # ✅ IMPORTANTE
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["Content-Disposition"],
 )
 
 TMP = "tmp"
@@ -39,7 +38,6 @@ def build_eq(bands):
     filters = []
     if not isinstance(bands, list):
         return filters
-
     for b in bands[:6]:
         f = safe(b.get("freq"), 1000)
         g = safe(b.get("gain"), 0)
@@ -49,9 +47,8 @@ def build_eq(bands):
         g = max(-18, min(18, g))
         q = max(0.3, min(10, q))
 
-        # ✅ BIQUAD (viene habilitado en Render)
+        # ✅ BIQUAD (estable en Render)
         filters.append(f"biquad=type=peaking:frequency={f}:gain={g}:width={q}")
-
     return filters
 
 def chain(cfg):
@@ -105,6 +102,7 @@ async def export_wav(audio: UploadFile = File(...), settings: str = Form("{}")):
         ]
 
         subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
         return FileResponse(out, media_type="audio/wav", filename="master.wav")
 
     except subprocess.CalledProcessError as e:
