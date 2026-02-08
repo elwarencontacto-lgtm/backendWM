@@ -217,6 +217,32 @@
     }
 
     .disabled{ opacity:.6; pointer-events:none; }
+.statusline{
+  margin-top: 12px;
+  display:flex;
+  gap:10px;
+  align-items:center;
+  font-size: 12px;
+  color: rgba(233,237,247,.70);
+}
+
+.progress{
+  margin-top: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.22);
+  overflow:hidden;
+}
+
+.progress-bar{
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(138,92,255,.95), rgba(0,215,255,.95));
+  transition: width .25s ease;
+}
+
   </style>
 </head>
 
@@ -251,9 +277,15 @@
         <button class="btn" id="btnImport" type="button">Importar</button>
         <button class="btn primary" id="btnMasterTop" type="button" disabled>Renderizar</button>
       </div>
+<div id="jobStatus" class="statusline" aria-live="polite">
+  <span class="dot run" style="box-shadow:none;"></span>
+  <span id="jobText">Listo para renderizar.</span>
+</div>
+<div class="progress" aria-hidden="true">
+  <div id="jobBar" class="progress-bar"></div>
+</div>
     </div>
 
-    <!-- NUEVO MASTER (movido desde dashboard) -->
     <section class="card" id="newMasterCard">
       <div class="card-h">
         <h2>Nuevo master</h2>
@@ -325,7 +357,109 @@
     if (btnStartJob) btnStartJob.disabled = !currentFile;
   });
 
+ <script>
+  const fileInput = document.getElementById("fileInput");
+  const btnPick = document.getElementById("btnPick");
+  const btnStartJob = document.getElementById("btnStartJob");
+  const preset = document.getElementById("preset");
+  const intensity = document.getElementById("intensity2");
+  const fileField = document.getElementById("file");
+
+  const jobText = document.getElementById("jobText");
+  const jobBar = document.getElementById("jobBar");
+
+  let currentFile = null;
+  let fakeTimer = null;
+
+  function setStatus(text, pct){
+    if (jobText) jobText.textContent = text;
+    if (jobBar && typeof pct === "number") jobBar.style.width = `${pct}%`;
+  }
+
+  function lockUI(lock){
+    // bloquea botones mientras procesa
+    btnStartJob.disabled = lock || !currentFile;
+    btnPick && (btnPick.disabled = lock);
+    document.getElementById("btnUploadTop")?.toggleAttribute("disabled", lock);
+  }
+
+  function startFakeProgress(){
+    let p = 8;
+    setStatus("Subiendo archivo…", p);
+    fakeTimer = setInterval(() => {
+      // sube hasta 92% y se queda esperando respuesta real
+      p = Math.min(92, p + Math.random() * 10);
+      if (p < 35) setStatus("Subiendo archivo…", p);
+      else if (p < 80) setStatus("Procesando master…", p);
+      else setStatus("Finalizando…", p);
+    }, 350);
+  }
+
+  function stopFakeProgress(finalText){
+    if (fakeTimer) clearInterval(fakeTimer);
+    fakeTimer = null;
+    if (finalText) setStatus(finalText, 100);
+    setTimeout(() => { if (jobBar) jobBar.style.width = "0%"; }, 1200);
+  }
+
+  function pick(){ fileInput.click(); }
+
+  btnPick?.addEventListener("click", pick);
+  document.getElementById("btnUploadTop")?.addEventListener("click", pick);
+
+  fileInput?.addEventListener("change", (e) => {
+    currentFile = e.target.files?.[0] || null;
+    if (fileField) fileField.value = currentFile ? currentFile.name : "";
+    setStatus(currentFile ? "Archivo cargado. Listo para renderizar." : "Listo para renderizar.", 0);
+    lockUI(false);
+  });
+
   btnStartJob?.addEventListener("click", async () => {
+    if (!currentFile) return;
+
+    lockUI(true);
+    startFakeProgress();
+
+    try{
+      const fd = new FormData();
+      fd.append("file", currentFile);
+      fd.append("preset", preset?.value || "clean");
+      fd.append("intensity", String(intensity?.value || 55));
+      fd.append("out_format", "wav");
+
+      const res = await fetch("/api/master", { method: "POST", body: fd });
+
+      if (!res.ok) {
+        const txt = await res.text().catch(()=> "");
+        stopFakeProgress("Falló el masterizado.");
+        alert("Falló el masterizado.\n" + txt.slice(0, 400));
+        lockUI(false);
+        return;
+      }
+
+      setStatus("Descargando master…", 96);
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "warmaster_master.wav";
+      a.click();
+      URL.revokeObjectURL(url);
+
+      stopFakeProgress("Listo ✅ Master descargado.");
+      lockUI(false);
+    } catch (err){
+      stopFakeProgress("Error de conexión.");
+      alert("Error de conexión.");
+      lockUI(false);
+    }
+  });
+
+  // estado inicial
+  setStatus("Listo para renderizar.", 0);
+</script>
+
     if (!currentFile) return;
 
     const old = btnStartJob.textContent;
