@@ -399,6 +399,40 @@ if (currentFile && audioPreview) {
 
 
   });
+// PASO 6: Intensidad en tiempo real (preview)
+intensity?.addEventListener("input", () => {
+  if (!gainNode) return;
+
+  const v = Number(intensity.value || 55) / 100; // 0..1
+  gainNode.gain.value = 1 + v * 0.8;             // 1.0..1.8 aprox
+});
+
+// PASO 7: Preset en tiempo real (preview)
+preset?.addEventListener("change", () => {
+  if (!bass || !treble) return;
+
+  switch (preset.value) {
+    case "club":
+      bass.gain.value = 6;
+      treble.gain.value = 2;
+      break;
+    case "warm":
+      bass.gain.value = 4;
+      treble.gain.value = -2;
+      break;
+    case "bright":
+      bass.gain.value = 1;
+      treble.gain.value = 5;
+      break;
+    case "heavy":
+      bass.gain.value = 7;
+      treble.gain.value = 3;
+      break;
+    default:
+      bass.gain.value = 2;
+      treble.gain.value = 1;
+  }
+});
 
   btnStartJob?.addEventListener("click", async () => {
     if (!currentFile) return;
