@@ -17,35 +17,31 @@ app = FastAPI()
 
 
 def build_chain(preset: str, intensity: int) -> str:
-    """Cadena simple pero REAL: EQ + limitador + normalización LUFS."""
     preset = (preset or "clean").lower()
 
-    # Clamp
     try:
         intensity = int(intensity)
-    except Exception:
+    except:
         intensity = 55
+
     intensity = max(0, min(100, intensity))
 
-    # Base
-    base = "highpass=f=30"
-
-    # Presets simples
+    # EQ simple (seguro)
     if preset == "club":
-        eq = "equalizer=f=80:width_type=o:width=1:g=3, equalizer=f=9000:width_type=o:width=1:g=2"
+        eq = "bass=g=5"
     elif preset == "warm":
-        eq = "equalizer=f=200:width_type=o:width=1:g=2, equalizer=f=7000:width_type=o:width=1:g=-1.5"
+        eq = "bass=g=3,treble=g=-1"
     elif preset == "bright":
-        eq = "equalizer=f=12000:width_type=o:width=1:g=3, equalizer=f=250:width_type=o:width=1:g=-1"
+        eq = "treble=g=4"
     elif preset == "heavy":
-        eq = "equalizer=f=120:width_type=o:width=1:g=3, equalizer=f=3500:width_type=o:width=1:g=2"
+        eq = "bass=g=6,treble=g=2"
     else:
-        eq = "equalizer=f=100:width_type=o:width=1:g=1.5, equalizer=f=10000:width_type=o:width=1:g=1.0"
+        eq = "bass=g=2,treble=g=1"
 
-    limiter = "alimiter=limit=0.97:level=0.97"
+    # Ganancia según intensidad
+    gain = 3 + (intensity / 100) * 5  # 3 a 8 dB
 
-    # Intensidad -> LUFS objetivo (realista para demo)
-    target_lufs = -14 + (intensity / 100.0) * 6.0  # -14..-8 aprox
+    return f"{eq},volume={gain}dB,alimiter=limit=0.98"
 
     loudnorm = f"loudnorm=I={target_lufs}:TP=-1.0:LRA=11"
     return f"{base}, {eq}, {limiter}, {loudnorm}"
