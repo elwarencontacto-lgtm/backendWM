@@ -321,6 +321,7 @@
   </div>
 </main>
 <script>
+  const audioOriginal = document.getElementById("audioOriginal");
   const fileInput = document.getElementById("fileInput");
   const btnPick = document.getElementById("btnPick");
   const btnStartJob = document.getElementById("btnStartJob");
@@ -340,6 +341,10 @@
     if (fileField) fileField.value = currentFile ? currentFile.name : "";
     if (btnStartJob) btnStartJob.disabled = !currentFile;
     document.getElementById("abWrapper")?.classList.remove("hidden");
+if (currentFile && audioOriginal) {
+  audioOriginal.src = URL.createObjectURL(currentFile);
+  audioOriginal.load();
+}
 
   });
 
