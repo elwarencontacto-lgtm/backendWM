@@ -217,6 +217,8 @@
     }
 
     .disabled{ opacity:.6; pointer-events:none; }
+    .hidden{ display:none; }
+
   </style>
 </head>
 
@@ -250,6 +252,11 @@
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <button class="btn" id="btnImport" type="button">Importar</button>
         <button class="btn primary" id="btnMasterTop" type="button" disabled>Renderizar</button>
+</div>
+<div id="abWrapper" class="hidden">
+  <!-- aquí irá el A/B después -->
+</div>
+
       </div>
     </div>
 
@@ -323,6 +330,8 @@
     currentFile = e.target.files?.[0] || null;
     if (fileField) fileField.value = currentFile ? currentFile.name : "";
     if (btnStartJob) btnStartJob.disabled = !currentFile;
+    document.getElementById("abWrapper")?.classList.remove("hidden");
+
   });
 
   btnStartJob?.addEventListener("click", async () => {
