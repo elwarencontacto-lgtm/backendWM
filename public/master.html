@@ -314,6 +314,19 @@
         </div>
       </div>
     </section>
+<div id="abWrapper" class="hidden">
+  <div class="ab-player">
+    <div class="ab-col">
+      <label>Original</label>
+      <audio id="audioOriginal" controls></audio>
+    </div>
+
+    <div class="ab-col">
+      <label>Preview</label>
+      <audio id="audioPreview" controls></audio>
+    </div>
+  </div>
+</div>
 
     <!-- input real para conectar luego (por ahora oculto) -->
     <input id="fileInput" type="file" accept="audio/*" hidden />
@@ -328,6 +341,38 @@
   const preset = document.getElementById("preset");
   const intensity = document.getElementById("intensity2");
   const fileField = document.getElementById("file");
+const audioPreview = document.getElementById("audioPreview");
+
+let audioCtx, sourceNode, gainNode, bass, treble;
+
+function initPreview() {
+  if (audioCtx) {
+    try { audioCtx.close(); } catch (e) {}
+  }
+
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  sourceNode = audioCtx.createMediaElementSource(audioPreview);
+
+  bass = audioCtx.createBiquadFilter();
+  bass.type = "lowshelf";
+  bass.frequency.value = 160;
+  bass.gain.value = 2;
+
+  treble = audioCtx.createBiquadFilter();
+  treble.type = "highshelf";
+  treble.frequency.value = 4200;
+  treble.gain.value = 1;
+
+  gainNode = audioCtx.createGain();
+  gainNode.gain.value = 1;
+
+  sourceNode
+    .connect(bass)
+    .connect(treble)
+    .connect(gainNode)
+    .connect(audioCtx.destination);
+}
 
   let currentFile = null;
 
@@ -345,6 +390,13 @@ if (currentFile && audioOriginal) {
   audioOriginal.src = URL.createObjectURL(currentFile);
   audioOriginal.load();
 }
+
+if (currentFile && audioPreview) {
+  audioPreview.src = URL.createObjectURL(currentFile);
+  audioPreview.load();
+  initPreview();
+}
+
 
   });
 
