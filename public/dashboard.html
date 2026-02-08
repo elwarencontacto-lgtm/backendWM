@@ -1,1 +1,579 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WarMaster — Dashboard</title>
+  <meta name="description" content="Panel de usuario WarMaster: proyectos, masters, descargas y plan." />
 
+  <style>
+    :root{
+      --bg0:#07080c;
+      --bg1:#0b0e16;
+      --text:#e9edf7;
+      --muted: rgba(233,237,247,.72);
+
+      --a:#8a5cff;   /* violeta */
+      --b:#00d7ff;   /* cyan */
+      --c:#00ff9a;   /* verde */
+
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
+      --radius: 18px;
+      --radius2: 24px;
+      --max: 1160px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color:var(--text);
+      background:
+        radial-gradient(900px 500px at 10% 10%, rgba(138,92,255,.22), transparent 55%),
+        radial-gradient(800px 500px at 90% 15%, rgba(0,215,255,.18), transparent 55%),
+        radial-gradient(700px 500px at 60% 90%, rgba(0,255,154,.10), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1) 55%, #06070b);
+      overflow-x:hidden;
+    }
+
+    a{ color:inherit; text-decoration:none; }
+    .container{ width:min(var(--max), calc(100% - 40px)); margin:0 auto; }
+
+    .grid-bg{
+      position: fixed;
+      inset: 0;
+      pointer-events:none;
+      opacity:.35;
+      background:
+        linear-gradient(to right, rgba(255,255,255,.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,.03) 1px, transparent 1px);
+      background-size: 54px 54px;
+      mask-image: radial-gradient(600px 400px at 50% 10%, #000 60%, transparent 100%);
+    }
+
+    header{
+      position: sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter: blur(14px);
+      background: rgba(7,8,12,.55);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+
+    .nav{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 14px 0;
+      gap: 18px;
+    }
+
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      font-weight: 820;
+      letter-spacing:.3px;
+    }
+
+    .logo{
+      width: 36px; height:36px; border-radius: 12px;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(0,215,255,.95), transparent 55%),
+        radial-gradient(circle at 70% 70%, rgba(138,92,255,.95), transparent 55%),
+        linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.02));
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 12px 40px rgba(0,0,0,.45);
+      position: relative;
+      overflow:hidden;
+    }
+    .logo::after{
+      content:"";
+      position:absolute; inset:-30px;
+      background: conic-gradient(from 120deg, rgba(0,255,154,.0), rgba(0,255,154,.35), rgba(0,215,255,.0));
+      animation: spin 6s linear infinite;
+      opacity:.9;
+    }
+    @keyframes spin{ to{ transform: rotate(360deg); } }
+
+    .grad{
+      background: linear-gradient(90deg, rgba(138,92,255,1), rgba(0,215,255,1), rgba(0,255,154,1));
+      -webkit-background-clip:text;
+      background-clip:text;
+      color: transparent;
+    }
+
+    .btn{
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-weight: 720;
+      font-size: 14px;
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+      display:inline-flex; align-items:center; gap:10px;
+      user-select:none;
+    }
+    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.22); }
+    .btn.primary{
+      border:none;
+      background: linear-gradient(90deg, rgba(138,92,255,.95), rgba(0,215,255,.95));
+      color:#071018;
+      box-shadow: var(--shadow);
+    }
+    .btn.ghost{ background: transparent; }
+    .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
+
+    main{ padding: 22px 0 40px; }
+
+    .top{
+      display:flex; align-items:flex-end; justify-content:space-between;
+      gap: 18px; flex-wrap: wrap;
+      margin: 10px 0 16px;
+    }
+    h1{
+      margin:0;
+      font-size: clamp(26px, 3.5vw, 34px);
+      letter-spacing:-.6px;
+    }
+    .sub{
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height:1.5;
+      max-width: 70ch;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns: 280px 1fr;
+      gap: 16px;
+      align-items:start;
+    }
+
+    .card{
+      border-radius: var(--radius2);
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      box-shadow: 0 14px 50px rgba(0,0,0,.35);
+      overflow:hidden;
+      position:relative;
+    }
+    .card::before{
+      content:"";
+      position:absolute; inset:-1px;
+      background: radial-gradient(260px 160px at 20% 20%, rgba(138,92,255,.14), transparent 60%);
+      pointer-events:none;
+      opacity:.9;
+    }
+    .card > *{ position:relative; }
+
+    .card-h{
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      display:flex; justify-content:space-between; gap: 10px; align-items:center;
+    }
+    .card-h h2{
+      margin:0;
+      font-size: 14px;
+      letter-spacing:.2px;
+    }
+    .card-b{ padding: 14px; }
+
+    /* Sidebar */
+    .menu{
+      display:flex; flex-direction:column; gap: 8px;
+    }
+    .menu a{
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      color: rgba(233,237,247,.84);
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .menu a.active{
+      border-color: rgba(0,215,255,.35);
+      background: rgba(0,215,255,.08);
+      color: rgba(233,237,247,.95);
+    }
+    .menu small{
+      color: rgba(233,237,247,.55);
+      font-weight: 700;
+      margin-top: 6px;
+    }
+
+    .statgrid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .stat{
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      padding: 12px;
+    }
+    .stat .k{ color: rgba(233,237,247,.65); font-size:12px; font-weight:800; }
+    .stat .v{ margin-top:6px; font-size: 20px; font-weight: 900; letter-spacing:-.5px; }
+    .stat .v small{ font-size: 12px; color: rgba(233,237,247,.6); font-weight:800; }
+
+    /* Table */
+    table{ width:100%; border-collapse: collapse; }
+    th, td{
+      padding: 10px 8px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      font-size: 13px;
+      text-align:left;
+    }
+    th{ color: rgba(233,237,247,.70); font-weight: 900; font-size: 12px; letter-spacing:.2px; }
+    td{ color: rgba(233,237,247,.88); }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      font-weight: 900;
+      font-size: 12px;
+      color: rgba(233,237,247,.9);
+    }
+    .dot{
+      width:8px; height:8px; border-radius:999px; display:inline-block;
+      background: rgba(233,237,247,.45);
+    }
+    .dot.ok{ background: rgba(0,255,154,.75); box-shadow: 0 0 0 6px rgba(0,255,154,.12); }
+    .dot.run{ background: rgba(0,215,255,.85); box-shadow: 0 0 0 6px rgba(0,215,255,.12); }
+    .dot.fail{ background: rgba(255,120,120,.80); box-shadow: 0 0 0 6px rgba(255,120,120,.10); }
+
+    .split{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .field{
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      padding: 12px;
+    }
+    .field label{
+      display:block;
+      font-size: 12px;
+      font-weight: 900;
+      color: rgba(233,237,247,.75);
+      margin-bottom: 6px;
+    }
+    input[type="text"], select{
+      width:100%;
+      padding: 10px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.22);
+      color: var(--text);
+      outline:none;
+    }
+    input[type="range"]{ width:100%; accent-color: var(--b); }
+
+    .row{
+      display:flex; gap: 10px; flex-wrap: wrap; justify-content:flex-end;
+      margin-top: 10px;
+    }
+
+    footer{
+      padding: 18px 0 28px;
+      color: rgba(233,237,247,.55);
+      font-size: 12px;
+    }
+
+    @media (max-width: 980px){
+      .layout{ grid-template-columns: 1fr; }
+      .statgrid{ grid-template-columns: 1fr; }
+      .split{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body> 
+  <script>
+  fetch("http://localhost:3000/me", { credentials: "include" })
+    .then(r => {
+      if (!r.ok) window.location.href = "index.html";
+    });
+</script>
+
+  <div class="grid-bg" aria-hidden="true"></div>
+
+  <header>
+    <div class="container">
+      <div class="nav">
+        <a class="brand" href="index.html" title="Volver al inicio">
+          <span class="logo" aria-hidden="true"></span>
+          <span>War<span class="grad">Master</span></span>
+        </a>
+
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <span class="pill" title="Plan actual"><span class="dot run"></span> Pro (demo)</span>
+          <button class="btn ghost" type="button" id="btnLogout">Cerrar sesión</button>
+          <button class="btn primary" type="button" id="btnNewMaster">Nuevo master</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="top">
+        <div>
+          <h1>Dashboard</h1>
+          <p class="sub">Administra tus masters, revisa el estado de render y descarga versiones listas para publicar.</p>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <a class="btn" href="index.html">Landing</a>
+          <button class="btn" type="button" id="btnBilling">Plan y pagos</button>
+        </div>
+      </div>
+
+      <div class="layout">
+        <!-- Sidebar -->
+        <aside class="card">
+          <div class="card-h">
+            <h2>Menú</h2>
+          </div>
+          <div class="card-b">
+            <div class="menu">
+              <a class="active" href="#overview">Resumen</a>
+              <a href="#projects">Proyectos</a>
+              <a href="#library">Biblioteca</a>
+              <a href="#settings">Ajustes</a>
+              <small>Cuenta</small>
+              <a href="#support">Soporte</a>
+            </div>
+
+            <div style="margin-top:14px; color:rgba(233,237,247,.62); font-size:12px; line-height:1.5;">
+              <b>Tip:</b> cuando conectes backend, este panel puede consumir:
+              <span class="grad">/api/jobs</span>, <span class="grad">/api/upload</span>, <span class="grad">/api/download</span>.
+            </div>
+          </div>
+        </aside>
+
+        <!-- Main -->
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <!-- Overview -->
+          <section id="overview" class="card">
+            <div class="card-h">
+              <h2>Resumen</h2>
+              <span class="pill"><span class="dot ok"></span> Todo OK</span>
+            </div>
+            <div class="card-b">
+              <div class="statgrid">
+                <div class="stat">
+                  <div class="k">Masters este mes</div>
+                  <div class="v">7 <small>/ 20</small></div>
+                </div>
+                <div class="stat">
+                  <div class="k">En cola / procesando</div>
+                  <div class="v">1</div>
+                </div>
+                <div class="stat">
+                  <div class="k">Descargas</div>
+                  <div class="v">14</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Jobs table -->
+          <section id="projects" class="card">
+            <div class="card-h">
+              <h2>Últimos renders</h2>
+              <button class="btn" type="button" id="btnRefresh">Actualizar</button>
+            </div>
+            <div class="card-b" style="padding-top:6px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Track</th>
+                    <th>Estilo</th>
+                    <th>LUFS</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="jobsTbody">
+                  <!-- demo rows inserted by JS -->
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- Library -->
+          <section id="library" class="card">
+            <div class="card-h">
+              <h2>Biblioteca</h2>
+              <button class="btn" type="button" id="btnExport">Exportar lista</button>
+            </div>
+            <div class="card-b" style="color:rgba(233,237,247,.78); font-size:13px; line-height:1.6;">
+              Aquí puedes mostrar “masters guardados”, versiones (WAV/MP3), y links de descarga.
+              <div style="margin-top:10px;">
+                <span class="pill"><span class="dot ok"></span> Guardado automático</span>
+                <span class="pill" style="margin-left:8px;"><span class="dot"></span> Historial de versiones</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Settings -->
+          <section id="settings" class="card">
+            <div class="card-h">
+              <h2>Ajustes rápidos</h2>
+            </div>
+            <div class="card-b">
+              <div class="split">
+                <div class="field">
+                  <label>Nombre</label>
+                  <input type="text" value="Usuario WarMaster" />
+                </div>
+                <div class="field">
+                  <label>Email</label>
+                  <input type="text" value="usuario@warmaster.com" />
+                </div>
+              </div>
+              <div class="row">
+                <button class="btn" type="button">Guardar</button>
+                <button class="btn" type="button">Cambiar contraseña</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Support -->
+          <section id="support" class="card">
+            <div class="card-h">
+              <h2>Soporte</h2>
+              <a class="btn" href="index.html#faq">FAQ</a>
+            </div>
+            <div class="card-b" style="color:rgba(233,237,247,.78); font-size:13px; line-height:1.6;">
+              Agrega aquí un formulario o link a WhatsApp / correo / ticketera.
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <footer>
+        © <span id="year"></span> WarMaster. Dashboard (demo UI).
+      </footer>
+    </div>
+  </main>
+
+  <script>
+    const year = document.getElementById('year');
+    year.textContent = new Date().getFullYear();
+
+    // Demo jobs
+    const jobs = [
+      { track: "Demo_01.wav", style: "Clean", lufs: "-10.2", status: "Listo", s: "ok" },
+      { track: "Club_Banger.mp3", style: "Club", lufs: "-8.5", status: "Procesando", s: "run" },
+      { track: "Rock_Mix.wav", style: "Heavy", lufs: "-9.1", status: "Listo", s: "ok" },
+    ];
+
+    const tbody = document.getElementById('jobsTbody');
+    function dotClass(s){ return s === "ok" ? "ok" : (s === "run" ? "run" : "fail"); }
+
+    function renderJobs(){
+      tbody.innerHTML = jobs.map((j, idx) => `
+        <tr>
+          <td>${j.track}</td>
+          <td>${j.style}</td>
+          <td>${j.lufs}</td>
+          <td><span class="pill"><span class="dot ${dotClass(j.s)}"></span> ${j.status}</span></td>
+          <td style="display:flex; gap:8px; flex-wrap:wrap; padding-top:8px; padding-bottom:8px;">
+            <button class="btn" type="button" onclick="downloadJob(${idx})" ${j.s!=="ok" ? "disabled" : ""}>Descargar</button>
+            <button class="btn" type="button" onclick="duplicateJob(${idx})">Duplicar</button>
+          </td>
+        </tr>
+      `).join("");
+    }
+    renderJobs();
+
+    window.downloadJob = (idx) => {
+      alert("Descarga demo. Conecta aquí GET /api/download/:jobId");
+    };
+    window.duplicateJob = (idx) => {
+      alert("Duplicar preset/intensidad (demo). Conecta POST /api/master con parámetros del job.");
+    };
+
+    document.getElementById('btnRefresh').addEventListener('click', () => {
+      alert("Actualizar (demo). Conecta GET /api/jobs");
+      renderJobs();
+    });
+
+    // New master UI demo
+    const fileField = document.getElementById('file');
+    const btnStartJob = document.getElementById('btnStartJob');
+    const intensity = document.getElementById('intensity');
+    const outLufs = document.getElementById('outLufs');
+
+    function setLufs(){
+      const val = Number(intensity.value);
+      const lufs = (-14 + (val/100)*7).toFixed(1);
+      outLufs.innerHTML = `<span class="dot"></span> ${lufs} LUFS`;
+    }
+    intensity.addEventListener('input', setLufs);
+    setLufs();
+
+    function enableStart(){
+      btnStartJob.disabled = !fileField.value;
+    }
+
+    document.getElementById('btnPick').addEventListener('click', () => {
+      const name = prompt("Nombre de archivo (demo):", "MiTrack.wav");
+      if(name){ fileField.value = name; enableStart(); }
+    });
+
+    document.getElementById('btnPaste').addEventListener('click', () => {
+      const name = prompt("Pega el nombre del archivo:", "");
+      if(name){ fileField.value = name; enableStart(); }
+    });
+
+    document.getElementById('btnStartJob').addEventListener('click', () => {
+      btnStartJob.textContent = "Encolando…";
+      btnStartJob.disabled = true;
+      setTimeout(() => {
+        btnStartJob.textContent = "Renderizar";
+        btnStartJob.disabled = false;
+        alert("Job creado (demo). Conecta POST /api/upload + POST /api/master");
+      }, 900);
+    });
+
+    // Top buttons
+    document.getElementById('btnNewMaster').addEventListener('click', () => {
+      document.querySelector('section.card:nth-of-type(3)')?.scrollIntoView({behavior:"smooth", block:"start"});
+    });
+    document.getElementById('btnBilling').addEventListener('click', () => alert("Plan y pagos (demo)."));
+    document.getElementById('btnExport').addEventListener('click', () => alert("Exportar (demo)."));
+    document.getElementById('btnLogout').addEventListener('click', () => alert("Logout (demo)."));
+  </script>  
+  <script>
+  const btnLogout = document.getElementById("btnLogout");
+
+  if (btnLogout) {
+    btnLogout.addEventListener("click", () => {
+      fetch("http://localhost:3000/logout", {
+        method: "POST",
+        credentials: "include"
+      }).then(() => {
+        window.location.href = "index.html";
+      });
+    });
+  }
+</script>
+<script>
+  document.getElementById("btnNewMaster")?.addEventListener("click", () => {
+    window.location.href = "master.html";
+  });
+</script>
+</body>
+</html>
