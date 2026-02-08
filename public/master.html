@@ -253,12 +253,18 @@
         <button class="btn" id="btnImport" type="button">Importar</button>
         <button class="btn primary" id="btnMasterTop" type="button" disabled>Renderizar</button>
 </div>
-<div id="abWrapper" class="hidden">
-<div style="color:white; font-size:14px;">
-  A/B listo (placeholder)
+<div class="ab-player">
+  <div class="ab-col">
+    <label>Original</label>
+    <audio id="audioOriginal" controls></audio>
+  </div>
+
+  <div class="ab-col">
+    <label>Preview</label>
+    <audio id="audioPreview" controls></audio>
+  </div>
 </div>
 
-</div>
 
       </div>
     </div>
