@@ -304,7 +304,61 @@
 
   </div>
 </main>
+<script>
+  const fileInput = document.getElementById("fileInput");
+  const btnPick = document.getElementById("btnPick");
+  const btnStartJob = document.getElementById("btnStartJob");
+  const preset = document.getElementById("preset");
+  const intensity = document.getElementById("intensity2");
+  const fileField = document.getElementById("file");
 
-<!-- JS lo añadimos después como dijiste -->
+  let currentFile = null;
+
+  function pick() { fileInput.click(); }
+
+  btnPick?.addEventListener("click", pick);
+  document.getElementById("btnUploadTop")?.addEventListener("click", pick);
+
+  fileInput?.addEventListener("change", (e) => {
+    currentFile = e.target.files?.[0] || null;
+    if (fileField) fileField.value = currentFile ? currentFile.name : "";
+    if (btnStartJob) btnStartJob.disabled = !currentFile;
+  });
+
+  btnStartJob?.addEventListener("click", async () => {
+    if (!currentFile) return;
+
+    const old = btnStartJob.textContent;
+    btnStartJob.textContent = "Procesando…";
+    btnStartJob.disabled = true;
+
+    const fd = new FormData();
+    fd.append("file", currentFile);
+    fd.append("preset", preset?.value || "clean");
+    fd.append("intensity", String(intensity?.value || 55));
+
+    const res = await fetch("/api/master", { method: "POST", body: fd });
+
+    if (!res.ok) {
+      const txt = await res.text().catch(()=> "");
+      alert("Falló el masterizado. Revisa logs.\n" + txt.slice(0,300));
+      btnStartJob.textContent = old;
+      btnStartJob.disabled = false;
+      return;
+    }
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "warmaster_master.wav";
+    a.click();
+    URL.revokeObjectURL(url);
+
+    btnStartJob.textContent = old;
+    btnStartJob.disabled = false;
+  });
+</script>
+
 </body>
 </html>
