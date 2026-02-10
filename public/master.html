@@ -629,7 +629,8 @@
       console.log("[Render] POST /api/master", { file: currentFile.name });
 
       // timeout 3 min
-      const res = await fetchWithTimeout("/api/master", { method: "POST", body: fd }, 180000);
+      const API_BASE = "https://backendwm.onrender.com";
+const res = await fetch(`${API_BASE}/api/master`, { method: "POST", body: fd });
 
       console.log("[Render] status:", res.status);
 
