@@ -213,7 +213,7 @@
     .hidden{ display:none; }
     .disabled{ opacity:.6; pointer-events:none; }
 
-    /* === A/B WarMaster UI (sin players blancos) === */
+    /* A/B WarMaster (sin audio blanco) */
     .abCard{
       margin-top:14px;
       border-radius: 18px;
@@ -248,7 +248,7 @@
       font-weight: 900;
     }
     .abBtn[aria-pressed="true"]{
-      border: none;
+      border:none;
       background: linear-gradient(90deg, rgba(138,92,255,.95), rgba(0,215,255,.95));
       color:#061018;
     }
@@ -266,20 +266,14 @@
       justify-content:center;
       font-weight: 900;
     }
-    .abTimeline{
-      flex:1;
-      min-width: 180px;
-    }
+    .abTimeline{ flex:1; min-width: 180px; }
     .abTime{
       font-size: 11px;
       color: rgba(233,237,247,.65);
       margin-bottom:6px;
       text-align:left;
     }
-    #abSeek{
-      width:100%;
-      accent-color: var(--b);
-    }
+    #abSeek{ width:100%; accent-color: var(--b); }
   </style>
 </head>
 
@@ -305,7 +299,7 @@
       <div>
         <h1>Masterizado</h1>
         <p class="sub">
-          Sube tu audio, elige un preset y ajusta la intensidad. Esta pantalla mantiene la línea gráfica de WarMaster.
+          Sube tu audio, elige un preset y ajusta la intensidad.
         </p>
       </div>
     </div>
@@ -320,10 +314,9 @@
         <div class="split">
           <div class="field">
             <label for="file">Archivo</label>
-            <input type="text" id="file" placeholder="Arrastra aquí o elige un archivo (demo)" readonly />
+            <input type="text" id="file" placeholder="Arrastra aquí o elige un archivo" readonly />
             <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
               <button class="btn" type="button" id="btnPick">Seleccionar</button>
-              <button class="btn" type="button" id="btnPaste">Pegar nombre</button>
             </div>
           </div>
 
@@ -353,7 +346,6 @@
           <button class="btn primary" type="button" id="btnStartJob" disabled>Renderizar</button>
         </div>
 
-        <!-- A/B (aparece solo cuando subes audio) -->
         <div id="abWrapper" class="hidden">
           <div class="abCard">
             <div class="abHead">
@@ -392,7 +384,7 @@
 </main>
 
 <script>
-  // === DOM ===
+  // DOM
   const fileInput   = document.getElementById("fileInput");
   const fileField   = document.getElementById("file");
   const btnPick     = document.getElementById("btnPick");
@@ -409,24 +401,20 @@
   const btnABStop     = document.getElementById("btnABStop");
   const abSeek        = document.getElementById("abSeek");
   const abTime        = document.getElementById("abTime");
-
   const btnDownloadMaster = document.getElementById("btnDownloadMaster");
 
   const audioOriginal = document.getElementById("audioOriginal");
   const audioPreview  = document.getElementById("audioPreview");
   const audioMaster   = document.getElementById("audioMaster");
 
-  // === state ===
   let currentFile = null;
   let activeAudio = audioPreview;
   let masterObjectUrl = null;
 
-  // === Preview engine (WebAudio) ===
+  // Preview engine
   let audioCtx, sourceNode, gainNode, bass, treble;
 
   function initPreviewEngine(){
-    if (!audioPreview) return;
-
     if (audioCtx) { try { audioCtx.close(); } catch(e){} }
 
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -445,11 +433,7 @@
     gainNode = audioCtx.createGain();
     gainNode.gain.value = 1;
 
-    sourceNode
-      .connect(bass)
-      .connect(treble)
-      .connect(gainNode)
-      .connect(audioCtx.destination);
+    sourceNode.connect(bass).connect(treble).connect(gainNode).connect(audioCtx.destination);
   }
 
   function applyPreset(){
@@ -469,7 +453,7 @@
     gainNode.gain.value = 1 + v * 0.8;
   }
 
-  // === AB UI ===
+  // A/B UI
   function fmtTime(s){
     s = Math.max(0, Math.floor(s || 0));
     const m = Math.floor(s/60);
@@ -481,21 +465,19 @@
     if (!activeAudio) return;
     const dur = activeAudio.duration || 0;
     const cur = activeAudio.currentTime || 0;
-    if (abTime) abTime.textContent = `${fmtTime(cur)} / ${fmtTime(dur)}`;
-    if (abSeek && dur > 0) abSeek.value = Math.floor((cur/dur)*1000);
+    abTime.textContent = `${fmtTime(cur)} / ${fmtTime(dur)}`;
+    if (dur > 0) abSeek.value = Math.floor((cur/dur)*1000);
   }
 
   function stopAll(){
     [audioOriginal,audioPreview,audioMaster].forEach(a=>{
-      if(!a) return;
-      a.pause();
-      a.currentTime = 0;
+      a.pause(); a.currentTime = 0;
     });
-    if (btnABPlay) btnABPlay.textContent = "▶";
+    btnABPlay.textContent = "▶";
   }
 
   function setPressed(which){
-    const set = (el, v) => el && el.setAttribute("aria-pressed", v ? "true":"false");
+    const set = (el, v) => el.setAttribute("aria-pressed", v ? "true":"false");
     set(btnABOriginal, which==="original");
     set(btnABPreview,  which==="preview");
     set(btnABMaster,   which==="master");
@@ -505,26 +487,21 @@
     const wasPlaying = activeAudio && !activeAudio.paused;
     const t = activeAudio ? activeAudio.currentTime : 0;
 
-    [audioOriginal,audioPreview,audioMaster].forEach(a=>{
-      if(a && a !== next) a.pause();
-    });
+    [audioOriginal,audioPreview,audioMaster].forEach(a=>{ if (a !== next) a.pause(); });
 
     activeAudio = next;
     setPressed(which);
 
-    if (activeAudio){
-      try { activeAudio.currentTime = t; } catch(e){}
-      if (wasPlaying) activeAudio.play();
-    }
+    try { activeAudio.currentTime = t; } catch(e){}
+    if (wasPlaying) activeAudio.play();
     syncUI();
   }
 
-  btnABOriginal?.addEventListener("click", ()=> setActive(audioOriginal, "original"));
-  btnABPreview?.addEventListener("click",  ()=> setActive(audioPreview,  "preview"));
-  btnABMaster?.addEventListener("click",   ()=> setActive(audioMaster,   "master"));
+  btnABOriginal.addEventListener("click", ()=> setActive(audioOriginal, "original"));
+  btnABPreview.addEventListener("click",  ()=> setActive(audioPreview,  "preview"));
+  btnABMaster.addEventListener("click",   ()=> setActive(audioMaster,   "master"));
 
-  btnABPlay?.addEventListener("click", async ()=>{
-    if (!activeAudio) return;
+  btnABPlay.addEventListener("click", async ()=>{
     if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume();
 
     if (activeAudio.paused){
@@ -536,10 +513,9 @@
     }
   });
 
-  btnABStop?.addEventListener("click", stopAll);
+  btnABStop.addEventListener("click", stopAll);
 
-  abSeek?.addEventListener("input", ()=>{
-    if (!activeAudio) return;
+  abSeek.addEventListener("input", ()=>{
     const dur = activeAudio.duration || 0;
     if (dur <= 0) return;
     activeAudio.currentTime = (Number(abSeek.value)/1000) * dur;
@@ -547,32 +523,30 @@
   });
 
   [audioOriginal,audioPreview,audioMaster].forEach(a=>{
-    if(!a) return;
     a.addEventListener("timeupdate", syncUI);
     a.addEventListener("loadedmetadata", syncUI);
-    a.addEventListener("ended", ()=> { if(btnABPlay) btnABPlay.textContent="▶"; });
+    a.addEventListener("ended", ()=> { btnABPlay.textContent="▶"; });
   });
 
-  // === Upload / pick ===
+  // Pick file
   function pick(){ fileInput.click(); }
-  btnPick?.addEventListener("click", pick);
+  btnPick.addEventListener("click", pick);
 
-  fileInput?.addEventListener("change", (e) => {
+  fileInput.addEventListener("change", (e) => {
     currentFile = e.target.files?.[0] || null;
 
-    if (fileField) fileField.value = currentFile ? currentFile.name : "";
-    if (btnStartJob) btnStartJob.disabled = !currentFile;
+    fileField.value = currentFile ? currentFile.name : "";
+    btnStartJob.disabled = !currentFile;
 
     if (!currentFile) return;
 
-    // show AB
-    abWrapper?.classList.remove("hidden");
+    abWrapper.classList.remove("hidden");
 
-    // load original
+    // original
     audioOriginal.src = URL.createObjectURL(currentFile);
     audioOriginal.load();
 
-    // load preview + init engine
+    // preview
     audioPreview.src = URL.createObjectURL(currentFile);
     audioPreview.load();
     initPreviewEngine();
@@ -585,23 +559,19 @@
     audioMaster.load();
     btnABMaster.disabled = true;
 
-    // reset download button
-    if (btnDownloadMaster) {
-      btnDownloadMaster.href = "#";
-      btnDownloadMaster.classList.add("disabled");
-      btnDownloadMaster.setAttribute("aria-disabled", "true");
-    }
+    // reset download
+    btnDownloadMaster.href = "#";
+    btnDownloadMaster.classList.add("disabled");
+    btnDownloadMaster.setAttribute("aria-disabled","true");
 
-    // default active: preview
     setActive(audioPreview, "preview");
   });
 
-  // === Controls realtime ===
-  intensity?.addEventListener("input", () => applyIntensity());
-  preset?.addEventListener("change", () => applyPreset());
+  intensity.addEventListener("input", applyIntensity);
+  preset.addEventListener("change", applyPreset);
 
-  // === Render real (server) ===
-  btnStartJob?.addEventListener("click", async () => {
+  // Render real
+  btnStartJob.addEventListener("click", async () => {
     if (!currentFile) return;
 
     const old = btnStartJob.textContent;
@@ -618,27 +588,25 @@
 
       if (!res.ok) {
         const txt = await res.text().catch(()=> "");
-        alert("Falló el masterizado.\n" + txt.slice(0,300));
+        alert("Render falló.\n" + txt.slice(0,300));
         return;
       }
 
       const blob = await res.blob();
       masterObjectUrl = URL.createObjectURL(blob);
 
-      // set master audio + enable button
+      // enable master playback
       audioMaster.src = masterObjectUrl;
       audioMaster.load();
       btnABMaster.disabled = false;
 
       // enable download button
-      if (btnDownloadMaster) {
-        btnDownloadMaster.href = masterObjectUrl;
-        btnDownloadMaster.download = "warmaster_master.wav";
-        btnDownloadMaster.classList.remove("disabled");
-        btnDownloadMaster.setAttribute("aria-disabled", "false");
-      }
+      btnDownloadMaster.href = masterObjectUrl;
+      btnDownloadMaster.download = "warmaster_master.wav";
+      btnDownloadMaster.classList.remove("disabled");
+      btnDownloadMaster.setAttribute("aria-disabled","false");
 
-      // download safe
+      // auto-download (PC)
       const a = document.createElement("a");
       a.href = masterObjectUrl;
       a.download = "warmaster_master.wav";
