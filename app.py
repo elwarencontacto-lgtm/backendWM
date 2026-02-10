@@ -4,7 +4,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -15,104 +15,133 @@ TMP_DIR.mkdir(exist_ok=True)
 
 app = FastAPI()
 
+# Sirve tus HTML/CSS/JS desde / (index.html, dashboard.html, master.html)
+if PUBLIC_DIR.exists():
+    app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="public")
 
-def build_chain(preset: str, intensity: int) -> str:
-    preset = (preset or "clean").lower()
 
+def run_ffmpeg(cmd: list[str]) -> None:
+    """Ejecuta ffmpeg y lanza error si falla."""
     try:
-        intensity = int(intensity)
-    except:
-        intensity = 55
+        proc = subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=False,
+        )
+    except FileNotFoundError:
+        raise HTTPException(status_code=500, detail="ffmpeg no está instalado en el servidor.")
 
-    intensity = max(0, min(100, intensity))
+    if proc.returncode != 0:
+        # Devolvemos stderr recortado para no hacer gigante el response
+        err = (proc.stderr or "")[-2000:]
+        raise HTTPException(status_code=500, detail=f"FFmpeg error:\n{err}")
 
-    # EQ simple (seguro)
+
+def preset_chain(preset: str, intensity: int) -> str:
+    """
+    Devuelve una cadena de filtros FFmpeg (af) para simular master real.
+    intensity 0..100 controla compresión/limit.
+    """
+    intensity = max(0, min(100, int(intensity)))
+
+    # Compresión más agresiva según intensidad
+    # - mayor intensidad => threshold más bajo y ratio más alto
+    thr = -18.0 - (intensity * 0.10)      # -18 .. -28 dB aprox
+    ratio = 2.0 + (intensity * 0.04)      # 2.0 .. 6.0 aprox
+    makeup = 2.0 + (intensity * 0.06)     # 2 .. 8 dB aprox
+
+    # Limiter final
+    limit = -1.0
+
+    # EQ por preset
+    # (suave para no destruir el audio)
     if preset == "club":
-        eq = "bass=g=5"
+        eq = "equalizer=f=80:t=q:w=1.0:g=3, equalizer=f=9000:t=q:w=1.0:g=2"
     elif preset == "warm":
-        eq = "bass=g=3,treble=g=-1"
+        eq = "equalizer=f=160:t=q:w=1.0:g=2, equalizer=f=4500:t=q:w=1.0:g=-1"
     elif preset == "bright":
-        eq = "treble=g=4"
+        eq = "equalizer=f=120:t=q:w=1.0:g=-1, equalizer=f=8500:t=q:w=1.0:g=3"
     elif preset == "heavy":
-        eq = "bass=g=6,treble=g=2"
-    else:
-        eq = "bass=g=2,treble=g=1"
+        eq = "equalizer=f=90:t=q:w=1.0:g=3, equalizer=f=3000:t=q:w=1.0:g=2"
+    else:  # clean/balanced
+        eq = "equalizer=f=120:t=q:w=1.0:g=1, equalizer=f=8000:t=q:w=1.0:g=1"
 
-    # Ganancia según intensidad
-    gain = 3 + (intensity / 100) * 5  # 3 a 8 dB
+    # Cadena final
+    # acompressor + makeup gain + limiter
+    chain = (
+        f"{eq}, "
+        f"acompressor=threshold={thr}dB:ratio={ratio}:attack=12:release=120:makeup={makeup}, "
+        f"alimiter=limit={limit}dB"
+    )
+    return chain
 
-    return f"{eq},volume={gain}dB,alimiter=limit=0.98"
 
-    loudnorm = f"loudnorm=I={target_lufs}:TP=-1.0:LRA=11"
-    return f"{base}, {eq}, {limiter}, {loudnorm}"
+@app.get("/api/health")
+def health():
+    return {"ok": True}
 
 
 @app.post("/api/master")
-async def api_master(
+async def master_api(
     file: UploadFile = File(...),
     preset: str = Form("clean"),
     intensity: int = Form(55),
-    out_format: str = Form("wav"),
 ):
-    # Extensión de salida
-    out_format = (out_format or "wav").lower()
-    if out_format not in ("wav", "mp3"):
-        out_format = "wav"
+    if not file:
+        raise HTTPException(status_code=400, detail="Falta archivo.")
 
-    job_id = uuid.uuid4().hex
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="Nombre de archivo inválido.")
 
-    # Guardar input con su extensión real si viene
-    in_ext = Path(file.filename or "").suffix.lower() or ".wav"
-    in_path = TMP_DIR / f"in_{job_id}{in_ext}"
-    out_path = TMP_DIR / f"master_{job_id}.{out_format}"
-
-    with open(in_path, "wb") as f:
-        shutil.copyfileobj(file.file, f)
-
-    chain = build_chain(preset, intensity)
-
-    # Params salida
-    if out_format == "wav":
-        out_args = ["-c:a", "pcm_s16le"]
-        mime = "audio/wav"
-        dl_name = "warmaster_master.wav"
-    else:
-        out_args = ["-c:a", "libmp3lame", "-b:a", "320k"]
-        mime = "audio/mpeg"
-        dl_name = "warmaster_master.mp3"
-
-    cmd = [
-        "ffmpeg", "-y",
-        "-i", str(in_path),
-        "-vn",
-        "-af", chain,
-        *out_args,
-        str(out_path)
-    ]
+    # Guardar input temporal
+    job_id = uuid.uuid4().hex[:10]
+    in_path = TMP_DIR / f"in_{job_id}_{file.filename}"
+    out_path = TMP_DIR / f"warmaster_master_{job_id}.wav"
 
     try:
-        subprocess.run(cmd, check=True, capture_output=True)
-    except subprocess.CalledProcessError as e:
-        # Devuelve un error legible
-        err = e.stderr.decode("utf-8", errors="ignore")
-        return JSONResponse(
-            status_code=500,
-            content={"ok": False, "error": "FFmpeg falló", "details": err[-2000:]},
-        )
-    finally:
-        # Limpia input
-        try:
-            os.remove(in_path)
-        except Exception:
-            pass
+        with in_path.open("wb") as f:
+            shutil.copyfileobj(file.file, f)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"No pude guardar el archivo: {e}")
 
+    # Construir filtros
+    af = preset_chain(preset.strip().lower(), intensity)
+
+    # ffmpeg: convertir a wav 24-bit, 44.1k, stereo
+    cmd = [
+        "ffmpeg",
+        "-y",
+        "-i", str(in_path),
+        "-vn",
+        "-af", af,
+        "-ar", "44100",
+        "-ac", "2",
+        "-sample_fmt", "s32",   # 24-bit no siempre directo; s32 es compatible y “pro”
+        str(out_path),
+    ]
+
+    # Ejecutar
+    run_ffmpeg(cmd)
+
+    if not out_path.exists() or out_path.stat().st_size < 1024:
+        raise HTTPException(status_code=500, detail="El master salió vacío o no se generó.")
+
+    # Descargar
     return FileResponse(
         path=str(out_path),
-        media_type=mime,
-        filename=dl_name,
+        media_type="audio/wav",
+        filename="warmaster_master.wav",
+        headers={"Cache-Control": "no-store"},
     )
 
 
-# ✅ IMPORTANTE: montar StaticFiles al FINAL para no “atrapar” /api/*
-app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="public")
-
+# Opcional: limpiar tmp (simple, manual)
+@app.get("/api/tmp")
+def tmp_list():
+    files = []
+    for p in TMP_DIR.glob("*"):
+        if p.is_file():
+            files.append({"name": p.name, "bytes": p.stat().st_size})
+    return {"tmp": files}
