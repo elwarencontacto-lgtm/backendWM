@@ -381,6 +381,7 @@
 </main>
 
 <script>
+  // ===== DOM =====
   const fileInput   = document.getElementById("fileInput");
   const fileField   = document.getElementById("file");
   const btnPick     = document.getElementById("btnPick");
@@ -403,11 +404,12 @@
   const audioPreview  = document.getElementById("audioPreview");
   const audioMaster   = document.getElementById("audioMaster");
 
+  // ===== State =====
   let currentFile = null;
   let activeAudio = audioPreview;
   let masterObjectUrl = null;
 
-  // Preview engine (FIX: NO recrear createMediaElementSource)
+  // ===== Preview engine (no recrea createMediaElementSource) =====
   let audioCtx = null;
   let sourceNode = null;
   let gainNode = null;
@@ -417,14 +419,9 @@
   function initPreviewEngine(){
     if (!audioPreview) return;
 
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (!sourceNode) {
-      sourceNode = audioCtx.createMediaElementSource(audioPreview);
-    }
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (!sourceNode) sourceNode = audioCtx.createMediaElementSource(audioPreview);
 
-    // Nodos nuevos cada vez (seguro)
     bass = audioCtx.createBiquadFilter();
     bass.type = "lowshelf";
     bass.frequency.value = 160;
@@ -459,7 +456,7 @@
     gainNode.gain.value = 1 + v * 0.8;
   }
 
-  // A/B UI
+  // ===== A/B UI =====
   function fmtTime(s){
     s = Math.max(0, Math.floor(s || 0));
     const m = Math.floor(s/60);
@@ -471,19 +468,21 @@
     if (!activeAudio) return;
     const dur = activeAudio.duration || 0;
     const cur = activeAudio.currentTime || 0;
-    abTime.textContent = `${fmtTime(cur)} / ${fmtTime(dur)}`;
-    if (dur > 0) abSeek.value = Math.floor((cur/dur)*1000);
+    if (abTime) abTime.textContent = `${fmtTime(cur)} / ${fmtTime(dur)}`;
+    if (abSeek && dur > 0) abSeek.value = Math.floor((cur/dur)*1000);
   }
 
   function stopAll(){
     [audioOriginal,audioPreview,audioMaster].forEach(a=>{
-      a.pause(); a.currentTime = 0;
+      if(!a) return;
+      a.pause();
+      a.currentTime = 0;
     });
-    btnABPlay.textContent = "▶";
+    if (btnABPlay) btnABPlay.textContent = "▶";
   }
 
   function setPressed(which){
-    const set = (el, v) => el.setAttribute("aria-pressed", v ? "true":"false");
+    const set = (el, v) => el && el.setAttribute("aria-pressed", v ? "true":"false");
     set(btnABOriginal, which==="original");
     set(btnABPreview,  which==="preview");
     set(btnABMaster,   which==="master");
@@ -493,21 +492,25 @@
     const wasPlaying = activeAudio && !activeAudio.paused;
     const t = activeAudio ? activeAudio.currentTime : 0;
 
-    [audioOriginal,audioPreview,audioMaster].forEach(a=>{ if (a !== next) a.pause(); });
+    [audioOriginal,audioPreview,audioMaster].forEach(a=>{
+      if(a && a !== next) a.pause();
+    });
 
     activeAudio = next;
     setPressed(which);
 
-    try { activeAudio.currentTime = t; } catch(e){}
-    if (wasPlaying) activeAudio.play();
+    if (activeAudio){
+      try { activeAudio.currentTime = t; } catch(e){}
+      if (wasPlaying) activeAudio.play();
+    }
     syncUI();
   }
 
-  btnABOriginal.addEventListener("click", ()=> setActive(audioOriginal, "original"));
-  btnABPreview.addEventListener("click",  ()=> setActive(audioPreview,  "preview"));
+  btnABOriginal?.addEventListener("click", ()=> setActive(audioOriginal, "original"));
+  btnABPreview?.addEventListener("click",  ()=> setActive(audioPreview,  "preview"));
 
-  // FIX: Master habilita Descargar usando masterObjectUrl (más confiable)
-  btnABMaster.addEventListener("click", () => {
+  // ✅ Master: además habilita Descargar si ya existe masterObjectUrl
+  btnABMaster?.addEventListener("click", () => {
     setActive(audioMaster, "master");
 
     if (masterObjectUrl && btnDownloadMaster) {
@@ -518,8 +521,12 @@
     }
   });
 
-  btnABPlay.addEventListener("click", async ()=>{
-    if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume();
+  btnABPlay?.addEventListener("click", async ()=>{
+    try{
+      if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume();
+    } catch(e){}
+
+    if (!activeAudio) return;
 
     if (activeAudio.paused){
       await activeAudio.play();
@@ -530,9 +537,10 @@
     }
   });
 
-  btnABStop.addEventListener("click", stopAll);
+  btnABStop?.addEventListener("click", stopAll);
 
-  abSeek.addEventListener("input", ()=>{
+  abSeek?.addEventListener("input", ()=>{
+    if (!activeAudio) return;
     const dur = activeAudio.duration || 0;
     if (dur <= 0) return;
     activeAudio.currentTime = (Number(abSeek.value)/1000) * dur;
@@ -540,30 +548,33 @@
   });
 
   [audioOriginal,audioPreview,audioMaster].forEach(a=>{
+    if(!a) return;
     a.addEventListener("timeupdate", syncUI);
     a.addEventListener("loadedmetadata", syncUI);
-    a.addEventListener("ended", ()=> { btnABPlay.textContent="▶"; });
+    a.addEventListener("ended", ()=> { if(btnABPlay) btnABPlay.textContent="▶"; });
   });
 
-  function pick(){ fileInput.click(); }
-  btnPick.addEventListener("click", pick);
+  // ===== Upload =====
+  function pick(){ fileInput?.click(); }
+  btnPick?.addEventListener("click", pick);
 
-  fileInput.addEventListener("change", (e) => {
+  fileInput?.addEventListener("change", (e) => {
     currentFile = e.target.files?.[0] || null;
 
-    fileField.value = currentFile ? currentFile.name : "";
-    btnStartJob.disabled = !currentFile;
+    if (fileField) fileField.value = currentFile ? currentFile.name : "";
+    if (btnStartJob) btnStartJob.disabled = !currentFile;
 
     if (!currentFile) return;
 
-    abWrapper.classList.remove("hidden");
+    abWrapper?.classList.remove("hidden");
 
+    // original
     audioOriginal.src = URL.createObjectURL(currentFile);
     audioOriginal.load();
 
+    // preview
     audioPreview.src = URL.createObjectURL(currentFile);
     audioPreview.load();
-
     initPreviewEngine();
     applyPreset();
     applyIntensity();
@@ -572,19 +583,34 @@
     if (masterObjectUrl) { URL.revokeObjectURL(masterObjectUrl); masterObjectUrl = null; }
     audioMaster.removeAttribute("src");
     audioMaster.load();
-    btnABMaster.disabled = true;
+    if (btnABMaster) btnABMaster.disabled = true;
 
-    btnDownloadMaster.href = "#";
-    btnDownloadMaster.classList.add("disabled");
-    btnDownloadMaster.setAttribute("aria-disabled","true");
+    // reset download
+    if (btnDownloadMaster) {
+      btnDownloadMaster.href = "#";
+      btnDownloadMaster.classList.add("disabled");
+      btnDownloadMaster.setAttribute("aria-disabled","true");
+    }
 
     setActive(audioPreview, "preview");
   });
 
-  intensity.addEventListener("input", applyIntensity);
-  preset.addEventListener("change", applyPreset);
+  intensity?.addEventListener("input", applyIntensity);
+  preset?.addEventListener("change", applyPreset);
 
-  btnStartJob.addEventListener("click", async () => {
+  // ===== Render real =====
+  async function fetchWithTimeout(url, options, timeoutMs){
+    const controller = new AbortController();
+    const t = setTimeout(()=> controller.abort("timeout"), timeoutMs);
+    try{
+      const res = await fetch(url, { ...options, signal: controller.signal });
+      return res;
+    } finally {
+      clearTimeout(t);
+    }
+  }
+
+  btnStartJob?.addEventListener("click", async () => {
     if (!currentFile) return;
 
     const old = btnStartJob.textContent;
@@ -592,32 +618,61 @@
     btnStartJob.disabled = true;
 
     try{
+      // IMPORTANTE: en Chrome a veces el AudioContext queda "suspended" hasta gesto
+      try{ if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume(); } catch(e){}
+
       const fd = new FormData();
       fd.append("file", currentFile);
-      fd.append("preset", preset.value || "clean");
-      fd.append("intensity", String(intensity.value || 55));
+      fd.append("preset", preset?.value || "clean");
+      fd.append("intensity", String(intensity?.value || 55));
 
-      const res = await fetch("/api/master", { method: "POST", body: fd });
+      console.log("[Render] POST /api/master", { file: currentFile.name });
+
+      // timeout 3 min
+      const res = await fetchWithTimeout("/api/master", { method: "POST", body: fd }, 180000);
+
+      console.log("[Render] status:", res.status);
+
+      // si backend devuelve json de error, lo mostramos
+      const ct = (res.headers.get("content-type") || "").toLowerCase();
 
       if (!res.ok) {
         const txt = await res.text().catch(()=> "");
-        alert("Render falló.\n" + txt.slice(0,300));
+        alert("Render falló (" + res.status + ").\n" + txt.slice(0,400));
+        return;
+      }
+
+      // Si devuelve JSON por error aunque sea 200, lo avisamos igual
+      if (ct.includes("application/json")) {
+        const txt = await res.text().catch(()=> "");
+        alert("El backend devolvió JSON (no audio). Revisa /api/master.\n" + txt.slice(0,400));
         return;
       }
 
       const blob = await res.blob();
+      if (!blob || blob.size < 1024) {
+        alert("El master llegó vacío o muy pequeño. (blob: " + (blob ? blob.size : 0) + " bytes)");
+        return;
+      }
+
+      // set master url
+      if (masterObjectUrl) { URL.revokeObjectURL(masterObjectUrl); }
       masterObjectUrl = URL.createObjectURL(blob);
 
+      // habilitar master + descarga
       audioMaster.src = masterObjectUrl;
       audioMaster.load();
-      btnABMaster.disabled = false;
 
-      btnDownloadMaster.href = masterObjectUrl;
-      btnDownloadMaster.download = "warmaster_master.wav";
-      btnDownloadMaster.classList.remove("disabled");
-      btnDownloadMaster.setAttribute("aria-disabled","false");
+      if (btnABMaster) btnABMaster.disabled = false;
 
-      // auto-download (PC)
+      if (btnDownloadMaster) {
+        btnDownloadMaster.href = masterObjectUrl;
+        btnDownloadMaster.download = "warmaster_master.wav";
+        btnDownloadMaster.classList.remove("disabled");
+        btnDownloadMaster.setAttribute("aria-disabled","false");
+      }
+
+      // descarga segura PC
       const a = document.createElement("a");
       a.href = masterObjectUrl;
       a.download = "warmaster_master.wav";
@@ -625,12 +680,21 @@
       a.click();
       a.remove();
 
+      console.log("[Render] OK, blob bytes:", blob.size);
+
+    } catch (err) {
+      console.error("[Render] error:", err);
+      const msg = (err && (err.name === "AbortError" || err === "timeout"))
+        ? "Tiempo de espera agotado. El backend está demorando o colgado."
+        : ("Error de red/JS: " + (err?.message || String(err)));
+      alert(msg);
     } finally {
       btnStartJob.textContent = old;
       btnStartJob.disabled = !currentFile;
     }
   });
 </script>
+
 
 </body>
 </html>
