@@ -211,6 +211,7 @@
     }
 
     .hidden{ display:none; }
+    .disabled{ opacity:.6; pointer-events:none; }
 
     /* === A/B WarMaster UI (sin players blancos) === */
     .abCard{
@@ -238,6 +239,7 @@
       display:flex;
       gap:8px;
       flex-wrap:wrap;
+      align-items:center;
     }
     .abBtn{
       padding:8px 12px;
@@ -299,18 +301,12 @@
 
 <main>
   <div class="wrap">
-
     <div class="top">
       <div>
         <h1>Masterizado</h1>
         <p class="sub">
           Sube tu audio, elige un preset y ajusta la intensidad. Esta pantalla mantiene la línea gráfica de WarMaster.
         </p>
-      </div>
-
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button class="btn" id="btnImport" type="button">Importar</button>
-        <button class="btn primary" id="btnMasterTop" type="button" disabled>Renderizar</button>
       </div>
     </div>
 
@@ -366,6 +362,7 @@
                 <button class="btn abBtn" type="button" id="btnABOriginal" aria-pressed="false">Original</button>
                 <button class="btn abBtn" type="button" id="btnABPreview" aria-pressed="true">Preview</button>
                 <button class="btn abBtn" type="button" id="btnABMaster" aria-pressed="false" disabled>Master</button>
+                <a class="btn abBtn disabled" id="btnDownloadMaster" href="#" download="warmaster_master.wav" aria-disabled="true">Descargar</a>
               </div>
             </div>
 
@@ -399,8 +396,6 @@
   const fileInput   = document.getElementById("fileInput");
   const fileField   = document.getElementById("file");
   const btnPick     = document.getElementById("btnPick");
-  const btnImport   = document.getElementById("btnImport");
-  const btnMasterTop= document.getElementById("btnMasterTop");
   const btnStartJob = document.getElementById("btnStartJob");
 
   const preset      = document.getElementById("preset");
@@ -414,6 +409,8 @@
   const btnABStop     = document.getElementById("btnABStop");
   const abSeek        = document.getElementById("abSeek");
   const abTime        = document.getElementById("abTime");
+
+  const btnDownloadMaster = document.getElementById("btnDownloadMaster");
 
   const audioOriginal = document.getElementById("audioOriginal");
   const audioPreview  = document.getElementById("audioPreview");
@@ -559,17 +556,12 @@
   // === Upload / pick ===
   function pick(){ fileInput.click(); }
   btnPick?.addEventListener("click", pick);
-  btnImport?.addEventListener("click", pick);
-
-  // top render button mirrors main one
-  btnMasterTop?.addEventListener("click", ()=> btnStartJob?.click());
 
   fileInput?.addEventListener("change", (e) => {
     currentFile = e.target.files?.[0] || null;
 
     if (fileField) fileField.value = currentFile ? currentFile.name : "";
     if (btnStartJob) btnStartJob.disabled = !currentFile;
-    if (btnMasterTop) btnMasterTop.disabled = !currentFile;
 
     if (!currentFile) return;
 
@@ -580,7 +572,7 @@
     audioOriginal.src = URL.createObjectURL(currentFile);
     audioOriginal.load();
 
-    // load preview (same file) + init engine
+    // load preview + init engine
     audioPreview.src = URL.createObjectURL(currentFile);
     audioPreview.load();
     initPreviewEngine();
@@ -592,6 +584,13 @@
     audioMaster.removeAttribute("src");
     audioMaster.load();
     btnABMaster.disabled = true;
+
+    // reset download button
+    if (btnDownloadMaster) {
+      btnDownloadMaster.href = "#";
+      btnDownloadMaster.classList.add("disabled");
+      btnDownloadMaster.setAttribute("aria-disabled", "true");
+    }
 
     // default active: preview
     setActive(audioPreview, "preview");
@@ -608,7 +607,6 @@
     const old = btnStartJob.textContent;
     btnStartJob.textContent = "Procesando…";
     btnStartJob.disabled = true;
-    if (btnMasterTop) btnMasterTop.disabled = true;
 
     try{
       const fd = new FormData();
@@ -632,16 +630,25 @@
       audioMaster.load();
       btnABMaster.disabled = false;
 
-      // download file
+      // enable download button
+      if (btnDownloadMaster) {
+        btnDownloadMaster.href = masterObjectUrl;
+        btnDownloadMaster.download = "warmaster_master.wav";
+        btnDownloadMaster.classList.remove("disabled");
+        btnDownloadMaster.setAttribute("aria-disabled", "false");
+      }
+
+      // download safe
       const a = document.createElement("a");
       a.href = masterObjectUrl;
       a.download = "warmaster_master.wav";
+      document.body.appendChild(a);
       a.click();
+      a.remove();
 
     } finally {
       btnStartJob.textContent = old;
       btnStartJob.disabled = !currentFile;
-      if (btnMasterTop) btnMasterTop.disabled = !currentFile;
     }
   });
 </script>
