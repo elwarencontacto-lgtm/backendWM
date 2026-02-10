@@ -630,7 +630,8 @@
 
       // timeout 3 min
       const API_BASE = "https://backendwm.onrender.com";
-const res = await fetchWithTimeout(`${API_BASE}/api/master`, { method: "POST", body: fd }, 180000);
+const res = await fetch(`${API_BASE}/api/master`, { method: "POST", body: fd });
+
       console.log("[Render] status:", res.status);
 
       // si backend devuelve json de error, lo mostramos
