@@ -298,9 +298,7 @@
     <div class="top">
       <div>
         <h1>Masterizado</h1>
-        <p class="sub">
-          Sube tu audio, elige un preset y ajusta la intensidad.
-        </p>
+        <p class="sub">Sube tu audio, elige un preset y ajusta la intensidad.</p>
       </div>
     </div>
 
@@ -369,7 +367,6 @@
               <button class="btn abBtn" type="button" id="btnABStop">⏹</button>
             </div>
 
-            <!-- audios ocultos -->
             <audio id="audioOriginal" preload="metadata"></audio>
             <audio id="audioPreview" preload="metadata"></audio>
             <audio id="audioMaster" preload="metadata"></audio>
@@ -384,7 +381,6 @@
 </main>
 
 <script>
-  // DOM
   const fileInput   = document.getElementById("fileInput");
   const fileField   = document.getElementById("file");
   const btnPick     = document.getElementById("btnPick");
@@ -411,15 +407,24 @@
   let activeAudio = audioPreview;
   let masterObjectUrl = null;
 
-  // Preview engine
-  let audioCtx, sourceNode, gainNode, bass, treble;
+  // Preview engine (FIX: NO recrear createMediaElementSource)
+  let audioCtx = null;
+  let sourceNode = null;
+  let gainNode = null;
+  let bass = null;
+  let treble = null;
 
   function initPreviewEngine(){
-    if (audioCtx) { try { audioCtx.close(); } catch(e){} }
+    if (!audioPreview) return;
 
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    sourceNode = audioCtx.createMediaElementSource(audioPreview);
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (!sourceNode) {
+      sourceNode = audioCtx.createMediaElementSource(audioPreview);
+    }
 
+    // Nodos nuevos cada vez (seguro)
     bass = audioCtx.createBiquadFilter();
     bass.type = "lowshelf";
     bass.frequency.value = 160;
@@ -433,6 +438,7 @@
     gainNode = audioCtx.createGain();
     gainNode.gain.value = 1;
 
+    try { sourceNode.disconnect(); } catch(e){}
     sourceNode.connect(bass).connect(treble).connect(gainNode).connect(audioCtx.destination);
   }
 
@@ -499,7 +505,18 @@
 
   btnABOriginal.addEventListener("click", ()=> setActive(audioOriginal, "original"));
   btnABPreview.addEventListener("click",  ()=> setActive(audioPreview,  "preview"));
-  btnABMaster.addEventListener("click",   ()=> setActive(audioMaster,   "master"));
+
+  // FIX: Master habilita Descargar usando masterObjectUrl (más confiable)
+  btnABMaster.addEventListener("click", () => {
+    setActive(audioMaster, "master");
+
+    if (masterObjectUrl && btnDownloadMaster) {
+      btnDownloadMaster.href = masterObjectUrl;
+      btnDownloadMaster.download = "warmaster_master.wav";
+      btnDownloadMaster.classList.remove("disabled");
+      btnDownloadMaster.setAttribute("aria-disabled","false");
+    }
+  });
 
   btnABPlay.addEventListener("click", async ()=>{
     if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume();
@@ -528,7 +545,6 @@
     a.addEventListener("ended", ()=> { btnABPlay.textContent="▶"; });
   });
 
-  // Pick file
   function pick(){ fileInput.click(); }
   btnPick.addEventListener("click", pick);
 
@@ -542,13 +558,12 @@
 
     abWrapper.classList.remove("hidden");
 
-    // original
     audioOriginal.src = URL.createObjectURL(currentFile);
     audioOriginal.load();
 
-    // preview
     audioPreview.src = URL.createObjectURL(currentFile);
     audioPreview.load();
+
     initPreviewEngine();
     applyPreset();
     applyIntensity();
@@ -559,7 +574,6 @@
     audioMaster.load();
     btnABMaster.disabled = true;
 
-    // reset download
     btnDownloadMaster.href = "#";
     btnDownloadMaster.classList.add("disabled");
     btnDownloadMaster.setAttribute("aria-disabled","true");
@@ -570,7 +584,6 @@
   intensity.addEventListener("input", applyIntensity);
   preset.addEventListener("change", applyPreset);
 
-  // Render real
   btnStartJob.addEventListener("click", async () => {
     if (!currentFile) return;
 
@@ -595,12 +608,10 @@
       const blob = await res.blob();
       masterObjectUrl = URL.createObjectURL(blob);
 
-      // enable master playback
       audioMaster.src = masterObjectUrl;
       audioMaster.load();
       btnABMaster.disabled = false;
 
-      // enable download button
       btnDownloadMaster.href = masterObjectUrl;
       btnDownloadMaster.download = "warmaster_master.wav";
       btnDownloadMaster.classList.remove("disabled");
