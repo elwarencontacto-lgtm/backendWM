@@ -102,7 +102,16 @@
     }
     h1{ margin:0; font-size: 38px; letter-spacing:-.8px; }
     .sub{ margin:8px 0 0; color: var(--muted); font-size: 14px; line-height:1.6; max-width: 72ch; }
-  .card::before{
+
+    .card{
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      box-shadow: 0 24px 70px rgba(0,0,0,.55);
+      overflow:hidden;
+      position:relative;
+    }
+    .card::before{
       content:"";
       position:absolute; inset:-1px;
       background:
@@ -112,16 +121,6 @@
       pointer-events:none;
       opacity:.95;
     }
-    .card{
-      border-radius: var(--radius);
-      border: 1px solid rgba(255,255,255,.12);
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
-      box-shadow: 0 24px 70px rgba(0,0,0,.55);
-      overflow:hidden;
-      position:relative;
-    }
-
-    .card > *{ position:relative; }
 
     .pill{
       padding: 10px 12px;
@@ -276,29 +275,27 @@
       text-align:left;
     }
     #abSeek{ width:100%; accent-color: var(--b); }
-.file-hidden{
-  position:absolute;
-  left:-9999px;
-  width:1px;
-  height:1px;
-  opacity:0;
-}
-/* FIX: asegurar que los botones sean clickeables */
-.field, .field * , .row, .row * , #abWrapper, #abWrapper * {
-  position: relative;
-  z-index: 3;
-}
 
-.card-h{
-  position: relative;
-  z-index: 1;
-}
+    /* ✅ FIX OVERLAY: asegurar clicks en botones/inputs */
+    .card-h{ position:relative; z-index: 1; }
+    .card-b{ position:relative; z-index: 2; }
+    .field, .field * , .row, .row * , #abWrapper, #abWrapper *{
+      position: relative;
+      z-index: 5;
+    }
+    .btn, label.btn{
+      position: relative;
+      z-index: 10;
+    }
 
-.card-b{
-  position: relative;
-  z-index: 2;
-}
-
+    /* oculto real (sin display:none) para que label funcione en todos los casos */
+    .file-hidden{
+      position:absolute;
+      left:-9999px;
+      width:1px;
+      height:1px;
+      opacity:0;
+    }
   </style>
 </head>
 
@@ -337,20 +334,17 @@
         <div class="split">
           <div class="field" id="fileBox">
             <label for="file">Archivo</label>
-            <!-- ✅ click directo (no depende del JS) -->
+
             <input
               type="text"
               id="file"
               placeholder="Arrastra aquí o elige un archivo"
               readonly
-              onclick="document.getElementById('fileInput').click()"
             />
-            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
-              <!-- ✅ click directo (no depende del JS) -->
-            <label for="fileInput" class="btn">
-  Seleccionar
-</label>
 
+            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+              <!-- ✅ Label nativo (no se bloquea) -->
+              <label for="fileInput" class="btn" id="btnPick">Seleccionar</label>
             </div>
           </div>
 
@@ -408,13 +402,11 @@
             <audio id="audioMaster" preload="metadata"></audio>
           </div>
         </div>
-
       </div>
     </section>
 
-    <!-- ✅ fileInput UNA sola vez -->
-    <label for="fileInput" class="btn">Seleccionar</label>
-
+    <!-- ✅ fileInput UNA sola vez + oculto correcto -->
+    <input id="fileInput" type="file" accept="audio/*" class="file-hidden" />
   </div>
 </main>
 
@@ -448,19 +440,19 @@
   let activeAudio = audioPreview;
   let masterObjectUrl = null;
 
-  // WebAudio preview engine (solo para preview)
   let audioCtx = null;
   let sourceNode = null;
   let gainNode = null;
   let bass = null;
   let treble = null;
 
+  // Click en el campo de texto también abre selector
+  fileField.addEventListener("click", () => fileInput.click());
+
   function initPreviewEngine(){
     if (!audioPreview) return;
 
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-    // createMediaElementSource SOLO una vez por elemento
     if (!sourceNode) sourceNode = audioCtx.createMediaElementSource(audioPreview);
 
     bass = audioCtx.createBiquadFilter();
@@ -559,7 +551,6 @@
     try{
       if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume();
     } catch(e){}
-
     if (activeAudio.paused){
       await activeAudio.play();
       btnABPlay.textContent = "⏸";
@@ -584,28 +575,26 @@
     a.addEventListener("ended", ()=> { btnABPlay.textContent="▶"; });
   });
 
-  // Drag & Drop sobre el box del archivo
-  if (fileBox){
-    fileBox.addEventListener("dragover", (e)=>{
-      e.preventDefault();
-      fileBox.style.borderColor = "rgba(0,215,255,.55)";
-    });
-    fileBox.addEventListener("dragleave", ()=>{
-      fileBox.style.borderColor = "rgba(255,255,255,.10)";
-    });
-    fileBox.addEventListener("drop", (e)=>{
-      e.preventDefault();
-      fileBox.style.borderColor = "rgba(255,255,255,.10)";
-      const f = e.dataTransfer?.files?.[0];
-      if (!f) return;
-      const dt = new DataTransfer();
-      dt.items.add(f);
-      fileInput.files = dt.files;
-      fileInput.dispatchEvent(new Event("change", { bubbles:true }));
-    });
-  }
+  // Drag & Drop
+  fileBox.addEventListener("dragover", (e)=>{
+    e.preventDefault();
+    fileBox.style.borderColor = "rgba(0,215,255,.55)";
+  });
+  fileBox.addEventListener("dragleave", ()=>{
+    fileBox.style.borderColor = "rgba(255,255,255,.10)";
+  });
+  fileBox.addEventListener("drop", (e)=>{
+    e.preventDefault();
+    fileBox.style.borderColor = "rgba(255,255,255,.10)";
+    const f = e.dataTransfer?.files?.[0];
+    if (!f) return;
+    const dt = new DataTransfer();
+    dt.items.add(f);
+    fileInput.files = dt.files;
+    fileInput.dispatchEvent(new Event("change", { bubbles:true }));
+  });
 
-  // Change real
+  // Change
   fileInput.addEventListener("change", (e) => {
     currentFile = e.target.files?.[0] || null;
 
@@ -616,11 +605,9 @@
 
     abWrapper.classList.remove("hidden");
 
-    // original
     audioOriginal.src = URL.createObjectURL(currentFile);
     audioOriginal.load();
 
-    // preview
     audioPreview.src = URL.createObjectURL(currentFile);
     audioPreview.load();
 
@@ -628,13 +615,11 @@
     applyPreset();
     applyIntensity();
 
-    // reset master
     if (masterObjectUrl) { URL.revokeObjectURL(masterObjectUrl); masterObjectUrl = null; }
     audioMaster.removeAttribute("src");
     audioMaster.load();
     btnABMaster.disabled = true;
 
-    // reset download
     btnDownloadMaster.href = "#";
     btnDownloadMaster.classList.add("disabled");
     btnDownloadMaster.setAttribute("aria-disabled","true");
@@ -695,7 +680,6 @@
       btnDownloadMaster.classList.remove("disabled");
       btnDownloadMaster.setAttribute("aria-disabled","false");
 
-      // descarga automática
       const a = document.createElement("a");
       a.href = masterObjectUrl;
       a.download = "warmaster_master.wav";
@@ -705,7 +689,7 @@
 
     } catch (err) {
       const msg = (err && (err.name === "AbortError" || err === "timeout"))
-        ? "Tiempo de espera agotado. El backend está demorando o colgado."
+        ? "Tiempo de espera agotado."
         : ("Error: " + (err?.message || String(err)));
       alert(msg);
     } finally {
