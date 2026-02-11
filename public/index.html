@@ -92,6 +92,9 @@ header{
   font-weight:700;
 }
 
+/* ✅ Para links con clase btn */
+a.btn{ text-decoration:none; color: inherit; display:inline-flex; align-items:center; justify-content:center; }
+
 .btn.primary{
   background:linear-gradient(90deg,#8a5cff,#00d7ff);
   color:#000;
@@ -291,11 +294,6 @@ main{
   box-shadow: 0 0 0 6px rgba(0,215,255,.12);
   display:inline-block;
 }
-.btn{
-  text-decoration: none;
-  color: inherit;
-}
-
 </style>
 </head>
 
@@ -303,8 +301,8 @@ main{
 
 <header>
   <div class="brand">War<span class="grad">Master</span></div>
- <div style="display:flex; gap:10px; flex-wrap:wrap;">
-    <a href="master.html" class="btn primary">Nuevo master</a>
+  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    <a href="master.html" class="btn primary" id="linkNewMaster">Nuevo master</a>
     <button class="btn primary" id="btnLogin">Iniciar sesión</button>
   </div>
 </header>
@@ -317,10 +315,10 @@ main{
   Masterización automática impulsada por análisis inteligente.
   Obtén un sonido balanceado, fuerte y competitivo,
   listo para Spotify, YouTube y Apple Music.
-</p>
-<p style="margin-top:10px;font-size:14px;color:var(--muted);">
-  Sin plugins • Sin conocimientos técnicos • Resultados inmediatos
-</p>
+  </p>
+  <p style="margin-top:10px;font-size:14px;color:var(--muted);">
+    Sin plugins • Sin conocimientos técnicos • Resultados inmediatos
+  </p>
   <div class="actions">
     <button class="btn primary" id="btnLoginHero">Entrar al dashboard</button>
   </div>
@@ -328,107 +326,111 @@ main{
 
 <section class="section">
   <section class="sound-visual">
-  <div class="bars">
-    <span></span><span></span><span></span><span></span><span></span>
-    <span></span><span></span><span></span><span></span><span></span>
-  </div>
+    <div class="bars">
+      <span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
 
-  <p class="sound-text">
-    Análisis inteligente • Compresión precisa • Loudness profesional
-  </p>
-</section>
+    <p class="sound-text">
+      Análisis inteligente • Compresión precisa • Loudness profesional
+    </p>
+  </section>
+
   <section class="section" id="como">
-  <h2>Cómo funciona</h2>
-  <p class="lead">Sube tu track, elige un carácter y descarga un master listo para publicar.</p>
+    <h2>Cómo funciona</h2>
+    <p class="lead">Sube tu track, elige un carácter y descarga un master listo para publicar.</p>
 
-  <div class="cards">
-    <div class="card">
-      <div class="kicker"><div class="icon">1</div><h3>Sube tu track</h3></div>
-      <p>WAV o MP3. Luego podrás limitar tamaño/duración en el backend.</p>
-    </div>
+    <div class="cards">
+      <div class="card">
+        <div class="kicker"><div class="icon">1</div><h3>Sube tu track</h3></div>
+        <p>WAV o MP3. Luego podrás limitar tamaño/duración en el backend.</p>
+      </div>
 
-    <div class="card">
-      <div class="kicker"><div class="icon">2</div><h3>Elige el estilo</h3></div>
-      <p>Presets por género + control de intensidad para el carácter del master.</p>
-    </div>
+      <div class="card">
+        <div class="kicker"><div class="icon">2</div><h3>Elige el estilo</h3></div>
+        <p>Presets por género + control de intensidad para el carácter del master.</p>
+      </div>
 
-    <div class="card">
-      <div class="kicker"><div class="icon">3</div><h3>Descarga tu master</h3></div>
-      <p>Exporta WAV/MP3 y deja listo tu track para plataformas.</p>
+      <div class="card">
+        <div class="kicker"><div class="icon">3</div><h3>Descarga tu master</h3></div>
+        <p>Exporta WAV/MP3 y deja listo tu track para plataformas.</p>
+      </div>
     </div>
-  </div>
+  </section>
+
+  <section class="section" id="features">
+    <h2>Características</h2>
+    <p class="lead">Una experiencia rápida y pro: comparas, ajustas y publicas.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="kicker"><div class="icon">A</div><h3>Presets por género</h3></div>
+        <p>Clean, Club, Warm, Bright, Heavy (puedes agregar más).</p>
+      </div>
+
+      <div class="card">
+        <div class="kicker"><div class="icon">I</div><h3>Control de intensidad</h3></div>
+        <p>Define cuánta compresión/saturación quieres en el resultado.</p>
+      </div>
+
+      <div class="card">
+        <div class="kicker"><div class="icon">Q</div><h3>Exporta WAV / MP3</h3></div>
+        <p>Listo para Spotify / YouTube / Apple Music según tu plan.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="precios">
+    <h2>Precios</h2>
+    <p class="lead">Modelo demo. Luego conectas Stripe o ventas por créditos.</p>
+
+    <div class="cards">
+      <div class="card plan">
+        <span class="badge"><i></i> Recruit</span>
+        <h3>Free</h3>
+        <div class="price">$0</div>
+        <div class="meta">2 masters/mes • MP3 • Presets básicos</div>
+      </div>
+
+      <div class="card plan">
+        <span class="badge"><i></i> Popular</span>
+        <h3>Pro</h3>
+        <div class="price">$12</div>
+        <div class="meta">20 masters/mes • WAV 24-bit • A/B • Targets</div>
+      </div>
+
+      <div class="card plan">
+        <span class="badge"><i></i> Studio</span>
+        <h3>Studio</h3>
+        <div class="price">$29</div>
+        <div class="meta">Ilimitado* • Prioridad • API / Integración</div>
+      </div>
+    </div>
+  </section>
 </section>
-
-
-<section class="section" id="features">
-  <h2>Características</h2>
-  <p class="lead">Una experiencia rápida y pro: comparas, ajustas y publicas.</p>
-
-  <div class="cards">
-    <div class="card">
-      <div class="kicker"><div class="icon">A</div><h3>Presets por género</h3></div>
-      <p>Clean, Club, Warm, Bright, Heavy (puedes agregar más).</p>
-    </div>
-
-    <div class="card">
-      <div class="kicker"><div class="icon">I</div><h3>Control de intensidad</h3></div>
-      <p>Define cuánta compresión/saturación quieres en el resultado.</p>
-    </div>
-
-    <div class="card">
-      <div class="kicker"><div class="icon">Q</div><h3>Exporta WAV / MP3</h3></div>
-      <p>Listo para Spotify / YouTube / Apple Music según tu plan.</p>
-    </div>
-  </div>
-</section>
-
-
-<section class="section" id="precios">
-  <h2>Precios</h2>
-  <p class="lead">Modelo demo. Luego conectas Stripe o ventas por créditos.</p>
-
-  <div class="cards">
-    <div class="card plan">
-      <span class="badge"><i></i> Recruit</span>
-      <h3>Free</h3>
-      <div class="price">$0</div>
-      <div class="meta">2 masters/mes • MP3 • Presets básicos</div>
-    </div>
-
-    <div class="card plan">
-      <span class="badge"><i></i> Popular</span>
-      <h3>Pro</h3>
-      <div class="price">$12</div>
-      <div class="meta">20 masters/mes • WAV 24-bit • A/B • Targets</div>
-    </div>
-
-    <div class="card plan">
-      <span class="badge"><i></i> Studio</span>
-      <h3>Studio</h3>
-      <div class="price">$29</div>
-      <div class="meta">Ilimitado* • Prioridad • API / Integración</div>
-    </div>
-  </div>
-</section>
-
-<!-- ⚠️ FAQ ELIMINADA AQUÍ (COMO PEDISTE) -->
 
 </main>
 
-<!-- LOGIN FAKE — SOLO FUNCIONALIDAD -->
+<!-- LOGIN FAKE — SOLO FUNCIONALIDAD (Render-friendly) -->
 <script>
+  // ✅ preserva ?api=... en navegación (muy útil en Render)
+  function withSameQuery(path){
+    return path + (location.search || "");
+  }
+
+  // Ajustar link "Nuevo master" para preservar ?api=
+  const linkNewMaster = document.getElementById("linkNewMaster");
+  if (linkNewMaster) linkNewMaster.href = withSameQuery("master.html");
+
   function loginFake(){
     localStorage.setItem("warmaster_logged", "true");
-    window.location.href = "dashboard.html";
+    window.location.href = withSameQuery("dashboard.html");
   }
 
   document.getElementById("btnLogin")?.addEventListener("click", loginFake);
   document.getElementById("btnLoginHero")?.addEventListener("click", loginFake);
 </script>
-<script>
-  document.getElementById("btnNewMaster").addEventListener("click", () => {
-    window.location.href = "master.html";
-  });
-</script>
+
+<!-- ✅ eliminado: script btnNewMaster (no existía y rompía consola) -->
 </body>
 </html>
