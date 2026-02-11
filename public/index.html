@@ -6,299 +6,167 @@
 <title>WarMaster — Masterización Online</title>
 
 <style>
-  .sound-visual{
-  margin:60px auto 80px;
-  text-align:center;
-}
+  .sound-visual{ margin:60px auto 80px; text-align:center; }
+  .bars{ display:flex; justify-content:center; align-items:flex-end; gap:6px; height:80px; }
+  .bars span{
+    width:8px; height:20px;
+    background:linear-gradient(180deg,var(--a),var(--b),var(--c));
+    border-radius:6px;
+    animation: pulse 1.2s infinite ease-in-out;
+  }
+  .bars span:nth-child(odd){ animation-delay:.2s; }
+  .bars span:nth-child(even){ animation-delay:.4s; }
+  @keyframes pulse{
+    0%{ height:20px; opacity:.4; }
+    50%{ height:80px; opacity:1; }
+    100%{ height:20px; opacity:.4; }
+  }
+  .sound-text{ margin-top:18px; color:var(--muted); font-size:14px; letter-spacing:.4px; }
 
-.bars{
-  display:flex;
-  justify-content:center;
-  align-items:flex-end;
-  gap:6px;
-  height:80px;
-}
+  :root{
+    --bg0:#07080c;
+    --bg1:#0b0e16;
+    --text:#e9edf7;
+    --muted: rgba(233,237,247,.72);
+    --a:#8a5cff;
+    --b:#00d7ff;
+    --c:#00ff9a;
+  }
 
-.bars span{
-  width:8px;
-  height:20px;
-  background:linear-gradient(180deg,var(--a),var(--b),var(--c));
-  border-radius:6px;
-  animation: pulse 1.2s infinite ease-in-out;
-}
+  *{ box-sizing:border-box; }
 
-.bars span:nth-child(odd){ animation-delay:.2s; }
-.bars span:nth-child(even){ animation-delay:.4s; }
+  body{
+    margin:0;
+    font-family: Arial, sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(900px 500px at 10% 10%, rgba(138,92,255,.22), transparent 55%),
+      radial-gradient(800px 500px at 90% 15%, rgba(0,215,255,.18), transparent 55%),
+      linear-gradient(180deg, var(--bg0), var(--bg1));
+  }
 
-@keyframes pulse{
-  0%{ height:20px; opacity:.4; }
-  50%{ height:80px; opacity:1; }
-  100%{ height:20px; opacity:.4; }
-}
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px 28px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
 
-.sound-text{
-  margin-top:18px;
-  color:var(--muted);
-  font-size:14px;
-  letter-spacing:.4px;
-}
+  .brand{ font-size:22px; font-weight:800; }
+  .grad{
+    background:linear-gradient(90deg,#8a5cff,#00d7ff,#00ff9a);
+    -webkit-background-clip:text;
+    color:transparent;
+  }
 
-:root{
-  --bg0:#07080c;
-  --bg1:#0b0e16;
-  --text:#e9edf7;
-  --muted: rgba(233,237,247,.72);
-  --a:#8a5cff;
-  --b:#00d7ff;
-  --c:#00ff9a;
-}
+  .btn{
+    padding:10px 16px;
+    border-radius:14px;
+    border:none;
+    cursor:pointer;
+    font-weight:700;
+  }
+  a.btn{ text-decoration:none; color: inherit; display:inline-flex; align-items:center; justify-content:center; }
+  .btn.primary{ background:linear-gradient(90deg,#8a5cff,#00d7ff); color:#000; }
 
-*{ box-sizing:border-box; }
+  .hero{
+    max-width:1000px;
+    margin:90px auto 60px;
+    padding:0 24px;
+    text-align:center;
+  }
+  .hero h1{ font-size:48px; margin-bottom:18px; }
+  .hero p{ color:var(--muted); line-height:1.6; margin-bottom:28px; }
 
-body{
-  margin:0;
-  font-family: Arial, sans-serif;
-  color:var(--text);
-  background:
-    radial-gradient(900px 500px at 10% 10%, rgba(138,92,255,.22), transparent 55%),
-    radial-gradient(800px 500px at 90% 15%, rgba(0,215,255,.18), transparent 55%),
-    linear-gradient(180deg, var(--bg0), var(--bg1));
-}
+  .actions{ display:flex; justify-content:center; gap:14px; flex-wrap:wrap; }
 
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:20px 28px;
-  border-bottom:1px solid rgba(255,255,255,.08);
-}
+  main{ max-width: 1180px; margin: 0 auto; padding: 0 24px 80px; }
+  .section{ padding: 70px 0; }
+  .section h2{ font-size: 44px; margin: 0 0 18px; letter-spacing: -1px; }
+  .section .lead{
+    margin: 0 0 26px;
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 70ch;
+  }
 
-.brand{
-  font-size:22px;
-  font-weight:800;
-}
+  .cards{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  @media (max-width: 980px){
+    .cards{ grid-template-columns: 1fr; }
+    .section h2{ font-size: 34px; }
+  }
 
-.grad{
-  background:linear-gradient(90deg,#8a5cff,#00d7ff,#00ff9a);
-  -webkit-background-clip:text;
-  color:transparent;
-}
+  .card{
+    position: relative;
+    border-radius: 22px;
+    padding: 20px 20px 18px;
+    background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+    border: 1px solid rgba(255,255,255,.12);
+    box-shadow: 0 24px 70px rgba(0,0,0,.55);
+    overflow:hidden;
+    transition: transform .14s ease, border-color .14s ease, background .14s ease;
+  }
+  .card::before{
+    content:"";
+    position:absolute; inset:-1px;
+    background:
+      radial-gradient(420px 220px at 20% 20%, rgba(138,92,255,.18), transparent 60%),
+      radial-gradient(420px 220px at 85% 30%, rgba(0,215,255,.14), transparent 60%),
+      radial-gradient(520px 240px at 40% 95%, rgba(0,255,154,.10), transparent 60%);
+    pointer-events:none;
+    opacity:.95;
+  }
+  .card > *{ position:relative; }
 
-.btn{
-  padding:10px 16px;
-  border-radius:14px;
-  border:none;
-  cursor:pointer;
-  font-weight:700;
-}
+  .card:hover{
+    transform: translateY(-3px);
+    border-color: rgba(0,215,255,.26);
+    background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.045));
+  }
 
-/* ✅ Para links con clase btn */
-a.btn{ text-decoration:none; color: inherit; display:inline-flex; align-items:center; justify-content:center; }
+  .card .kicker{ display:flex; align-items:center; gap:10px; margin-bottom: 10px; }
+  .icon{
+    width: 40px; height: 40px;
+    border-radius: 16px;
+    display:flex; align-items:center; justify-content:center;
+    background: linear-gradient(135deg, rgba(138,92,255,.95), rgba(0,215,255,.75));
+    border: 1px solid rgba(255,255,255,.14);
+    box-shadow: 0 16px 46px rgba(0,0,0,.55);
+    color:#061018;
+    font-weight: 900;
+    user-select:none;
+  }
+  .card h3{ margin: 0; font-size: 18px; letter-spacing: -.2px; }
+  .card p{ margin: 10px 0 0; color: rgba(233,237,247,.72); font-size: 13px; line-height: 1.6; }
 
-.btn.primary{
-  background:linear-gradient(90deg,#8a5cff,#00d7ff);
-  color:#000;
-}
+  .plan{ display:flex; flex-direction:column; gap: 12px; min-height: 180px; }
+  .price{ font-size: 44px; letter-spacing: -1px; font-weight: 900; }
+  .plan .meta{ margin-top:-6px; color: rgba(233,237,247,.70); font-size: 13px; }
 
-.hero{
-  max-width:1000px;
-  margin:90px auto 60px;
-  padding:0 24px;
-  text-align:center;
-}
-
-.hero h1{
-  font-size:48px;
-  margin-bottom:18px;
-}
-
-.hero p{
-  color:var(--muted);
-  line-height:1.6;
-  margin-bottom:28px;
-}
-
-.actions{
-  display:flex;
-  justify-content:center;
-  gap:14px;
-  flex-wrap:wrap;
-}
-
-.section{
-  max-width:1100px;
-  margin:0 auto;
-  padding:60px 24px;
-}
-
-.section h2{
-  font-size:28px;
-  margin-bottom:14px;
-}
-
-.cards{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-  gap:18px;
-}
-
-.card{
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:18px;
-  padding:20px;
-}
-
-.price{
-  font-size:32px;
-  font-weight:800;
-}
-  /* ====== WARMASTER UI UPGRADE (LANDR-like) ====== */
-main{
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 0 24px 80px;
-}
-
-.section{
-  padding: 70px 0;
-}
-
-.section h2{
-  font-size: 44px;
-  margin: 0 0 18px;
-  letter-spacing: -1px;
-}
-
-.section .lead{
-  margin: 0 0 26px;
-  color: var(--muted);
-  font-size: 15px;
-  line-height: 1.6;
-  max-width: 70ch;
-}
-
-/* grid más pro */
-.cards{
-  display:grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
-}
-
-@media (max-width: 980px){
-  .cards{ grid-template-columns: 1fr; }
-  .section h2{ font-size: 34px; }
-}
-
-/* cards con profundidad + glow */
-.card{
-  position: relative;
-  border-radius: 22px;
-  padding: 20px 20px 18px;
-  background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
-  border: 1px solid rgba(255,255,255,.12);
-  box-shadow: 0 24px 70px rgba(0,0,0,.55);
-  overflow:hidden;
-  transition: transform .14s ease, border-color .14s ease, background .14s ease;
-}
-
-.card::before{
-  content:"";
-  position:absolute; inset:-1px;
-  background:
-    radial-gradient(420px 220px at 20% 20%, rgba(138,92,255,.18), transparent 60%),
-    radial-gradient(420px 220px at 85% 30%, rgba(0,215,255,.14), transparent 60%),
-    radial-gradient(520px 240px at 40% 95%, rgba(0,255,154,.10), transparent 60%);
-  pointer-events:none;
-  opacity:.95;
-}
-
-.card > *{ position:relative; }
-
-.card:hover{
-  transform: translateY(-3px);
-  border-color: rgba(0,215,255,.26);
-  background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.045));
-}
-
-.card .kicker{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-bottom: 10px;
-}
-
-.icon{
-  width: 40px; height: 40px;
-  border-radius: 16px;
-  display:flex; align-items:center; justify-content:center;
-  background: linear-gradient(135deg, rgba(138,92,255,.95), rgba(0,215,255,.75));
-  border: 1px solid rgba(255,255,255,.14);
-  box-shadow: 0 16px 46px rgba(0,0,0,.55);
-  color:#061018;
-  font-weight: 900;
-  user-select:none;
-}
-
-.card h3{
-  margin: 0;
-  font-size: 18px;
-  letter-spacing: -.2px;
-}
-
-.card p{
-  margin: 10px 0 0;
-  color: rgba(233,237,247,.72);
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-/* precios más “plan” */
-.plan{
-  display:flex;
-  flex-direction:column;
-  gap: 12px;
-  min-height: 180px;
-}
-
-.price{
-  font-size: 44px;
-  letter-spacing: -1px;
-  font-weight: 900;
-}
-
-.plan .meta{
-  margin-top:-6px;
-  color: rgba(233,237,247,.70);
-  font-size: 13px;
-}
-
-.badge{
-  display:inline-flex;
-  align-items:center;
-  gap: 8px;
-  padding: 7px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.06);
-  color: rgba(233,237,247,.9);
-  font-size: 12px;
-  font-weight: 900;
-  width: fit-content;
-}
-
-.badge i{
-  width: 9px; height:9px;
-  border-radius: 999px;
-  background: rgba(0,215,255,.9);
-  box-shadow: 0 0 0 6px rgba(0,215,255,.12);
-  display:inline-block;
-}
+  .badge{
+    display:inline-flex; align-items:center; gap: 8px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+    color: rgba(233,237,247,.9);
+    font-size: 12px;
+    font-weight: 900;
+    width: fit-content;
+  }
+  .badge i{
+    width: 9px; height:9px;
+    border-radius: 999px;
+    background: rgba(0,215,255,.9);
+    box-shadow: 0 0 0 6px rgba(0,215,255,.12);
+    display:inline-block;
+  }
 </style>
 </head>
 
 <body>
-
 <header>
   <div class="brand">War<span class="grad">Master</span></div>
   <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -308,117 +176,102 @@ main{
 </header>
 
 <main>
-
-<section class="hero">
-  <h1>Masteriza tu música con <span class="grad">calidad profesional</span></h1>
-  <p>
-  Masterización automática impulsada por análisis inteligente.
-  Obtén un sonido balanceado, fuerte y competitivo,
-  listo para Spotify, YouTube y Apple Music.
-  </p>
-  <p style="margin-top:10px;font-size:14px;color:var(--muted);">
-    Sin plugins • Sin conocimientos técnicos • Resultados inmediatos
-  </p>
-  <div class="actions">
-    <button class="btn primary" id="btnLoginHero">Entrar al dashboard</button>
-  </div>
-</section>
-
-<section class="section">
-  <section class="sound-visual">
-    <div class="bars">
-      <span></span><span></span><span></span><span></span><span></span>
-      <span></span><span></span><span></span><span></span><span></span>
-    </div>
-
-    <p class="sound-text">
-      Análisis inteligente • Compresión precisa • Loudness profesional
+  <section class="hero">
+    <h1>Masteriza tu música con <span class="grad">calidad profesional</span></h1>
+    <p>
+      Masterización automática impulsada por análisis inteligente.
+      Obtén un sonido balanceado, fuerte y competitivo,
+      listo para Spotify, YouTube y Apple Music.
     </p>
-  </section>
-
-  <section class="section" id="como">
-    <h2>Cómo funciona</h2>
-    <p class="lead">Sube tu track, elige un carácter y descarga un master listo para publicar.</p>
-
-    <div class="cards">
-      <div class="card">
-        <div class="kicker"><div class="icon">1</div><h3>Sube tu track</h3></div>
-        <p>WAV o MP3. Luego podrás limitar tamaño/duración en el backend.</p>
-      </div>
-
-      <div class="card">
-        <div class="kicker"><div class="icon">2</div><h3>Elige el estilo</h3></div>
-        <p>Presets por género + control de intensidad para el carácter del master.</p>
-      </div>
-
-      <div class="card">
-        <div class="kicker"><div class="icon">3</div><h3>Descarga tu master</h3></div>
-        <p>Exporta WAV/MP3 y deja listo tu track para plataformas.</p>
-      </div>
+    <p style="margin-top:10px;font-size:14px;color:var(--muted);">
+      Sin plugins • Sin conocimientos técnicos • Resultados inmediatos
+    </p>
+    <div class="actions">
+      <button class="btn primary" id="btnLoginHero">Entrar al dashboard</button>
     </div>
   </section>
 
-  <section class="section" id="features">
-    <h2>Características</h2>
-    <p class="lead">Una experiencia rápida y pro: comparas, ajustas y publicas.</p>
-
-    <div class="cards">
-      <div class="card">
-        <div class="kicker"><div class="icon">A</div><h3>Presets por género</h3></div>
-        <p>Clean, Club, Warm, Bright, Heavy (puedes agregar más).</p>
+  <section class="section">
+    <section class="sound-visual">
+      <div class="bars">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
       </div>
+      <p class="sound-text">Análisis inteligente • Compresión precisa • Loudness profesional</p>
+    </section>
 
-      <div class="card">
-        <div class="kicker"><div class="icon">I</div><h3>Control de intensidad</h3></div>
-        <p>Define cuánta compresión/saturación quieres en el resultado.</p>
-      </div>
+    <section class="section" id="como">
+      <h2>Cómo funciona</h2>
+      <p class="lead">Sube tu track, elige un carácter y descarga un master listo para publicar.</p>
 
-      <div class="card">
-        <div class="kicker"><div class="icon">Q</div><h3>Exporta WAV / MP3</h3></div>
-        <p>Listo para Spotify / YouTube / Apple Music según tu plan.</p>
+      <div class="cards">
+        <div class="card">
+          <div class="kicker"><div class="icon">1</div><h3>Sube tu track</h3></div>
+          <p>WAV o MP3. Luego podrás limitar tamaño/duración en el backend.</p>
+        </div>
+        <div class="card">
+          <div class="kicker"><div class="icon">2</div><h3>Elige el estilo</h3></div>
+          <p>Presets por género + control de intensidad para el carácter del master.</p>
+        </div>
+        <div class="card">
+          <div class="kicker"><div class="icon">3</div><h3>Descarga tu master</h3></div>
+          <p>Exporta WAV/MP3 y deja listo tu track para plataformas.</p>
+        </div>
       </div>
-    </div>
+    </section>
+
+    <section class="section" id="features">
+      <h2>Características</h2>
+      <p class="lead">Una experiencia rápida y pro: comparas, ajustas y publicas.</p>
+
+      <div class="cards">
+        <div class="card">
+          <div class="kicker"><div class="icon">A</div><h3>Presets por género</h3></div>
+          <p>Clean, Club, Warm, Bright, Heavy (puedes agregar más).</p>
+        </div>
+        <div class="card">
+          <div class="kicker"><div class="icon">I</div><h3>Control de intensidad</h3></div>
+          <p>Define cuánta compresión/saturación quieres en el resultado.</p>
+        </div>
+        <div class="card">
+          <div class="kicker"><div class="icon">Q</div><h3>Exporta WAV / MP3</h3></div>
+          <p>Listo para Spotify / YouTube / Apple Music según tu plan.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="precios">
+      <h2>Precios</h2>
+      <p class="lead">Modelo demo. Luego conectas Stripe o ventas por créditos.</p>
+
+      <div class="cards">
+        <div class="card plan">
+          <span class="badge"><i></i> Recruit</span>
+          <h3>Free</h3>
+          <div class="price">$0</div>
+          <div class="meta">2 masters/mes • MP3 • Presets básicos</div>
+        </div>
+        <div class="card plan">
+          <span class="badge"><i></i> Popular</span>
+          <h3>Pro</h3>
+          <div class="price">$12</div>
+          <div class="meta">20 masters/mes • WAV 24-bit • A/B • Targets</div>
+        </div>
+        <div class="card plan">
+          <span class="badge"><i></i> Studio</span>
+          <h3>Studio</h3>
+          <div class="price">$29</div>
+          <div class="meta">Ilimitado* • Prioridad • API / Integración</div>
+        </div>
+      </div>
+    </section>
   </section>
-
-  <section class="section" id="precios">
-    <h2>Precios</h2>
-    <p class="lead">Modelo demo. Luego conectas Stripe o ventas por créditos.</p>
-
-    <div class="cards">
-      <div class="card plan">
-        <span class="badge"><i></i> Recruit</span>
-        <h3>Free</h3>
-        <div class="price">$0</div>
-        <div class="meta">2 masters/mes • MP3 • Presets básicos</div>
-      </div>
-
-      <div class="card plan">
-        <span class="badge"><i></i> Popular</span>
-        <h3>Pro</h3>
-        <div class="price">$12</div>
-        <div class="meta">20 masters/mes • WAV 24-bit • A/B • Targets</div>
-      </div>
-
-      <div class="card plan">
-        <span class="badge"><i></i> Studio</span>
-        <h3>Studio</h3>
-        <div class="price">$29</div>
-        <div class="meta">Ilimitado* • Prioridad • API / Integración</div>
-      </div>
-    </div>
-  </section>
-</section>
-
 </main>
 
-<!-- LOGIN FAKE — SOLO FUNCIONALIDAD (Render-friendly) -->
 <script>
-  // ✅ preserva ?api=... en navegación (muy útil en Render)
-  function withSameQuery(path){
-    return path + (location.search || "");
-  }
+  // ✅ preserva ?api=... (aunque en single-service normalmente no lo necesitas)
+  function withSameQuery(path){ return path + (location.search || ""); }
 
-  // Ajustar link "Nuevo master" para preservar ?api=
   const linkNewMaster = document.getElementById("linkNewMaster");
   if (linkNewMaster) linkNewMaster.href = withSameQuery("master.html");
 
@@ -430,7 +283,5 @@ main{
   document.getElementById("btnLogin")?.addEventListener("click", loginFake);
   document.getElementById("btnLoginHero")?.addEventListener("click", loginFake);
 </script>
-
-<!-- ✅ eliminado: script btnNewMaster (no existía y rompía consola) -->
 </body>
 </html>
