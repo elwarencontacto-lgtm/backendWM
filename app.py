@@ -30,7 +30,7 @@ def run_ffmpeg(cmd: list[str]) -> None:
         cmd,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        text=True
+        text=True,
     )
     if proc.returncode != 0:
         raise HTTPException(status_code=500, detail=f"FFmpeg error:\n{proc.stderr[-8000:]}")
@@ -73,5 +73,63 @@ def cleanup_files(*paths: Path) -> None:
         except Exception:
             pass
 
-@app.get("/ap
+@app.get("/api/health")
+def health():
+    return {"ok": True}
 
+@app.post("/api/master")
+async def master(
+    file: UploadFile = File(...),
+    preset: str = Form("clean"),
+    intensity: int = Form(55),
+):
+    if not file or not file.filename:
+        raise HTTPException(status_code=400, detail="Archivo inválido")
+
+    job_id = uuid.uuid4().hex[:8]
+    safe_name = safe_filename(file.filename)
+
+    in_path = TMP_DIR / f"in_{job_id}_{safe_name}"
+    out_path = TMP_DIR / f"master_{job_id}.wav"
+
+    try:
+        with in_path.open("wb") as f:
+            shutil.copyfileobj(file.file, f)
+    finally:
+        try:
+            file.file.close()
+        except Exception:
+            pass
+
+    filters = preset_chain(preset, intensity)
+
+    cmd = [
+        "ffmpeg", "-y",
+        "-i", str(in_path),
+        "-vn",
+        "-af", filters,
+        "-ar", "44100",
+        "-ac", "2",
+        "-sample_fmt", "s32",
+        str(out_path)
+    ]
+
+    run_ffmpeg(cmd)
+
+    if not out_path.exists() or out_path.stat().st_size < 1024:
+        cleanup_files(in_path, out_path)
+        raise HTTPException(status_code=500, detail="Master no generado o vacío")
+
+    return FileResponse(
+        path=str(out_path),
+        media_type="audio/wav",
+        filename="warmaster_master.wav",
+        background=BackgroundTask(cleanup_files, in_path, out_path),
+    )
+
+@app.get("/")
+def root():
+    return RedirectResponse(url="/index.html")
+
+# 🔥 OJO: esto va al FINAL
+app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="public")
