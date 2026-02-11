@@ -213,7 +213,6 @@
     .hidden{ display:none; }
     .disabled{ opacity:.6; pointer-events:none; }
 
-    /* A/B WarMaster (sin audio blanco) */
     .abCard{
       margin-top:14px;
       border-radius: 18px;
@@ -381,7 +380,6 @@
 </main>
 
 <script>
-  // ===== DOM =====
   const fileInput   = document.getElementById("fileInput");
   const fileField   = document.getElementById("file");
   const btnPick     = document.getElementById("btnPick");
@@ -404,22 +402,19 @@
   const audioPreview  = document.getElementById("audioPreview");
   const audioMaster   = document.getElementById("audioMaster");
 
-  // ===== API (Render-friendly) =====
-  // - Si abres: master.html?api=https://backendwm.onrender.com -> usa ese backend
-  // - Si NO pasas ?api=... -> usa mismo dominio (ideal si sirves frontend+backend juntos)
+  // ✅ API_BASE: ?api=... o mismo dominio
   const params = new URLSearchParams(location.search);
-  const API_BASE = (params.get("api") || "").replace(/\/+$/,""); // sin slash final
+  const API_BASE = (params.get("api") || "").replace(/\/+$/,"");
 
   // ===== State =====
   let currentFile = null;
   let activeAudio = audioPreview;
 
-  // ObjectURLs para evitar fugas de memoria
   let originalUrl = null;
   let previewUrl  = null;
   let masterObjectUrl = null;
 
-  // ===== Preview engine (no recrea createMediaElementSource) =====
+  // Preview engine
   let audioCtx = null;
   let sourceNode = null;
   let gainNode = null;
@@ -466,7 +461,6 @@
     gainNode.gain.value = 1 + v * 0.8;
   }
 
-  // ===== A/B UI =====
   function fmtTime(s){
     s = Math.max(0, Math.floor(s || 0));
     const m = Math.floor(s/60);
@@ -519,10 +513,8 @@
   btnABOriginal?.addEventListener("click", ()=> setActive(audioOriginal, "original"));
   btnABPreview?.addEventListener("click",  ()=> setActive(audioPreview,  "preview"));
 
-  // Master: habilita Descargar si ya existe masterObjectUrl
   btnABMaster?.addEventListener("click", () => {
     setActive(audioMaster, "master");
-
     if (masterObjectUrl && btnDownloadMaster) {
       btnDownloadMaster.href = masterObjectUrl;
       btnDownloadMaster.download = "warmaster_master.wav";
@@ -535,7 +527,6 @@
     try{
       if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume();
     } catch(e){}
-
     if (!activeAudio) return;
 
     if (activeAudio.paused){
@@ -564,7 +555,6 @@
     a.addEventListener("ended", ()=> { if(btnABPlay) btnABPlay.textContent="▶"; });
   });
 
-  // ===== Upload =====
   function pick(){ fileInput?.click(); }
   btnPick?.addEventListener("click", pick);
 
@@ -578,18 +568,16 @@
 
     abWrapper?.classList.remove("hidden");
 
-    // ✅ Revocar URLs anteriores (evita fugas de memoria)
+    // ✅ revoke URLs
     if (originalUrl) URL.revokeObjectURL(originalUrl);
     if (previewUrl)  URL.revokeObjectURL(previewUrl);
 
     originalUrl = URL.createObjectURL(currentFile);
     previewUrl  = URL.createObjectURL(currentFile);
 
-    // original
     audioOriginal.src = originalUrl;
     audioOriginal.load();
 
-    // preview
     audioPreview.src = previewUrl;
     audioPreview.load();
 
@@ -597,13 +585,11 @@
     applyPreset();
     applyIntensity();
 
-    // reset master
     if (masterObjectUrl) { URL.revokeObjectURL(masterObjectUrl); masterObjectUrl = null; }
     audioMaster.removeAttribute("src");
     audioMaster.load();
     if (btnABMaster) btnABMaster.disabled = true;
 
-    // reset download
     if (btnDownloadMaster) {
       btnDownloadMaster.href = "#";
       btnDownloadMaster.classList.add("disabled");
@@ -616,13 +602,11 @@
   intensity?.addEventListener("input", applyIntensity);
   preset?.addEventListener("change", applyPreset);
 
-  // ===== Render real =====
   async function fetchWithTimeout(url, options, timeoutMs){
     const controller = new AbortController();
     const t = setTimeout(()=> controller.abort(new Error("timeout")), timeoutMs);
     try{
-      const res = await fetch(url, { ...options, signal: controller.signal });
-      return res;
+      return await fetch(url, { ...options, signal: controller.signal });
     } finally {
       clearTimeout(t);
     }
@@ -643,15 +627,10 @@
       fd.append("preset", preset?.value || "clean");
       fd.append("intensity", String(intensity?.value || 55));
 
-      console.log("[Render] POST", (API_BASE ? API_BASE : "(same-origin)") + "/api/master", { file: currentFile.name });
-
-      // ✅ timeout real 3 min
       const res = await fetchWithTimeout(`${API_BASE}/api/master`, {
         method: "POST",
         body: fd
       }, 180000);
-
-      console.log("[Render] status:", res.status);
 
       const ct = (res.headers.get("content-type") || "").toLowerCase();
 
@@ -673,8 +652,7 @@
         return;
       }
 
-      // set master url
-      if (masterObjectUrl) { URL.revokeObjectURL(masterObjectUrl); }
+      if (masterObjectUrl) URL.revokeObjectURL(masterObjectUrl);
       masterObjectUrl = URL.createObjectURL(blob);
 
       audioMaster.src = masterObjectUrl;
@@ -689,7 +667,6 @@
         btnDownloadMaster.setAttribute("aria-disabled","false");
       }
 
-      // descarga segura PC
       const a = document.createElement("a");
       a.href = masterObjectUrl;
       a.download = "warmaster_master.wav";
@@ -697,10 +674,7 @@
       a.click();
       a.remove();
 
-      console.log("[Render] OK, blob bytes:", blob.size);
-
     } catch (err) {
-      console.error("[Render] error:", err);
       const msg = (err && (err.name === "AbortError" || err?.message === "timeout"))
         ? "Tiempo de espera agotado. El backend está demorando o colgado."
         : ("Error de red/JS: " + (err?.message || String(err)));
@@ -711,6 +685,5 @@
     }
   });
 </script>
-
 </body>
 </html>
