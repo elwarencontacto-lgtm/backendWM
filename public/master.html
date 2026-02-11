@@ -243,4 +243,484 @@
     }
     .abBtn{
       padding:8px 12px;
-      border-radiu
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .abBtn[aria-pressed="true"]{
+      border:none;
+      background: linear-gradient(90deg, rgba(138,92,255,.95), rgba(0,215,255,.95));
+      color:#061018;
+    }
+    .abTransport{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .abPlay{
+      width:46px;
+      height:38px;
+      border-radius: 14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 900;
+    }
+    .abTimeline{ flex:1; min-width: 180px; }
+    .abTime{
+      font-size: 11px;
+      color: rgba(233,237,247,.65);
+      margin-bottom:6px;
+      text-align:left;
+    }
+    #abSeek{ width:100%; accent-color: var(--b); }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="wrap">
+    <div class="nav">
+      <a class="brand" href="index.html">
+        <span class="dotlogo" aria-hidden="true"></span>
+        <span>War<span class="grad">Master</span></span>
+      </a>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a class="btn ghost" href="dashboard.html">Dashboard</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Masterizado</h1>
+        <p class="sub">Sube tu audio, elige un preset y ajusta la intensidad.</p>
+      </div>
+    </div>
+
+    <section class="card" id="newMasterCard">
+      <div class="card-h">
+        <h2>Nuevo master</h2>
+        <span class="pill"><span class="dot run"></span> beta1</span>
+      </div>
+
+      <div class="card-b">
+        <div class="split">
+          <div class="field">
+            <label for="file">Archivo</label>
+            <input type="text" id="file" placeholder="Arrastra aquí o elige un archivo" readonly />
+            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn" type="button" id="btnPick">Seleccionar</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="preset">Preset</label>
+            <select id="preset">
+              <option value="clean">Clean / Balanced</option>
+              <option value="club">Club / Loud</option>
+              <option value="warm">Warm / Analog</option>
+              <option value="bright">Bright / Pop</option>
+              <option value="heavy">Heavy / Rock</option>
+            </select>
+
+            <div style="height:10px"></div>
+
+            <label for="intensity2">Intensidad</label>
+            <input type="range" id="intensity2" min="0" max="100" value="55" />
+            <div style="display:flex; justify-content:space-between; font-size:12px; color:rgba(233,237,247,.65); margin-top:6px;">
+              <span>Suave</span><span>Agresiva</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <span class="pill" id="outFmt"><span class="dot"></span> WAV</span>
+          <span class="pill" id="outLufs"><span class="dot"></span> -10.1 LUFS</span>
+          <button class="btn primary" type="button" id="btnStartJob" disabled>Renderizar</button>
+        </div>
+
+        <div id="abWrapper" class="hidden">
+          <div class="abCard">
+            <div class="abHead">
+              <div class="abTitle">Escucha A/B</div>
+              <div class="abChips">
+                <button class="btn abBtn" type="button" id="btnABOriginal" aria-pressed="false">Original</button>
+                <button class="btn abBtn" type="button" id="btnABPreview" aria-pressed="true">Preview</button>
+                <button class="btn abBtn" type="button" id="btnABMaster" aria-pressed="false" disabled>Master</button>
+                <a class="btn abBtn disabled" id="btnDownloadMaster" href="#" download="warmaster_master.wav" aria-disabled="true">Descargar</a>
+              </div>
+            </div>
+
+            <div class="abTransport">
+              <button class="btn primary abPlay" type="button" id="btnABPlay">▶</button>
+
+              <div class="abTimeline">
+                <div class="abTime" id="abTime">0:00 / 0:00</div>
+                <input id="abSeek" type="range" min="0" max="1000" value="0" />
+              </div>
+
+              <button class="btn abBtn" type="button" id="btnABStop">⏹</button>
+            </div>
+
+            <audio id="audioOriginal" preload="metadata"></audio>
+            <audio id="audioPreview" preload="metadata"></audio>
+            <audio id="audioMaster" preload="metadata"></audio>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <input id="fileInput" type="file"
+      accept=".wav,.mp3,.flac,.aac,.m4a,.ogg,.opus,.aiff,.aif,.wma,audio/*"
+      hidden
+    />
+  </div>
+</main>
+
+<script>
+  // ===== API_BASE (Render-friendly) =====
+  function getApiBase(){
+    const u = new URL(window.location.href);
+    const q = u.searchParams.get("api"); // optional override: ?api=https://backendwm.onrender.com
+    if (q) return q.replace(/\/+$/,'');
+    return `${u.origin}`; // same domain by default
+  }
+
+  async function fetchWithTimeout(url, options, timeoutMs){
+    const controller = new AbortController();
+    const t = setTimeout(()=> controller.abort("timeout"), timeoutMs);
+    try{
+      return await fetch(url, { ...options, signal: controller.signal });
+    } finally {
+      clearTimeout(t);
+    }
+  }
+
+  const API_BASE = getApiBase();
+
+  // ===== DOM =====
+  const fileInput   = document.getElementById("fileInput");
+  const fileField   = document.getElementById("file");
+  const btnPick     = document.getElementById("btnPick");
+  const btnStartJob = document.getElementById("btnStartJob");
+
+  const preset      = document.getElementById("preset");
+  const intensity   = document.getElementById("intensity2");
+
+  const abWrapper   = document.getElementById("abWrapper");
+  const btnABOriginal = document.getElementById("btnABOriginal");
+  const btnABPreview  = document.getElementById("btnABPreview");
+  const btnABMaster   = document.getElementById("btnABMaster");
+  const btnABPlay     = document.getElementById("btnABPlay");
+  const btnABStop     = document.getElementById("btnABStop");
+  const abSeek        = document.getElementById("abSeek");
+  const abTime        = document.getElementById("abTime");
+  const btnDownloadMaster = document.getElementById("btnDownloadMaster");
+
+  const audioOriginal = document.getElementById("audioOriginal");
+  const audioPreview  = document.getElementById("audioPreview");
+  const audioMaster   = document.getElementById("audioMaster");
+
+  // ===== State =====
+  let currentFile = null;
+  let activeAudio = audioPreview;
+
+  let originalObjectUrl = null;
+  let previewObjectUrl  = null;
+  let masterObjectUrl   = null;
+
+  function revokeIf(url){
+    try{ if(url) URL.revokeObjectURL(url); } catch(e){}
+  }
+
+  // ===== Preview engine =====
+  let audioCtx = null;
+  let sourceNode = null;
+  let gainNode = null;
+  let bass = null;
+  let treble = null;
+
+  function initPreviewEngine(){
+    if (!audioPreview) return;
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (!sourceNode) sourceNode = audioCtx.createMediaElementSource(audioPreview);
+
+    bass = audioCtx.createBiquadFilter();
+    bass.type = "lowshelf";
+    bass.frequency.value = 160;
+    bass.gain.value = 2;
+
+    treble = audioCtx.createBiquadFilter();
+    treble.type = "highshelf";
+    treble.frequency.value = 4200;
+    treble.gain.value = 1;
+
+    gainNode = audioCtx.createGain();
+    gainNode.gain.value = 1;
+
+    try { sourceNode.disconnect(); } catch(e){}
+    sourceNode.connect(bass).connect(treble).connect(gainNode).connect(audioCtx.destination);
+  }
+
+  function applyPreset(){
+    if (!bass || !treble) return;
+    switch (preset.value) {
+      case "club":   bass.gain.value = 6; treble.gain.value = 2; break;
+      case "warm":   bass.gain.value = 4; treble.gain.value = -2; break;
+      case "bright": bass.gain.value = 1; treble.gain.value = 5; break;
+      case "heavy":  bass.gain.value = 7; treble.gain.value = 3; break;
+      default:       bass.gain.value = 2; treble.gain.value = 1;
+    }
+  }
+
+  function applyIntensity(){
+    if (!gainNode) return;
+    const v = Number(intensity.value || 55) / 100;
+    gainNode.gain.value = 1 + v * 0.8;
+  }
+
+  // ===== A/B UI =====
+  function fmtTime(s){
+    s = Math.max(0, Math.floor(s || 0));
+    const m = Math.floor(s/60);
+    const r = s%60;
+    return `${m}:${String(r).padStart(2,'0')}`;
+  }
+
+  function syncUI(){
+    if (!activeAudio) return;
+    const dur = activeAudio.duration || 0;
+    const cur = activeAudio.currentTime || 0;
+    if (abTime) abTime.textContent = `${fmtTime(cur)} / ${fmtTime(dur)}`;
+    if (abSeek && dur > 0) abSeek.value = Math.floor((cur/dur)*1000);
+  }
+
+  function stopAll(){
+    [audioOriginal,audioPreview,audioMaster].forEach(a=>{
+      if(!a) return;
+      a.pause();
+      a.currentTime = 0;
+    });
+    if (btnABPlay) btnABPlay.textContent = "▶";
+  }
+
+  function setPressed(which){
+    const set = (el, v) => el && el.setAttribute("aria-pressed", v ? "true":"false");
+    set(btnABOriginal, which==="original");
+    set(btnABPreview,  which==="preview");
+    set(btnABMaster,   which==="master");
+  }
+
+  function setActive(next, which){
+    const wasPlaying = activeAudio && !activeAudio.paused;
+    const t = activeAudio ? activeAudio.currentTime : 0;
+
+    [audioOriginal,audioPreview,audioMaster].forEach(a=>{
+      if(a && a !== next) a.pause();
+    });
+
+    activeAudio = next;
+    setPressed(which);
+
+    if (activeAudio){
+      try { activeAudio.currentTime = t; } catch(e){}
+      if (wasPlaying) activeAudio.play();
+    }
+    syncUI();
+  }
+
+  btnABOriginal?.addEventListener("click", ()=> setActive(audioOriginal, "original"));
+  btnABPreview?.addEventListener("click",  ()=> setActive(audioPreview,  "preview"));
+  btnABMaster?.addEventListener("click", () => {
+    setActive(audioMaster, "master");
+    if (masterObjectUrl && btnDownloadMaster) {
+      btnDownloadMaster.href = masterObjectUrl;
+      btnDownloadMaster.download = "warmaster_master.wav";
+      btnDownloadMaster.classList.remove("disabled");
+      btnDownloadMaster.setAttribute("aria-disabled","false");
+    }
+  });
+
+  btnABPlay?.addEventListener("click", async ()=>{
+    try{
+      if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume();
+    } catch(e){}
+    if (!activeAudio) return;
+
+    if (activeAudio.paused){
+      await activeAudio.play();
+      btnABPlay.textContent = "⏸";
+    } else {
+      activeAudio.pause();
+      btnABPlay.textContent = "▶";
+    }
+  });
+
+  btnABStop?.addEventListener("click", stopAll);
+
+  abSeek?.addEventListener("input", ()=>{
+    if (!activeAudio) return;
+    const dur = activeAudio.duration || 0;
+    if (dur <= 0) return;
+    activeAudio.currentTime = (Number(abSeek.value)/1000) * dur;
+    syncUI();
+  });
+
+  [audioOriginal,audioPreview,audioMaster].forEach(a=>{
+    if(!a) return;
+    a.addEventListener("timeupdate", syncUI);
+    a.addEventListener("loadedmetadata", syncUI);
+    a.addEventListener("ended", ()=> { if(btnABPlay) btnABPlay.textContent="▶"; });
+  });
+
+  // ===== Upload =====
+  function pick(){ fileInput?.click(); }
+  btnPick?.addEventListener("click", pick);
+
+  fileInput?.addEventListener("change", (e) => {
+    currentFile = e.target.files?.[0] || null;
+
+    if (fileField) fileField.value = currentFile ? currentFile.name : "";
+    if (btnStartJob) btnStartJob.disabled = !currentFile;
+
+    if (!currentFile) return;
+
+    abWrapper?.classList.remove("hidden");
+
+    // revoke old object urls
+    revokeIf(originalObjectUrl);
+    revokeIf(previewObjectUrl);
+
+    // original
+    originalObjectUrl = URL.createObjectURL(currentFile);
+    audioOriginal.src = originalObjectUrl;
+    audioOriginal.load();
+
+    // preview
+    previewObjectUrl = URL.createObjectURL(currentFile);
+    audioPreview.src = previewObjectUrl;
+    audioPreview.load();
+
+    initPreviewEngine();
+    applyPreset();
+    applyIntensity();
+
+    // reset master
+    revokeIf(masterObjectUrl);
+    masterObjectUrl = null;
+    audioMaster.removeAttribute("src");
+    audioMaster.load();
+    if (btnABMaster) btnABMaster.disabled = true;
+
+    // reset download
+    if (btnDownloadMaster) {
+      btnDownloadMaster.href = "#";
+      btnDownloadMaster.classList.add("disabled");
+      btnDownloadMaster.setAttribute("aria-disabled","true");
+    }
+
+    setActive(audioPreview, "preview");
+  });
+
+  intensity?.addEventListener("input", applyIntensity);
+  preset?.addEventListener("change", applyPreset);
+
+  // ===== Render real =====
+  btnStartJob?.addEventListener("click", async () => {
+    if (!currentFile) return;
+
+    const old = btnStartJob.textContent;
+    btnStartJob.textContent = "Procesando…";
+    btnStartJob.disabled = true;
+
+    try{
+      try{ if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume(); } catch(e){}
+
+      const fd = new FormData();
+      fd.append("file", currentFile);
+      fd.append("preset", preset?.value || "clean");
+      fd.append("intensity", String(intensity?.value || 55));
+
+      console.log("[Render] POST", `${API_BASE}/api/master`);
+
+      const res = await fetchWithTimeout(
+        `${API_BASE}/api/master`,
+        { method: "POST", body: fd },
+        180000
+      );
+
+      console.log("[Render] status:", res.status);
+
+      const ct = (res.headers.get("content-type") || "").toLowerCase();
+
+      if (!res.ok) {
+        const txt = await res.text().catch(()=> "");
+        alert("Render falló (" + res.status + ").\n" + txt.slice(0,900));
+        return;
+      }
+
+      if (ct.includes("application/json")) {
+        const txt = await res.text().catch(()=> "");
+        alert("El backend devolvió JSON (no audio). Revisa /api/master.\n" + txt.slice(0,900));
+        return;
+      }
+
+      const blob = await res.blob();
+      if (!blob || blob.size < 1024) {
+        alert("El master llegó vacío o muy pequeño. (blob: " + (blob ? blob.size : 0) + " bytes)");
+        return;
+      }
+
+      revokeIf(masterObjectUrl);
+      masterObjectUrl = URL.createObjectURL(blob);
+
+      audioMaster.src = masterObjectUrl;
+      audioMaster.load();
+
+      if (btnABMaster) btnABMaster.disabled = false;
+
+      if (btnDownloadMaster) {
+        btnDownloadMaster.href = masterObjectUrl;
+        btnDownloadMaster.download = "warmaster_master.wav";
+        btnDownloadMaster.classList.remove("disabled");
+        btnDownloadMaster.setAttribute("aria-disabled","false");
+      }
+
+      // descarga segura PC
+      const a = document.createElement("a");
+      a.href = masterObjectUrl;
+      a.download = "warmaster_master.wav";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      console.log("[Render] OK, blob bytes:", blob.size);
+
+    } catch (err) {
+      console.error("[Render] error:", err);
+      const msg = (err && (err.name === "AbortError" || err === "timeout"))
+        ? "Tiempo de espera agotado (3 min). El backend está demorando o colgado."
+        : ("Error de red/JS: " + (err?.message || String(err)));
+      alert(msg);
+    } finally {
+      btnStartJob.textContent = old;
+      btnStartJob.disabled = !currentFile;
+    }
+  });
+
+  // cleanup when leaving page
+  window.addEventListener("beforeunload", () => {
+    revokeIf(originalObjectUrl);
+    revokeIf(previewObjectUrl);
+    revokeIf(masterObjectUrl);
+  });
+</script>
+
+</body>
+</html>
