@@ -338,11 +338,20 @@
           </div>
         </div>
 
-        <div class="row">
-          <span class="pill" id="outFmt"><span class="dot"></span> WAV</span>
-          <span class="pill" id="outLufs"><span class="dot"></span> -10.1 LUFS</span>
-          <button class="btn primary" type="button" id="btnStartJob" disabled>Renderizar</button>
-        </div>
+        <div class="row" style="justify-content:space-between; align-items:center;">
+  <div class="statusWrap" id="statusWrap" aria-live="polite">
+    <div class="statusTop">
+      <span class="statusDot" id="statusDot"></span>
+      <span class="statusText" id="statusText">Listo para renderizar</span>
+      <span class="statusPct" id="statusPct"></span>
+    </div>
+    <div class="statusBar">
+      <div class="statusFill" id="statusFill"></div>
+    </div>
+  </div>
+
+  <button class="btn primary" type="button" id="btnStartJob" disabled>Renderizar</button>
+</div>
 
         <div id="abWrapper" class="hidden">
           <div class="abCard">
