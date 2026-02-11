@@ -926,6 +926,45 @@
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
   </script>
+<script>
+  const btnLogin = document.getElementById("btnLogin");
+  const btnRegister = document.getElementById("btnRegister");
 
+  const loginModal = document.getElementById("loginModal");
+  const registerModal = document.getElementById("registerModal");
+
+  const closeLogin = document.getElementById("closeLogin");
+  const closeRegister = document.getElementById("closeRegister");
+
+  // Abrir Login
+  btnLogin?.addEventListener("click", () => {
+    loginModal?.classList.add("show");
+  });
+
+  // Abrir Register
+  btnRegister?.addEventListener("click", () => {
+    registerModal?.classList.add("show");
+  });
+
+  // Cerrar Login
+  closeLogin?.addEventListener("click", () => {
+    loginModal?.classList.remove("show");
+  });
+
+  // Cerrar Register
+  closeRegister?.addEventListener("click", () => {
+    registerModal?.classList.remove("show");
+  });
+
+  // Cerrar al hacer click fuera del modal
+  window.addEventListener("click", (e) => {
+    if (e.target === loginModal) {
+      loginModal.classList.remove("show");
+    }
+    if (e.target === registerModal) {
+      registerModal.classList.remove("show");
+    }
+  });
+</script>
 </body>
 </html>
