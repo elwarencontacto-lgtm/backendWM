@@ -1,3 +1,4 @@
+import os
 import uuid
 import shutil
 import subprocess
@@ -6,6 +7,7 @@ from pathlib import Path
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.background import BackgroundTask
 
 BASE_DIR = Path(__file__).parent
 TMP_DIR = BASE_DIR / "tmp"
@@ -13,7 +15,7 @@ TMP_DIR.mkdir(exist_ok=True)
 
 app = FastAPI()
 
-# CORS (por si tu frontend está en otro dominio)
+# CORS (si tu frontend está en otro dominio). Si un día lo restringes, cambia ["*"].
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -21,17 +23,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-def run_ffmpeg(cmd):
+def run_ffmpeg(cmd: list[str]) -> None:
     proc = subprocess.run(
         cmd,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        text=True
+        text=True,
     )
     if proc.returncode != 0:
         raise HTTPException(
             status_code=500,
-            detail=f"FFmpeg error:\n{proc.stderr[-8000:]}"
+            detail=f"FFmpeg error:\n{proc.stderr[-8000:]}",
         )
 
 def preset_chain(preset: str, intensity: int) -> str:
@@ -60,6 +62,19 @@ def preset_chain(preset: str, intensity: int) -> str:
         f"alimiter=limit=-1.0dB"
     )
 
+def safe_filename(name: str) -> str:
+    # deja solo caracteres seguros
+    clean = "".join(c for c in (name or "") if c.isalnum() or c in "._-").strip("._-")
+    return clean or "audio.wav"
+
+def cleanup_files(*paths: Path) -> None:
+    for p in paths:
+        try:
+            if p and p.exists():
+                p.unlink()
+        except Exception:
+            pass
+
 @app.get("/api/health")
 def health():
     return {"ok": True}
@@ -74,16 +89,20 @@ async def master(
         raise HTTPException(status_code=400, detail="Archivo inválido")
 
     job_id = uuid.uuid4().hex[:8]
-
-    safe_name = "".join(
-        c for c in file.filename if c.isalnum() or c in "._-"
-    ) or "audio.wav"
+    safe_name = safe_filename(file.filename)
 
     in_path = TMP_DIR / f"in_{job_id}_{safe_name}"
     out_path = TMP_DIR / f"master_{job_id}.wav"
 
-    with in_path.open("wb") as f:
-        shutil.copyfileobj(file.file, f)
+    # guardar archivo
+    try:
+        with in_path.open("wb") as f:
+            shutil.copyfileobj(file.file, f)
+    finally:
+        try:
+            file.file.close()
+        except Exception:
+            pass
 
     filters = preset_chain(preset, intensity)
 
@@ -101,10 +120,16 @@ async def master(
     run_ffmpeg(cmd)
 
     if not out_path.exists() or out_path.stat().st_size < 1024:
+        cleanup_files(in_path, out_path)
         raise HTTPException(status_code=500, detail="Master no generado o vacío")
 
+    # ✅ borrar input+output después de entregar la respuesta
     return FileResponse(
         path=str(out_path),
         media_type="audio/wav",
-        filename="warmaster_master.wav"
+        filename="warmaster_master.wav",
+        background=BackgroundTask(cleanup_files, in_path, out_path),
     )
+
+# Para ejecutar local:
+# uvicorn app:app --reload --host 0.0.0.0 --port 3000
