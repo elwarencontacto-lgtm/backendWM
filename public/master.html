@@ -276,6 +276,13 @@
       text-align:left;
     }
     #abSeek{ width:100%; accent-color: var(--b); }
+.file-hidden{
+  position:absolute;
+  left:-9999px;
+  width:1px;
+  height:1px;
+  opacity:0;
+}
   </style>
 </head>
 
@@ -390,7 +397,8 @@
     </section>
 
     <!-- ✅ fileInput UNA sola vez -->
-    <input id="fileInput" type="file" accept="audio/*" hidden />
+    <label for="fileInput" class="btn">Seleccionar</label>
+
   </div>
 </main>
 
