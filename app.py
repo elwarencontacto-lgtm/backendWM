@@ -1,21 +1,23 @@
-import os
 import uuid
 import shutil
 import subprocess
 from pathlib import Path
 
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from starlette.background import BackgroundTask
 
 BASE_DIR = Path(__file__).parent
 TMP_DIR = BASE_DIR / "tmp"
 TMP_DIR.mkdir(exist_ok=True)
 
+STATIC_DIR = BASE_DIR / "static"
+STATIC_DIR.mkdir(exist_ok=True)
+
 app = FastAPI()
 
-# CORS (si tu frontend está en otro dominio). Si un día lo restringes, cambia ["*"].
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -28,12 +30,12 @@ def run_ffmpeg(cmd: list[str]) -> None:
         cmd,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        text=True,
+        text=True
     )
     if proc.returncode != 0:
         raise HTTPException(
             status_code=500,
-            detail=f"FFmpeg error:\n{proc.stderr[-8000:]}",
+            detail=f"FFmpeg error:\n{proc.stderr[-8000:]}"
         )
 
 def preset_chain(preset: str, intensity: int) -> str:
@@ -63,7 +65,6 @@ def preset_chain(preset: str, intensity: int) -> str:
     )
 
 def safe_filename(name: str) -> str:
-    # deja solo caracteres seguros
     clean = "".join(c for c in (name or "") if c.isalnum() or c in "._-").strip("._-")
     return clean or "audio.wav"
 
@@ -94,7 +95,6 @@ async def master(
     in_path = TMP_DIR / f"in_{job_id}_{safe_name}"
     out_path = TMP_DIR / f"master_{job_id}.wav"
 
-    # guardar archivo
     try:
         with in_path.open("wb") as f:
             shutil.copyfileobj(file.file, f)
@@ -123,7 +123,6 @@ async def master(
         cleanup_files(in_path, out_path)
         raise HTTPException(status_code=500, detail="Master no generado o vacío")
 
-    # ✅ borrar input+output después de entregar la respuesta
     return FileResponse(
         path=str(out_path),
         media_type="audio/wav",
@@ -131,5 +130,10 @@ async def master(
         background=BackgroundTask(cleanup_files, in_path, out_path),
     )
 
-# Para ejecutar local:
-# uvicorn app:app --reload --host 0.0.0.0 --port 3000
+# ✅ Fuerza / -> /index.html (evita Not Found)
+@app.get("/")
+def root():
+    return RedirectResponse(url="/index.html")
+
+# ✅ Montar estáticos al FINAL para no romper /api/*
+app.mount("/", StaticFiles(directory=str(STATIC_DIR), html=True), name="static")
