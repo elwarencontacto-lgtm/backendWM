@@ -13,8 +13,8 @@ BASE_DIR = Path(__file__).parent
 TMP_DIR = BASE_DIR / "tmp"
 TMP_DIR.mkdir(exist_ok=True)
 
-STATIC_DIR = BASE_DIR / "static"
-STATIC_DIR.mkdir(exist_ok=True)
+PUBLIC_DIR = BASE_DIR / "public"
+PUBLIC_DIR.mkdir(exist_ok=True)
 
 app = FastAPI()
 
@@ -33,10 +33,7 @@ def run_ffmpeg(cmd: list[str]) -> None:
         text=True
     )
     if proc.returncode != 0:
-        raise HTTPException(
-            status_code=500,
-            detail=f"FFmpeg error:\n{proc.stderr[-8000:]}"
-        )
+        raise HTTPException(status_code=500, detail=f"FFmpeg error:\n{proc.stderr[-8000:]}")
 
 def preset_chain(preset: str, intensity: int) -> str:
     intensity = max(0, min(100, int(intensity)))
@@ -76,64 +73,5 @@ def cleanup_files(*paths: Path) -> None:
         except Exception:
             pass
 
-@app.get("/api/health")
-def health():
-    return {"ok": True}
+@app.get("/ap
 
-@app.post("/api/master")
-async def master(
-    file: UploadFile = File(...),
-    preset: str = Form("clean"),
-    intensity: int = Form(55),
-):
-    if not file or not file.filename:
-        raise HTTPException(status_code=400, detail="Archivo inválido")
-
-    job_id = uuid.uuid4().hex[:8]
-    safe_name = safe_filename(file.filename)
-
-    in_path = TMP_DIR / f"in_{job_id}_{safe_name}"
-    out_path = TMP_DIR / f"master_{job_id}.wav"
-
-    try:
-        with in_path.open("wb") as f:
-            shutil.copyfileobj(file.file, f)
-    finally:
-        try:
-            file.file.close()
-        except Exception:
-            pass
-
-    filters = preset_chain(preset, intensity)
-
-    cmd = [
-        "ffmpeg", "-y",
-        "-i", str(in_path),
-        "-vn",
-        "-af", filters,
-        "-ar", "44100",
-        "-ac", "2",
-        "-sample_fmt", "s32",
-        str(out_path)
-    ]
-
-    run_ffmpeg(cmd)
-
-    if not out_path.exists() or out_path.stat().st_size < 1024:
-        cleanup_files(in_path, out_path)
-        raise HTTPException(status_code=500, detail="Master no generado o vacío")
-
-    return FileResponse(
-        path=str(out_path),
-        media_type="audio/wav",
-        filename="warmaster_master.wav",
-        background=BackgroundTask(cleanup_files, in_path, out_path),
-    )
-
-# ✅ Fuerza / -> /index.html (evita Not Found)
-@app.get("/")
-def root():
-    return RedirectResponse(url="/index.html")
-
-# ✅ Montar estáticos al FINAL para no romper /api/*
-app.mount("/", StaticFiles(directory=str(STATIC_DIR), html=True), name="static")
