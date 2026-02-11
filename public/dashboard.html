@@ -13,9 +13,9 @@
       --text:#e9edf7;
       --muted: rgba(233,237,247,.72);
 
-      --a:#8a5cff;   /* violeta */
-      --b:#00d7ff;   /* cyan */
-      --c:#00ff9a;   /* verde */
+      --a:#8a5cff;
+      --b:#00d7ff;
+      --c:#00ff9a;
 
       --shadow: 0 18px 60px rgba(0,0,0,.55);
       --radius: 18px;
@@ -298,20 +298,13 @@
   </style>
 </head>
 
-<body> 
-  <script>
-  fetch("http://localhost:3000/me", { credentials: "include" })
-    .then(r => {
-      if (!r.ok) window.location.href = "index.html";
-    });
-</script>
-
+<body>
   <div class="grid-bg" aria-hidden="true"></div>
 
   <header>
     <div class="container">
       <div class="nav">
-        <a class="brand" href="index.html" title="Volver al inicio">
+        <a class="brand" href="index.html" id="linkHome" title="Volver al inicio">
           <span class="logo" aria-hidden="true"></span>
           <span>War<span class="grad">Master</span></span>
         </a>
@@ -333,7 +326,7 @@
           <p class="sub">Administra tus masters, revisa el estado de render y descarga versiones listas para publicar.</p>
         </div>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <a class="btn" href="index.html">Landing</a>
+          <a class="btn" href="index.html" id="linkLanding">Landing</a>
           <button class="btn" type="button" id="btnBilling">Plan y pagos</button>
         </div>
       </div>
@@ -356,7 +349,7 @@
 
             <div style="margin-top:14px; color:rgba(233,237,247,.62); font-size:12px; line-height:1.5;">
               <b>Tip:</b> cuando conectes backend, este panel puede consumir:
-              <span class="grad">/api/jobs</span>, <span class="grad">/api/upload</span>, <span class="grad">/api/download</span>.
+              <span class="grad">/api/jobs</span> y <span class="grad">/api/download</span>.
             </div>
           </div>
         </aside>
@@ -453,7 +446,7 @@
           <section id="support" class="card">
             <div class="card-h">
               <h2>Soporte</h2>
-              <a class="btn" href="index.html#faq">FAQ</a>
+              <a class="btn" href="index.html" id="linkFaq">Inicio</a>
             </div>
             <div class="card-b" style="color:rgba(233,237,247,.78); font-size:13px; line-height:1.6;">
               Agrega aquí un formulario o link a WhatsApp / correo / ticketera.
@@ -469,8 +462,23 @@
   </main>
 
   <script>
-    const year = document.getElementById('year');
-    year.textContent = new Date().getFullYear();
+    // ✅ Preserva ?api=... en navegación (Render-friendly)
+    function withSameQuery(path){
+      return path + (location.search || "");
+    }
+
+    // ✅ Auth demo coherente con index.html (loginFake)
+    if (localStorage.getItem("warmaster_logged") !== "true") {
+      window.location.href = withSameQuery("index.html");
+    }
+
+    // Links preservando query
+    document.getElementById("linkHome").href = withSameQuery("index.html");
+    document.getElementById("linkLanding").href = withSameQuery("index.html");
+    document.getElementById("linkFaq").href = withSameQuery("index.html");
+
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
 
     // Demo jobs
     const jobs = [
@@ -502,7 +510,8 @@
       alert("Descarga demo. Conecta aquí GET /api/download/:jobId");
     };
     window.duplicateJob = (idx) => {
-      alert("Duplicar preset/intensidad (demo). Conecta POST /api/master con parámetros del job.");
+      // tip: redirigir al master con preset/intensity en query
+      alert("Duplicar (demo). Puedes redirigir a master.html con parámetros del job.");
     };
 
     document.getElementById('btnRefresh').addEventListener('click', () => {
@@ -510,70 +519,18 @@
       renderJobs();
     });
 
-    // New master UI demo
-    const fileField = document.getElementById('file');
-    const btnStartJob = document.getElementById('btnStartJob');
-    const intensity = document.getElementById('intensity');
-    const outLufs = document.getElementById('outLufs');
-
-    function setLufs(){
-      const val = Number(intensity.value);
-      const lufs = (-14 + (val/100)*7).toFixed(1);
-      outLufs.innerHTML = `<span class="dot"></span> ${lufs} LUFS`;
-    }
-    intensity.addEventListener('input', setLufs);
-    setLufs();
-
-    function enableStart(){
-      btnStartJob.disabled = !fileField.value;
-    }
-
-    document.getElementById('btnPick').addEventListener('click', () => {
-      const name = prompt("Nombre de archivo (demo):", "MiTrack.wav");
-      if(name){ fileField.value = name; enableStart(); }
-    });
-
-    document.getElementById('btnPaste').addEventListener('click', () => {
-      const name = prompt("Pega el nombre del archivo:", "");
-      if(name){ fileField.value = name; enableStart(); }
-    });
-
-    document.getElementById('btnStartJob').addEventListener('click', () => {
-      btnStartJob.textContent = "Encolando…";
-      btnStartJob.disabled = true;
-      setTimeout(() => {
-        btnStartJob.textContent = "Renderizar";
-        btnStartJob.disabled = false;
-        alert("Job creado (demo). Conecta POST /api/upload + POST /api/master");
-      }, 900);
-    });
-
     // Top buttons
     document.getElementById('btnNewMaster').addEventListener('click', () => {
-      document.querySelector('section.card:nth-of-type(3)')?.scrollIntoView({behavior:"smooth", block:"start"});
+      window.location.href = withSameQuery("master.html");
     });
     document.getElementById('btnBilling').addEventListener('click', () => alert("Plan y pagos (demo)."));
     document.getElementById('btnExport').addEventListener('click', () => alert("Exportar (demo)."));
-    document.getElementById('btnLogout').addEventListener('click', () => alert("Logout (demo)."));
-  </script>  
-  <script>
-  const btnLogout = document.getElementById("btnLogout");
 
-  if (btnLogout) {
-    btnLogout.addEventListener("click", () => {
-      fetch("http://localhost:3000/logout", {
-        method: "POST",
-        credentials: "include"
-      }).then(() => {
-        window.location.href = "index.html";
-      });
+    // Logout demo
+    document.getElementById('btnLogout').addEventListener('click', () => {
+      localStorage.removeItem("warmaster_logged");
+      window.location.href = withSameQuery("index.html");
     });
-  }
-</script>
-<script>
-  document.getElementById("btnNewMaster")?.addEventListener("click", () => {
-    window.location.href = "master.html";
-  });
-</script>
+  </script>
 </body>
 </html>
