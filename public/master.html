@@ -283,6 +283,22 @@
   height:1px;
   opacity:0;
 }
+/* FIX: asegurar que los botones sean clickeables */
+.field, .field * , .row, .row * , #abWrapper, #abWrapper * {
+  position: relative;
+  z-index: 3;
+}
+
+.card-h{
+  position: relative;
+  z-index: 1;
+}
+
+.card-b{
+  position: relative;
+  z-index: 2;
+}
+
   </style>
 </head>
 
