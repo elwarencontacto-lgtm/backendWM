@@ -1,203 +1,931 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>WarMaster — Masterización Online</title>
-<meta name="description" content="Masterización online profesional. Sube tu track y obtén un master listo para plataformas." />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WarMaster — Masterización Online</title>
+  <meta name="description" content="Masterización online rápida y profesional. Sube tu track, elige un estilo y descarga un master listo para Spotify, YouTube y Apple Music." />
 
-<style>
-:root{
-  --bg0:#07080c;
-  --bg1:#0b0e16;
-  --text:#e9edf7;
-  --muted: rgba(233,237,247,.72);
-  --a:#8a5cff;
-  --b:#00d7ff;
-  --c:#00ff9a;
-  --shadow: 0 24px 70px rgba(0,0,0,.55);
-}
+  <style>
+    :root{
+      --bg0:#07080c;
+      --bg1:#0b0e16;
+      --text:#e9edf7;
+      --muted: rgba(233,237,247,.72);
+      --a:#8a5cff;
+      --b:#00d7ff;
+      --c:#00ff9a;
 
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family: ui-sans-serif, system-ui;
-  color:var(--text);
-  background:
-    radial-gradient(900px 500px at 10% 10%, rgba(138,92,255,.22), transparent 55%),
-    radial-gradient(800px 500px at 90% 15%, rgba(0,215,255,.18), transparent 55%),
-    linear-gradient(180deg,var(--bg0),var(--bg1));
-}
+      --shadow: 0 24px 70px rgba(0,0,0,.55);
+      --radius: 22px;
+      --max: 1180px;
+    }
 
-a{text-decoration:none;color:inherit}
+    *{ box-sizing:border-box; }
+    html, body{ height:100%; }
 
-.wrap{width:min(1180px, calc(100% - 40px)); margin:0 auto;}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color:var(--text);
+      background:
+        radial-gradient(900px 500px at 10% 10%, rgba(138,92,255,.22), transparent 55%),
+        radial-gradient(800px 500px at 90% 15%, rgba(0,215,255,.18), transparent 55%),
+        radial-gradient(700px 500px at 60% 90%, rgba(0,255,154,.10), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1) 55%, #06070b);
+      overflow-x:hidden;
+    }
 
-header{
-  position:sticky; top:0;
-  backdrop-filter:blur(14px);
-  background:rgba(7,8,12,.6);
-  border-bottom:1px solid rgba(255,255,255,.08);
-  z-index:10;
-}
+    a{ color:inherit; text-decoration:none; }
+    .wrap{ width:min(var(--max), calc(100% - 40px)); margin:0 auto; }
 
-.nav{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:16px 0;
-  flex-wrap:wrap;
-}
+    /* subtle grid */
+    .grid-bg{
+      position: fixed;
+      inset: 0;
+      pointer-events:none;
+      opacity:.32;
+      background:
+        linear-gradient(to right, rgba(255,255,255,.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,.03) 1px, transparent 1px);
+      background-size: 54px 54px;
+      mask-image: radial-gradient(600px 400px at 50% 10%, #000 60%, transparent 100%);
+    }
 
-.brand{
-  font-weight:900;
-  font-size:22px;
-}
+    header{
+      position: sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter: blur(14px);
+      background: rgba(7,8,12,.55);
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
 
-.grad{
-  background:linear-gradient(90deg,var(--a),var(--b),var(--c));
-  -webkit-background-clip:text;
-  color:transparent;
-}
+    .nav{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:14px;
+      padding:16px 0;
+      flex-wrap:wrap;
+    }
 
-.navlinks{
-  display:flex;
-  gap:12px;
-  font-size:13px;
-  font-weight:800;
-  color:rgba(233,237,247,.75);
-}
+    .brand{
+      font-size:22px;
+      font-weight:950;
+      letter-spacing:.2px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
 
-.navlinks a{
-  padding:8px 10px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(255,255,255,.04);
-}
+    .dotlogo{
+      width:34px;height:34px;border-radius:12px;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(0,215,255,.95), transparent 55%),
+        radial-gradient(circle at 70% 70%, rgba(138,92,255,.95), transparent 55%),
+        linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow: 0 12px 40px rgba(0,0,0,.45);
+    }
 
-.navlinks a:hover{
-  border-color:rgba(0,215,255,.35);
-}
+    .grad{
+      background:linear-gradient(90deg,var(--a),var(--b),var(--c));
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+    }
 
-.btn{
-  padding:10px 16px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.14);
-  background:rgba(255,255,255,.06);
-  font-weight:900;
-  cursor:pointer;
-  transition:.2s;
-}
+    .navlinks{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      flex-wrap:wrap;
+      color: rgba(233,237,247,.78);
+      font-size: 13px;
+      font-weight: 900;
+    }
+    .navlinks a{
+      padding:8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+    }
+    .navlinks a:hover{
+      border-color: rgba(0,215,255,.24);
+      background: rgba(255,255,255,.05);
+    }
 
-.btn:hover{
-  transform:translateY(-1px);
-  background:rgba(255,255,255,.08);
-}
+    /* ===== Buttons corporativos ===== */
+    .btn{
+      padding:10px 16px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      cursor:pointer;
+      font-weight:950;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      user-select:none;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
+      gap:10px;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,.08);
+      border-color: rgba(255,255,255,.22);
+    }
+    .btn.primary{
+      border:none;
+      background: linear-gradient(90deg, rgba(138,92,255,.95), rgba(0,215,255,.95));
+      color:#061018;
+      box-shadow: 0 18px 60px rgba(0,0,0,.55);
+    }
+    .btn.neon{
+      background: rgba(0,0,0,.16);
+      border: 1px solid rgba(0,215,255,.35);
+      box-shadow: 0 0 0 6px rgba(0,215,255,.10), 0 0 34px rgba(0,215,255,.10);
+    }
+    .btn.neon:hover{
+      border-color: rgba(0,215,255,.65);
+      box-shadow: 0 0 0 8px rgba(0,215,255,.12), 0 0 44px rgba(0,215,255,.12);
+    }
+    .btn.alt{
+      background: rgba(0,0,0,.14);
+      border: 1px solid rgba(138,92,255,.30);
+      box-shadow: 0 0 0 6px rgba(138,92,255,.10), 0 0 34px rgba(138,92,255,.10);
+    }
+    .btn.alt:hover{
+      border-color: rgba(138,92,255,.60);
+      box-shadow: 0 0 0 8px rgba(138,92,255,.12), 0 0 44px rgba(138,92,255,.12);
+    }
 
-.btn.primary{
-  border:none;
-  background:linear-gradient(90deg,var(--a),var(--b));
-  color:#071018;
-  box-shadow:var(--shadow);
-}
+    main{ padding: 30px 0 90px; }
 
-.btn.outline{
-  background:transparent;
-}
+    /* HERO */
+    .hero{ padding: 52px 0 14px; }
+    .heroGrid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 18px;
+      align-items: start;
+    }
+    @media (max-width: 980px){ .heroGrid{ grid-template-columns: 1fr; } }
 
-main{padding:80px 0 120px}
+    .heroCard{
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+      padding: 22px;
+    }
+    .heroCard::before{
+      content:"";
+      position:absolute; inset:-1px;
+      background:
+        radial-gradient(520px 260px at 15% 20%, rgba(138,92,255,.18), transparent 60%),
+        radial-gradient(520px 260px at 85% 20%, rgba(0,215,255,.14), transparent 60%),
+        radial-gradient(520px 260px at 55% 95%, rgba(0,255,154,.10), transparent 60%);
+      pointer-events:none;
+      opacity:.95;
+    }
+    .heroCard > *{ position:relative; }
 
-.hero{
-  text-align:center;
-}
+    h1{
+      margin:0;
+      font-size: clamp(34px, 4.6vw, 52px);
+      letter-spacing:-1px;
+      line-height:1.05;
+    }
+    .lead{
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+      max-width: 72ch;
+    }
 
-.hero h1{
-  font-size:clamp(34px,5vw,54px);
-  margin:0;
-  line-height:1.05;
-}
+    .heroActions{
+      display:flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items:center;
+      margin-top: 18px;
+    }
 
-.hero p{
-  margin:20px auto;
-  max-width:700px;
-  font-size:14px;
-  color:var(--muted);
-  line-height:1.7;
-}
+    .chips{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      color: rgba(233,237,247,.88);
+      font-size: 12px;
+      font-weight: 950;
+    }
+    .chip i{
+      width: 9px; height: 9px;
+      border-radius: 999px;
+      background: rgba(0,215,255,.9);
+      box-shadow: 0 0 0 6px rgba(0,215,255,.12);
+      display:inline-block;
+    }
 
-.heroActions{
-  display:flex;
-  justify-content:center;
-  gap:12px;
-  flex-wrap:wrap;
-  margin-top:20px;
-}
+    /* Trust card */
+    .trustCard{
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      box-shadow: 0 14px 50px rgba(0,0,0,.35);
+      overflow:hidden;
+    }
+    .trustHead{
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .trustHead b{
+      font-size: 12px;
+      letter-spacing:.2px;
+      color: rgba(233,237,247,.90);
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      font-weight: 950;
+      font-size: 12px;
+      color: rgba(233,237,247,.9);
+    }
+    .dot{
+      width:8px; height:8px;
+      border-radius:999px;
+      background: rgba(0,255,154,.75);
+      box-shadow: 0 0 0 6px rgba(0,255,154,.12);
+    }
+    .trustBody{
+      padding: 14px;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+    }
 
-footer{
-  text-align:center;
-  font-size:12px;
-  color:rgba(233,237,247,.5);
-  padding:30px 0;
-  border-top:1px solid rgba(255,255,255,.08);
-  margin-top:80px;
-}
-</style>
+    .stats{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    @media (max-width: 980px){ .stats{ grid-template-columns: 1fr; } }
+
+    .stat{
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.16);
+      padding: 12px;
+    }
+    .stat .k{
+      color: rgba(233,237,247,.65);
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing:.2px;
+    }
+    .stat .v{
+      margin-top: 6px;
+      font-size: 20px;
+      font-weight: 980;
+      letter-spacing:-.4px;
+    }
+
+    .trustList{
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+      color: rgba(233,237,247,.76);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .trustList .item{
+      display:flex;
+      gap: 10px;
+      align-items:flex-start;
+      padding: 10px 10px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+    }
+    .check{
+      width: 20px; height: 20px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(138,92,255,.95), rgba(0,215,255,.75));
+      border: 1px solid rgba(255,255,255,.14);
+      color:#061018;
+      display:flex; align-items:center; justify-content:center;
+      font-weight: 950;
+      flex: 0 0 auto;
+      margin-top: 1px;
+    }
+
+    /* Sections */
+    .section{ padding: 56px 0 0; }
+    .sectionTitle{
+      margin: 0 0 12px;
+      font-size: clamp(24px, 3vw, 40px);
+      letter-spacing:-.8px;
+    }
+    .sectionLead{
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+      max-width: 72ch;
+    }
+
+    .cards{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 980px){ .cards{ grid-template-columns: 1fr; } }
+
+    .card{
+      position: relative;
+      border-radius: var(--radius);
+      padding: 18px 18px 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      transition: transform .14s ease, border-color .14s ease, background .14s ease;
+    }
+    .card:hover{
+      transform: translateY(-3px);
+      border-color: rgba(0,215,255,.26);
+    }
+
+    .kicker{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom: 10px;
+    }
+    .icon{
+      width: 40px; height: 40px;
+      border-radius: 16px;
+      display:flex; align-items:center; justify-content:center;
+      background: linear-gradient(135deg, rgba(138,92,255,.95), rgba(0,215,255,.75));
+      border: 1px solid rgba(255,255,255,.14);
+      box-shadow: 0 16px 46px rgba(0,0,0,.55);
+      color:#061018;
+      font-weight: 980;
+      user-select:none;
+      flex: 0 0 auto;
+    }
+    .card h3{ margin:0; font-size: 16px; letter-spacing: -.2px; }
+    .card p{
+      margin: 10px 0 0;
+      color: rgba(233,237,247,.72);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    /* Pricing */
+    .plan{
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+      min-height: 220px;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: rgba(233,237,247,.9);
+      font-size: 12px;
+      font-weight: 980;
+      width: fit-content;
+    }
+    .badge i{
+      width: 9px; height:9px;
+      border-radius: 999px;
+      background: rgba(0,215,255,.9);
+      box-shadow: 0 0 0 6px rgba(0,215,255,.12);
+      display:inline-block;
+    }
+    .price{
+      font-size: 44px;
+      letter-spacing: -1px;
+      font-weight: 990;
+    }
+    .meta{
+      margin-top:-6px;
+      color: rgba(233,237,247,.70);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .fine{
+      color: rgba(233,237,247,.55);
+      font-size: 12px;
+      line-height: 1.5;
+      margin-top: 10px;
+    }
+
+    footer{
+      margin-top: 70px;
+      padding: 18px 0 0;
+      border-top: 1px solid rgba(255,255,255,.08);
+      color: rgba(233,237,247,.55);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .footRow{
+      display:flex;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap:wrap;
+      padding: 16px 0 0;
+    }
+    .footLinks{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .footLinks a{
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+    }
+    .footLinks a:hover{
+      border-color: rgba(0,215,255,.24);
+      background: rgba(255,255,255,.05);
+    }
+
+    /* ===== Modal (Tech Neon) ===== */
+    .modalOverlay{
+      position: fixed;
+      inset: 0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      background: rgba(0,0,0,.62);
+      backdrop-filter: blur(8px);
+      z-index: 999;
+      animation: fadeIn .14s ease;
+    }
+    .modalOverlay.open{ display:flex; }
+
+    @keyframes fadeIn{
+      from{ opacity:0; }
+      to{ opacity:1; }
+    }
+
+    .modal{
+      width: min(520px, 100%);
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      box-shadow: 0 30px 110px rgba(0,0,0,.7);
+      overflow:hidden;
+      position:relative;
+      transform: translateY(8px) scale(.98);
+      animation: pop .16s ease forwards;
+    }
+    @keyframes pop{
+      to{ transform: translateY(0) scale(1); }
+    }
+    .modal::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background:
+        radial-gradient(420px 220px at 20% 20%, rgba(138,92,255,.22), transparent 60%),
+        radial-gradient(420px 220px at 85% 30%, rgba(0,215,255,.18), transparent 60%),
+        radial-gradient(520px 240px at 40% 95%, rgba(0,255,154,.12), transparent 60%);
+      pointer-events:none;
+      opacity:.95;
+    }
+    .modal > *{ position:relative; }
+
+    .modalHead{
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .modalTitle{
+      font-weight: 980;
+      font-size: 14px;
+      letter-spacing:.2px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .miniLogo{
+      width:28px;height:28px;border-radius:10px;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(0,215,255,.95), transparent 55%),
+        radial-gradient(circle at 70% 70%, rgba(138,92,255,.95), transparent 55%),
+        linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow: 0 12px 40px rgba(0,0,0,.45);
+    }
+    .closeBtn{
+      width: 40px;
+      height: 38px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      cursor:pointer;
+      font-weight: 980;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    .closeBtn:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,.08);
+      border-color: rgba(255,255,255,.22);
+    }
+
+    .modalBody{
+      padding: 14px;
+    }
+
+    .tabs{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom: 12px;
+    }
+    .tab{
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      color: rgba(233,237,247,.86);
+      font-weight: 950;
+      font-size: 12px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .tab[aria-selected="true"]{
+      border: none;
+      background: linear-gradient(90deg, rgba(138,92,255,.95), rgba(0,215,255,.95));
+      color: #061018;
+      box-shadow: 0 10px 40px rgba(0,0,0,.35);
+    }
+
+    .field{
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .field label{
+      display:block;
+      font-size: 12px;
+      font-weight: 980;
+      color: rgba(233,237,247,.72);
+      margin-bottom: 8px;
+    }
+    .field input{
+      width:100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.22);
+      color: var(--text);
+      outline:none;
+    }
+    .helpRow{
+      display:flex;
+      justify-content:space-between;
+      gap: 10px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin: 8px 0 0;
+      font-size: 12px;
+      color: rgba(233,237,247,.65);
+    }
+    .link{
+      color: rgba(0,215,255,.95);
+      font-weight: 950;
+      cursor:pointer;
+    }
+    .link:hover{ text-decoration: underline; }
+
+    .modalActions{
+      display:flex;
+      gap: 10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      margin-top: 10px;
+    }
+
+    .errorBox{
+      display:none;
+      margin-top: 10px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,120,120,.35);
+      background: rgba(255,120,120,.08);
+      padding: 10px 12px;
+      color: rgba(233,237,247,.9);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .finePrint{
+      margin-top: 10px;
+      color: rgba(233,237,247,.55);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+  </style>
 </head>
 
 <body>
+  <div class="grid-bg" aria-hidden="true"></div>
 
-<header>
-  <div class="wrap">
-    <div class="nav">
-      <div class="brand">War<span class="grad">Master</span></div>
+  <header>
+    <div class="wrap">
+      <div class="nav">
+        <a class="brand" href="index.html" aria-label="WarMaster Home">
+          <span class="dotlogo" aria-hidden="true"></span>
+          <span>War<span class="grad">Master</span></span>
+        </a>
 
-      <nav class="navlinks">
-        <a href="#como">Cómo funciona</a>
-        <a href="#features">Características</a>
-        <a href="#precios">Precios</a>
-      </nav>
+        <nav class="navlinks" aria-label="Navegación">
+          <a href="#como">Cómo funciona</a>
+          <a href="#features">Características</a>
+          <a href="#precios">Precios</a>
+        </nav>
 
-      <div style="display:flex; gap:10px;">
-        <button class="btn outline" id="btnLogin">Iniciar sesión</button>
-        <button class="btn primary" id="btnRegister">Crear cuenta</button>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn neon" id="btnLogin">Iniciar sesión</button>
+          <button class="btn primary" id="btnRegister">Crear cuenta</button>
+        </div>
       </div>
     </div>
-  </div>
-</header>
+  </header>
 
-<main>
-  <div class="wrap hero">
-    <h1>Masteriza tu música con <span class="grad">calidad profesional</span></h1>
-    <p>
-      Sube tu track, elige un estilo y descarga un master listo para Spotify,
-      YouTube y Apple Music.
-      Sin plugins. Sin complicaciones.
-    </p>
+  <main>
+    <div class="wrap">
 
-    <div class="heroActions">
-      <a href="master.html" class="btn primary">Probar master ahora</a>
-      <button class="btn" id="btnDashboard">Entrar al dashboard</button>
+      <!-- HERO -->
+      <section class="hero">
+        <div class="heroGrid">
+          <div class="heroCard">
+            <h1>Masteriza tu música con <span class="grad">calidad profesional</span></h1>
+            <p class="lead">
+              Sube tu track, elige un estilo y descarga un master listo para distribución.
+              Diseñado para sonar fuerte, limpio y competitivo en plataformas.
+            </p>
+
+            <div class="heroActions">
+              <a class="btn primary" href="master.html">Probar master ahora</a>
+              <button class="btn alt" id="btnDashboard">Entrar al dashboard</button>
+            </div>
+
+            <div class="chips" aria-label="Highlights">
+              <span class="chip"><i></i> Procesamiento en la nube</span>
+              <span class="chip"><i></i> A/B + Descarga</span>
+              <span class="chip"><i></i> Presets por género</span>
+              <span class="chip"><i></i> Listo para plataformas</span>
+            </div>
+          </div>
+
+          <aside class="trustCard">
+            <div class="trustHead">
+              <b>Listo para publicar</b>
+              <span class="pill"><span class="dot"></span> Online</span>
+            </div>
+
+            <div class="trustBody">
+              <div class="stats" aria-label="Estadísticas">
+                <div class="stat">
+                  <div class="k">Renders</div>
+                  <div class="v">1.000+</div>
+                </div>
+                <div class="stat">
+                  <div class="k">Tiempo promedio</div>
+                  <div class="v">~1–3 min</div>
+                </div>
+                <div class="stat">
+                  <div class="k">Formatos</div>
+                  <div class="v">WAV/MP3</div>
+                </div>
+              </div>
+
+              <div class="trustList" aria-label="Garantías">
+                <div class="item">
+                  <span class="check">✓</span>
+                  <div>
+                    <b>Optimizado para plataformas</b><br>
+                    <span style="color:rgba(233,237,247,.7);">
+                      Spotify • YouTube • Apple Music
+                    </span>
+                  </div>
+                </div>
+
+                <div class="item">
+                  <span class="check">✓</span>
+                  <div>
+                    <b>Control de intensidad</b><br>
+                    <span style="color:rgba(233,237,247,.7);">
+                      Suave → agresivo sin complicarte
+                    </span>
+                  </div>
+                </div>
+
+                <div class="item">
+                  <span class="check">✓</span>
+                  <div>
+                    <b>Privacidad</b><br>
+                    <span style="color:rgba(233,237,247,.7);">
+                      Tus archivos no se publican
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="fine">
+                * Cifras y tiempos referenciales para beta. El rendimiento depende del tamaño del audio y la carga del servidor.
+              </div>
+
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- COMO FUNCIONA -->
+      <section class="section" id="como">
+        <h2 class="sectionTitle">Cómo funciona</h2>
+        <p class="sectionLead">
+          Tres pasos para obtener un master listo para subir a plataformas.
+        </p>
+
+        <div class="cards">
+          <div class="card">
+            <div class="kicker">
+              <div class="icon">1</div>
+              <h3>Sube tu track</h3>
+            </div>
+            <p>
+              WAV, MP3 y más formatos. Tu archivo se procesa automáticamente en la nube.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="kicker">
+              <div class="icon">2</div>
+              <h3>Elige el estilo</h3>
+            </div>
+            <p>
+              Presets por carácter (Clean, Club, Warm, Bright, Heavy) + intensidad.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="kicker">
+              <div class="icon">3</div>
+              <h3>Descarga y publica</h3>
+            </div>
+            <p>
+              Compara con A/B y descarga una versión lista para distribución.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- FEATURES -->
+      <section class="section" id="features">
+        <h2 class="sectionTitle">Características</h2>
+        <p class="sectionLead">
+          Una experiencia rápida y profesional.
+        </p>
+
+        <div class="cards">
+          <div class="card">
+            <div class="kicker">
+              <div class="icon">A</div>
+              <h3>Presets por género</h3>
+            </div>
+            <p>
+              Ajustes optimizados según el carácter de tu canción.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="kicker">
+              <div class="icon">I</div>
+              <h3>Intensidad ajustable</h3>
+            </div>
+            <p>
+              Define cuánta compresión y carácter quieres aplicar.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="kicker">
+              <div class="icon">Q</div>
+              <h3>Exportación lista</h3>
+            </div>
+            <p>
+              WAV o MP3 preparados para distribución digital.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRECIOS -->
+      <section class="section" id="precios">
+        <h2 class="sectionTitle">Precios</h2>
+        <p class="sectionLead">
+          Planes simples. En beta el acceso es libre.
+        </p>
+
+        <div class="cards">
+          <div class="card plan">
+            <span class="badge"><i></i> Recruit</span>
+            <h3>Free</h3>
+            <div class="price">$0</div>
+            <div class="meta">
+              2 masters/mes • MP3 • Presets básicos
+            </div>
+            <div style="margin-top:auto;">
+              <a class="btn alt" href="master.html">Probar</a>
+            </div>
+          </div>
+
+          <div class="card plan">
+            <span class="badge"><i></i> Popular</span>
+            <h3>Pro</h3>
+            <div class="price">$12</div>
+            <div class="meta">
+              20 masters/mes • WAV 24-bit • A/B • Targets
+            </div>
+            <div style="margin-top:auto;">
+              <button class="btn primary" id="btnChoosePro">Elegir Pro</button>
+            </div>
+          </div>
+
+          <div class="card plan">
+            <span class="badge"><i></i> Studio</span>
+            <h3>Studio</h3>
+            <div class="price">$29</div>
+            <div class="meta">
+              Ilimitado* • Prioridad • API / Integración
+            </div>
+            <div style="margin-top:auto;">
+              <button class="btn primary" id="btnChooseStudio">Hablar con ventas</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <div class="footRow">
+          <div>
+            © <span id="year"></span> WarMaster — beta1.1 estable
+          </div>
+          <div class="footLinks">
+            <a href="master.html">Nuevo master</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="#como">Cómo funciona</a>
+          </div>
+        </div>
+      </footer>
+
     </div>
-  </div>
-</main>
+  </main>
 
-<footer>
-  © <span id="year"></span> WarMaster — beta1.1 estable
-</footer>
-
-<script>
-document.getElementById("year").textContent = new Date().getFullYear();
-
-// Modo beta1.1 → login simulado
-function fakeAuth(){
-  localStorage.setItem("warmaster_logged","true");
-  window.location.href="dashboard.html";
-}
-
-document.getElementById("btnLogin").addEventListener("click", fakeAuth);
-document.getElementById("btnRegister").addEventListener("click", fakeAuth);
-document.getElementById("btnDashboard").addEventListener("click", fakeAuth);
-</script>
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
 
 </body>
 </html>
