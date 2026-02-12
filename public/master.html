@@ -218,7 +218,7 @@
     }
 
     /* A/B */
-    .hidden{ display:none; }
+    .hidden{ display:none !important; }
     .abCard{
       margin-top:14px;
       border-radius: 18px;
@@ -270,6 +270,7 @@
       align-items:center;
       justify-content:center;
       font-weight: 900;
+      padding:0;
     }
     .abTimeline{ flex:1; min-width: 180px; }
     .abTime{
@@ -281,6 +282,12 @@
     #abSeek{ width:100%; accent-color: var(--b); }
 
     .disabled{ opacity:.6; pointer-events:none; }
+
+    /* Iconos blanco/negro (sin emojis) */
+    .ico{ display:inline-flex; align-items:center; justify-content:center; }
+    .abPlay{ color:#061018; } /* botón primary */
+    #btnABStop{ color: rgba(233,237,247,.92); }
+    #btnABStop:hover{ color: rgba(233,237,247,1); }
   </style>
 </head>
 
@@ -312,7 +319,7 @@
     <section class="card">
       <div class="card-h">
         <h2>Nuevo master</h2>
-        <span style="font-size:12px;color:rgba(233,237,247,.7);font-weight:900;">beta1.2</span>
+        <span style="font-size:12px;color:rgba(233,237,247,.7);font-weight:900;">beta1.1</span>
       </div>
 
       <div class="card-b">
@@ -349,25 +356,11 @@
           <button class="btn primary" type="button" id="btnStartJob" disabled>Renderizar</button>
         </div>
 
-        <!-- Progreso UI -->
+        <!-- Progreso UI (simulado) -->
         <div class="progressWrap" id="progressWrap" aria-live="polite">
           <div class="bar"><div class="fill" id="progressFill"></div></div>
           <div class="ptext" id="progressText">Listo</div>
         </div>
-
-        <!-- ✅ Caja de estado / error (bonita, sin alert) -->
-        <div id="statusBox" style="
-          display:none;
-          margin-top:12px;
-          padding:12px;
-          border-radius:16px;
-          border:1px solid rgba(255,120,120,.35);
-          background:rgba(255,120,120,.08);
-          font-size:13px;
-          line-height:1.5;
-          color:rgba(233,237,247,.9);
-          font-weight:600;
-        "></div>
 
         <div id="abWrapper" class="hidden">
           <div class="abCard">
@@ -382,14 +375,29 @@
             </div>
 
             <div class="abTransport">
-              <button class="btn primary abPlay" type="button" id="btnABPlay">▶</button>
+              <button class="btn primary abPlay" type="button" id="btnABPlay" aria-label="Reproducir / Pausar">
+                <span class="ico" id="icoPlay">
+                  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                    <path fill="currentColor" d="M8 5v14l11-7z"></path>
+                  </svg>
+                </span>
+                <span class="ico hidden" id="icoPause">
+                  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                    <path fill="currentColor" d="M6 5h4v14H6zM14 5h4v14h-4z"></path>
+                  </svg>
+                </span>
+              </button>
 
               <div class="abTimeline">
                 <div class="abTime" id="abTime">0:00 / 0:00</div>
                 <input id="abSeek" type="range" min="0" max="1000" value="0" />
               </div>
 
-              <button class="btn abBtn" type="button" id="btnABStop">⏹</button>
+              <button class="btn abBtn" type="button" id="btnABStop" aria-label="Detener">
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                  <path fill="currentColor" d="M7 7h10v10H7z"></path>
+                </svg>
+              </button>
             </div>
 
             <audio id="audioOriginal" preload="metadata"></audio>
@@ -426,7 +434,6 @@
   const progressWrap = document.getElementById("progressWrap");
   const progressFill = document.getElementById("progressFill");
   const progressText = document.getElementById("progressText");
-  const statusBox    = document.getElementById("statusBox");
 
   const abWrapper   = document.getElementById("abWrapper");
   const btnABOriginal = document.getElementById("btnABOriginal");
@@ -441,6 +448,9 @@
   const audioOriginal = document.getElementById("audioOriginal");
   const audioPreview  = document.getElementById("audioPreview");
   const audioMaster   = document.getElementById("audioMaster");
+
+  const icoPlay = document.getElementById("icoPlay");
+  const icoPause = document.getElementById("icoPause");
 
   // ===== State =====
   let currentFile = null;
@@ -518,7 +528,8 @@
       a.pause();
       a.currentTime = 0;
     });
-    if (btnABPlay) btnABPlay.textContent = "▶";
+    icoPause?.classList.add("hidden");
+    icoPlay?.classList.remove("hidden");
   }
 
   function setPressed(which){
@@ -567,10 +578,12 @@
 
     if (activeAudio.paused){
       await activeAudio.play();
-      btnABPlay.textContent = "⏸";
+      icoPlay?.classList.add("hidden");
+      icoPause?.classList.remove("hidden");
     } else {
       activeAudio.pause();
-      btnABPlay.textContent = "▶";
+      icoPause?.classList.add("hidden");
+      icoPlay?.classList.remove("hidden");
     }
   });
 
@@ -588,7 +601,10 @@
     if(!a) return;
     a.addEventListener("timeupdate", syncUI);
     a.addEventListener("loadedmetadata", syncUI);
-    a.addEventListener("ended", ()=> { if(btnABPlay) btnABPlay.textContent="▶"; });
+    a.addEventListener("ended", ()=> {
+      icoPause?.classList.add("hidden");
+      icoPlay?.classList.remove("hidden");
+    });
   });
 
   // ===== Upload =====
@@ -646,11 +662,9 @@
     if (progressFill) progressFill.style.width = "0%";
     if (progressText) progressText.textContent = "Listo";
 
-    // reset status box
-    if (statusBox) {
-      statusBox.style.display = "none";
-      statusBox.textContent = "";
-    }
+    // reset icons
+    icoPause?.classList.add("hidden");
+    icoPlay?.classList.remove("hidden");
 
     setActive(audioPreview, "preview");
   });
@@ -675,16 +689,6 @@
     progressWrap.classList.add("show");
     if (progressFill) progressFill.style.width = `${Math.max(0, Math.min(100, pct))}%`;
     if (progressText) progressText.textContent = text || "";
-  }
-
-  // ✅ NUEVO: estado bonito dentro de la UI (sin alert)
-  function showStatus(message){
-    if (!statusBox) return;
-    statusBox.style.display = "block";
-    statusBox.innerText = message;
-    setTimeout(()=>{
-      statusBox.style.display = "none";
-    }, 6000);
   }
 
   // ===== Render real (POST correcto) =====
@@ -715,21 +719,21 @@
 
       if (!res.ok) {
         const txt = await res.text().catch(()=> "");
-        showStatus("❌ " + (txt ? txt.slice(0,400) : ("Render falló (" + res.status + ")")));
+        alert("Render falló (" + res.status + ").\n" + txt.slice(0,400));
         progressSet(0, "Error");
         return;
       }
 
       if (ct.includes("application/json")) {
         const txt = await res.text().catch(()=> "");
-        showStatus("❌ El backend devolvió JSON (no audio). " + txt.slice(0,240));
+        alert("El backend devolvió JSON (no audio). Revisa /api/master.\n" + txt.slice(0,400));
         progressSet(0, "Error");
         return;
       }
 
       const blob = await res.blob();
       if (!blob || blob.size < 1024) {
-        showStatus("❌ El master llegó vacío o muy pequeño.");
+        alert("El master llegó vacío o muy pequeño. (blob: " + (blob ? blob.size : 0) + " bytes)");
         progressSet(0, "Error");
         return;
       }
@@ -754,9 +758,9 @@
 
     } catch (err) {
       const msg = (err && (err.name === "AbortError" || err === "timeout"))
-        ? "⏳ El servidor tardó demasiado en responder."
-        : "❌ Error de red o procesamiento.";
-      showStatus(msg);
+        ? "Tiempo de espera agotado. El backend está demorando o colgado."
+        : ("Error de red/JS: " + (err?.message || String(err)));
+      alert(msg);
       progressSet(0, "Error");
     } finally {
       btnStartJob.textContent = old;
