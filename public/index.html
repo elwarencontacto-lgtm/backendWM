@@ -496,11 +496,7 @@
       animation: fadeIn .14s ease;
     }
     .modalOverlay.open{ display:flex; }
-
-    @keyframes fadeIn{
-      from{ opacity:0; }
-      to{ opacity:1; }
-    }
+    @keyframes fadeIn{ from{ opacity:0; } to{ opacity:1; } }
 
     .modal{
       width: min(520px, 100%);
@@ -513,9 +509,8 @@
       transform: translateY(8px) scale(.98);
       animation: pop .16s ease forwards;
     }
-    @keyframes pop{
-      to{ transform: translateY(0) scale(1); }
-    }
+    @keyframes pop{ to{ transform: translateY(0) scale(1); } }
+
     .modal::before{
       content:"";
       position:absolute; inset:-2px;
@@ -570,9 +565,7 @@
       border-color: rgba(255,255,255,.22);
     }
 
-    .modalBody{
-      padding: 14px;
-    }
+    .modalBody{ padding: 14px; }
 
     .tabs{
       display:flex;
@@ -685,8 +678,8 @@
         </nav>
 
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <button class="btn neon" id="btnLogin">Iniciar sesión</button>
-          <button class="btn primary" id="btnRegister">Crear cuenta</button>
+          <button class="btn neon" id="btnLogin" type="button">Iniciar sesión</button>
+          <button class="btn primary" id="btnRegister" type="button">Crear cuenta</button>
         </div>
       </div>
     </div>
@@ -707,7 +700,7 @@
 
             <div class="heroActions">
               <a class="btn primary" href="master.html">Probar master ahora</a>
-              <button class="btn alt" id="btnDashboard">Entrar al dashboard</button>
+              <button class="btn alt" id="btnDashboard" type="button">Entrar al dashboard</button>
             </div>
 
             <div class="chips" aria-label="Highlights">
@@ -745,9 +738,7 @@
                   <span class="check">✓</span>
                   <div>
                     <b>Optimizado para plataformas</b><br>
-                    <span style="color:rgba(233,237,247,.7);">
-                      Spotify • YouTube • Apple Music
-                    </span>
+                    <span style="color:rgba(233,237,247,.7);">Spotify • YouTube • Apple Music</span>
                   </div>
                 </div>
 
@@ -755,9 +746,7 @@
                   <span class="check">✓</span>
                   <div>
                     <b>Control de intensidad</b><br>
-                    <span style="color:rgba(233,237,247,.7);">
-                      Suave → agresivo sin complicarte
-                    </span>
+                    <span style="color:rgba(233,237,247,.7);">Suave → agresivo sin complicarte</span>
                   </div>
                 </div>
 
@@ -765,9 +754,7 @@
                   <span class="check">✓</span>
                   <div>
                     <b>Privacidad</b><br>
-                    <span style="color:rgba(233,237,247,.7);">
-                      Tus archivos no se publican
-                    </span>
+                    <span style="color:rgba(233,237,247,.7);">Tus archivos no se publican</span>
                   </div>
                 </div>
               </div>
@@ -784,39 +771,22 @@
       <!-- COMO FUNCIONA -->
       <section class="section" id="como">
         <h2 class="sectionTitle">Cómo funciona</h2>
-        <p class="sectionLead">
-          Tres pasos para obtener un master listo para subir a plataformas.
-        </p>
+        <p class="sectionLead">Tres pasos para obtener un master listo para subir a plataformas.</p>
 
         <div class="cards">
           <div class="card">
-            <div class="kicker">
-              <div class="icon">1</div>
-              <h3>Sube tu track</h3>
-            </div>
-            <p>
-              WAV, MP3 y más formatos. Tu archivo se procesa automáticamente en la nube.
-            </p>
+            <div class="kicker"><div class="icon">1</div><h3>Sube tu track</h3></div>
+            <p>WAV, MP3 y más formatos. Tu archivo se procesa automáticamente en la nube.</p>
           </div>
 
           <div class="card">
-            <div class="kicker">
-              <div class="icon">2</div>
-              <h3>Elige el estilo</h3>
-            </div>
-            <p>
-              Presets por carácter (Clean, Club, Warm, Bright, Heavy) + intensidad.
-            </p>
+            <div class="kicker"><div class="icon">2</div><h3>Elige el estilo</h3></div>
+            <p>Presets por carácter (Clean, Club, Warm, Bright, Heavy) + intensidad.</p>
           </div>
 
           <div class="card">
-            <div class="kicker">
-              <div class="icon">3</div>
-              <h3>Descarga y publica</h3>
-            </div>
-            <p>
-              Compara con A/B y descarga una versión lista para distribución.
-            </p>
+            <div class="kicker"><div class="icon">3</div><h3>Descarga y publica</h3></div>
+            <p>Compara con A/B y descarga una versión lista para distribución.</p>
           </div>
         </div>
       </section>
@@ -824,39 +794,22 @@
       <!-- FEATURES -->
       <section class="section" id="features">
         <h2 class="sectionTitle">Características</h2>
-        <p class="sectionLead">
-          Una experiencia rápida y profesional.
-        </p>
+        <p class="sectionLead">Una experiencia rápida y profesional.</p>
 
         <div class="cards">
           <div class="card">
-            <div class="kicker">
-              <div class="icon">A</div>
-              <h3>Presets por género</h3>
-            </div>
-            <p>
-              Ajustes optimizados según el carácter de tu canción.
-            </p>
+            <div class="kicker"><div class="icon">A</div><h3>Presets por género</h3></div>
+            <p>Ajustes optimizados según el carácter de tu canción.</p>
           </div>
 
           <div class="card">
-            <div class="kicker">
-              <div class="icon">I</div>
-              <h3>Intensidad ajustable</h3>
-            </div>
-            <p>
-              Define cuánta compresión y carácter quieres aplicar.
-            </p>
+            <div class="kicker"><div class="icon">I</div><h3>Intensidad ajustable</h3></div>
+            <p>Define cuánta compresión y carácter quieres aplicar.</p>
           </div>
 
           <div class="card">
-            <div class="kicker">
-              <div class="icon">Q</div>
-              <h3>Exportación lista</h3>
-            </div>
-            <p>
-              WAV o MP3 preparados para distribución digital.
-            </p>
+            <div class="kicker"><div class="icon">Q</div><h3>Exportación lista</h3></div>
+            <p>WAV o MP3 preparados para distribución digital.</p>
           </div>
         </div>
       </section>
@@ -864,18 +817,14 @@
       <!-- PRECIOS -->
       <section class="section" id="precios">
         <h2 class="sectionTitle">Precios</h2>
-        <p class="sectionLead">
-          Planes simples. En beta el acceso es libre.
-        </p>
+        <p class="sectionLead">Planes simples. En beta el acceso es libre.</p>
 
         <div class="cards">
           <div class="card plan">
             <span class="badge"><i></i> Recruit</span>
             <h3>Free</h3>
             <div class="price">$0</div>
-            <div class="meta">
-              2 masters/mes • MP3 • Presets básicos
-            </div>
+            <div class="meta">2 masters/mes • MP3 • Presets básicos</div>
             <div style="margin-top:auto;">
               <a class="btn alt" href="master.html">Probar</a>
             </div>
@@ -885,11 +834,9 @@
             <span class="badge"><i></i> Popular</span>
             <h3>Pro</h3>
             <div class="price">$12</div>
-            <div class="meta">
-              20 masters/mes • WAV 24-bit • A/B • Targets
-            </div>
+            <div class="meta">20 masters/mes • WAV 24-bit • A/B • Targets</div>
             <div style="margin-top:auto;">
-              <button class="btn primary" id="btnChoosePro">Elegir Pro</button>
+              <button class="btn primary" id="btnChoosePro" type="button">Elegir Pro</button>
             </div>
           </div>
 
@@ -897,11 +844,9 @@
             <span class="badge"><i></i> Studio</span>
             <h3>Studio</h3>
             <div class="price">$29</div>
-            <div class="meta">
-              Ilimitado* • Prioridad • API / Integración
-            </div>
+            <div class="meta">Ilimitado* • Prioridad • API / Integración</div>
             <div style="margin-top:auto;">
-              <button class="btn primary" id="btnChooseStudio">Hablar con ventas</button>
+              <button class="btn primary" id="btnChooseStudio" type="button">Hablar con ventas</button>
             </div>
           </div>
         </div>
@@ -909,9 +854,7 @@
 
       <footer>
         <div class="footRow">
-          <div>
-            © <span id="year"></span> WarMaster — beta1.1 estable
-          </div>
+          <div>© <span id="year"></span> WarMaster — beta1.1 estable</div>
           <div class="footLinks">
             <a href="master.html">Nuevo master</a>
             <a href="dashboard.html">Dashboard</a>
@@ -923,48 +866,193 @@
     </div>
   </main>
 
+  <!-- ===== MODAL AUTH (LOGIN / REGISTER) ===== -->
+  <div class="modalOverlay" id="authOverlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="authTitleText">
+      <div class="modalHead">
+        <div class="modalTitle">
+          <span class="miniLogo" aria-hidden="true"></span>
+          <span id="authTitleText">Iniciar sesión</span>
+        </div>
+        <button class="closeBtn" type="button" id="btnAuthClose" aria-label="Cerrar">✕</button>
+      </div>
+
+      <div class="modalBody">
+        <div class="tabs" role="tablist" aria-label="Acceso">
+          <button class="tab" type="button" id="tabLogin" aria-selected="true">Iniciar sesión</button>
+          <button class="tab" type="button" id="tabRegister" aria-selected="false">Crear cuenta</button>
+        </div>
+
+        <div class="field">
+          <label for="authEmail">Email</label>
+          <input id="authEmail" type="email" placeholder="tu@email.com" autocomplete="email" />
+        </div>
+
+        <div class="field">
+          <label for="authPass">Contraseña</label>
+          <input id="authPass" type="password" placeholder="••••••••" autocomplete="current-password" />
+          <div class="helpRow">
+            <span id="authHelper">Usa tu email para entrar.</span>
+            <span class="link" id="authForgot">¿Olvidaste tu clave?</span>
+          </div>
+        </div>
+
+        <div class="field" id="registerExtra" style="display:none;">
+          <label for="authPass2">Repetir contraseña</label>
+          <input id="authPass2" type="password" placeholder="••••••••" autocomplete="new-password" />
+          <div class="helpRow">
+            <span>Al crear cuenta aceptas los términos.</span>
+            <span class="link" id="authTerms">Ver términos</span>
+          </div>
+        </div>
+
+        <div class="modalActions">
+          <button class="btn" type="button" id="btnAuthCancel">Cancelar</button>
+          <button class="btn primary" type="button" id="btnAuthSubmit">Entrar</button>
+        </div>
+
+        <div class="errorBox" id="authError"></div>
+        <div class="finePrint">beta1.1: autenticación simulada (se conectará a backend en beta2).</div>
+      </div>
+    </div>
+  </div>
+
   <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
+    document.addEventListener("DOMContentLoaded", () => {
+      const $ = (id) => document.getElementById(id);
+
+      // Footer year
+      const year = $("year");
+      if (year) year.textContent = new Date().getFullYear();
+
+      // DOM
+      const overlay = $("authOverlay");
+
+      const btnLogin = $("btnLogin");
+      const btnRegister = $("btnRegister");
+      const btnDashboard = $("btnDashboard");
+      const btnChoosePro = $("btnChoosePro");
+      const btnChooseStudio = $("btnChooseStudio");
+
+      const btnClose = $("btnAuthClose");
+      const btnCancel = $("btnAuthCancel");
+      const btnSubmit = $("btnAuthSubmit");
+
+      const tabLogin = $("tabLogin");
+      const tabRegister = $("tabRegister");
+
+      const titleText = $("authTitleText");
+      const helper = $("authHelper");
+
+      const email = $("authEmail");
+      const pass = $("authPass");
+      const pass2Wrap = $("registerExtra");
+      const pass2 = $("authPass2");
+
+      const err = $("authError");
+
+      if (!overlay) return; // seguridad
+
+      let mode = "login";
+
+      function clearError(){
+        if (!err) return;
+        err.textContent = "";
+        err.style.display = "none";
+      }
+      function showError(msg){
+        if (!err) return;
+        err.textContent = msg;
+        err.style.display = "block";
+      }
+
+      function setMode(m){
+        mode = m;
+        const isRegister = (mode === "register");
+
+        tabLogin?.setAttribute("aria-selected", String(!isRegister));
+        tabRegister?.setAttribute("aria-selected", String(isRegister));
+
+        if (titleText) titleText.textContent = isRegister ? "Crear cuenta" : "Iniciar sesión";
+        if (helper) helper.textContent = isRegister
+          ? "Crea tu cuenta para guardar tus masters."
+          : "Usa tu email para entrar.";
+
+        if (btnSubmit) btnSubmit.textContent = isRegister ? "Crear cuenta" : "Entrar";
+        if (pass2Wrap) pass2Wrap.style.display = isRegister ? "block" : "none";
+
+        if (pass) pass.setAttribute("autocomplete", isRegister ? "new-password" : "current-password");
+
+        clearError();
+      }
+
+      function openModal(nextMode){
+        setMode(nextMode || "login");
+        overlay.classList.add("open");
+        overlay.setAttribute("aria-hidden","false");
+        clearError();
+        setTimeout(() => email?.focus(), 60);
+      }
+
+      function closeModal(){
+        overlay.classList.remove("open");
+        overlay.setAttribute("aria-hidden","true");
+        clearError();
+      }
+
+      function goDashboard(){
+        const ok = localStorage.getItem("warmaster_logged") === "true";
+        if (ok) window.location.href = "dashboard.html";
+        else openModal("login");
+      }
+
+      // Open actions
+      btnLogin?.addEventListener("click", () => openModal("login"));
+      btnRegister?.addEventListener("click", () => openModal("register"));
+      btnChoosePro?.addEventListener("click", () => openModal("register"));
+      btnChooseStudio?.addEventListener("click", () => openModal("register"));
+      btnDashboard?.addEventListener("click", goDashboard);
+
+      // Tabs
+      tabLogin?.addEventListener("click", () => setMode("login"));
+      tabRegister?.addEventListener("click", () => setMode("register"));
+
+      // Close
+      btnClose?.addEventListener("click", closeModal);
+      btnCancel?.addEventListener("click", closeModal);
+
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) closeModal();
+      });
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && overlay.classList.contains("open")) closeModal();
+      });
+
+      // Extras
+      $("authForgot")?.addEventListener("click", () => alert("Recuperación (beta2)."));
+      $("authTerms")?.addEventListener("click", () => alert("Términos (beta2)."));
+
+      // Submit (fake auth)
+      btnSubmit?.addEventListener("click", () => {
+        clearError();
+        const e = (email?.value || "").trim();
+        const p = (pass?.value || "").trim();
+
+        if (!e.includes("@")) return showError("Ingresa un email válido.");
+        if (p.length < 4) return showError("Contraseña muy corta (mínimo 4 caracteres).");
+
+        if (mode === "register"){
+          const p2 = (pass2?.value || "").trim();
+          if (p2.length < 4) return showError("Repite tu contraseña.");
+          if (p !== p2) return showError("Las contraseñas no coinciden.");
+        }
+
+        localStorage.setItem("warmaster_logged", "true");
+        closeModal();
+        window.location.href = "dashboard.html";
+      });
+    });
   </script>
-<script>
-  const btnLogin = document.getElementById("btnLogin");
-  const btnRegister = document.getElementById("btnRegister");
-
-  const loginModal = document.getElementById("loginModal");
-  const registerModal = document.getElementById("registerModal");
-
-  const closeLogin = document.getElementById("closeLogin");
-  const closeRegister = document.getElementById("closeRegister");
-
-  // Abrir Login
-  btnLogin?.addEventListener("click", () => {
-    loginModal?.classList.add("show");
-  });
-
-  // Abrir Register
-  btnRegister?.addEventListener("click", () => {
-    registerModal?.classList.add("show");
-  });
-
-  // Cerrar Login
-  closeLogin?.addEventListener("click", () => {
-    loginModal?.classList.remove("show");
-  });
-
-  // Cerrar Register
-  closeRegister?.addEventListener("click", () => {
-    registerModal?.classList.remove("show");
-  });
-
-  // Cerrar al hacer click fuera del modal
-  window.addEventListener("click", (e) => {
-    if (e.target === loginModal) {
-      loginModal.classList.remove("show");
-    }
-    if (e.target === registerModal) {
-      registerModal.classList.remove("show");
-    }
-  });
-</script>
 </body>
 </html>
