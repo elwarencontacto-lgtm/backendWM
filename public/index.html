@@ -15,12 +15,10 @@
       --a:#8a5cff;
       --b:#00d7ff;
       --c:#00ff9a;
-
       --shadow: 0 24px 70px rgba(0,0,0,.55);
       --radius: 22px;
       --max: 1180px;
     }
-
     *{ box-sizing:border-box; }
     html, body{ height:100%; }
 
@@ -77,7 +75,6 @@
       align-items:center;
       gap:10px;
     }
-
     .dotlogo{
       width:34px;height:34px;border-radius:12px;
       background:
@@ -87,7 +84,6 @@
       border:1px solid rgba(255,255,255,.12);
       box-shadow: 0 12px 40px rgba(0,0,0,.45);
     }
-
     .grad{
       background:linear-gradient(90deg,var(--a),var(--b),var(--c));
       -webkit-background-clip:text;
@@ -283,14 +279,12 @@
       flex-direction:column;
       gap: 12px;
     }
-
     .stats{
       display:grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
     }
     @media (max-width: 980px){ .stats{ grid-template-columns: 1fr; } }
-
     .stat{
       border-radius: 16px;
       border: 1px solid rgba(255,255,255,.10);
@@ -358,7 +352,6 @@
       gap: 16px;
     }
     @media (max-width: 980px){ .cards{ grid-template-columns: 1fr; } }
-
     .card{
       position: relative;
       border-radius: var(--radius);
@@ -373,7 +366,6 @@
       transform: translateY(-3px);
       border-color: rgba(0,215,255,.26);
     }
-
     .kicker{
       display:flex;
       align-items:center;
@@ -400,25 +392,43 @@
       line-height: 1.6;
     }
 
-    .plan{ display:flex; flex-direction:column; gap: 12px; min-height: 220px; }
+    .plan{
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+      min-height: 220px;
+    }
     .badge{
-      display:inline-flex; align-items:center; gap: 8px;
-      padding: 7px 10px; border-radius: 999px;
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 999px;
       border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.06);
       color: rgba(233,237,247,.9);
-      font-size: 12px; font-weight: 980;
+      font-size: 12px;
+      font-weight: 980;
       width: fit-content;
     }
     .badge i{
-      width: 9px; height:9px; border-radius: 999px;
+      width: 9px; height:9px;
+      border-radius: 999px;
       background: rgba(0,215,255,.9);
       box-shadow: 0 0 0 6px rgba(0,215,255,.12);
       display:inline-block;
     }
-    .price{ font-size: 44px; letter-spacing: -1px; font-weight: 990; }
-    .meta{ margin-top:-6px; color: rgba(233,237,247,.70); font-size: 13px; line-height: 1.5; }
-    .fine{ color: rgba(233,237,247,.55); font-size: 12px; line-height: 1.5; margin-top: 10px; }
+    .price{
+      font-size: 44px;
+      letter-spacing: -1px;
+      font-weight: 990;
+    }
+    .meta{
+      margin-top:-6px;
+      color: rgba(233,237,247,.70);
+      font-size: 13px;
+      line-height: 1.5;
+    }
 
     footer{
       margin-top: 70px;
@@ -435,7 +445,11 @@
       flex-wrap:wrap;
       padding: 16px 0 0;
     }
-    .footLinks{ display:flex; gap: 10px; flex-wrap: wrap; }
+    .footLinks{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
     .footLinks a{
       padding: 6px 10px;
       border-radius: 999px;
@@ -449,9 +463,11 @@
 
     /* ===== Modal ===== */
     .modalOverlay{
-      position: fixed; inset: 0;
+      position: fixed;
+      inset: 0;
       display:none;
-      align-items:center; justify-content:center;
+      align-items:center;
+      justify-content:center;
       padding: 18px;
       background: rgba(0,0,0,.62);
       backdrop-filter: blur(8px);
@@ -473,7 +489,6 @@
       animation: pop .16s ease forwards;
     }
     @keyframes pop{ to{ transform: translateY(0) scale(1); } }
-
     .modal::before{
       content:"";
       position:absolute; inset:-2px;
@@ -512,20 +527,21 @@
       box-shadow: 0 12px 40px rgba(0,0,0,.45);
     }
     .closeBtn{
-      width: 40px; height: 38px;
+      width: 40px;
+      height: 38px;
       border-radius: 14px;
       border: 1px solid rgba(255,255,255,.14);
       background: rgba(255,255,255,.06);
       color: var(--text);
       cursor:pointer;
       font-weight: 980;
-      transition: transform .12s ease, background .12s ease, border-color .12s ease;
     }
     .closeBtn:hover{
       transform: translateY(-1px);
       background: rgba(255,255,255,.08);
       border-color: rgba(255,255,255,.22);
     }
+
     .modalBody{ padding: 14px; }
 
     .field{
@@ -551,18 +567,6 @@
       color: var(--text);
       outline:none;
     }
-    .helpRow{
-      display:flex;
-      justify-content:space-between;
-      gap: 10px;
-      flex-wrap:wrap;
-      align-items:center;
-      margin: 8px 0 0;
-      font-size: 12px;
-      color: rgba(233,237,247,.65);
-    }
-    .link{ color: rgba(0,215,255,.95); font-weight: 950; cursor:pointer; }
-    .link:hover{ text-decoration: underline; }
 
     .modalActions{
       display:flex;
@@ -571,6 +575,7 @@
       justify-content:flex-end;
       margin-top: 10px;
     }
+
     .finePrint{
       margin-top: 10px;
       color: rgba(233,237,247,.55);
@@ -607,6 +612,7 @@
 
   <main>
     <div class="wrap">
+
       <section class="hero">
         <div class="heroGrid">
           <div class="heroCard">
@@ -618,7 +624,7 @@
 
             <div class="heroActions">
               <a class="btn primary" href="master.html">Probar master ahora</a>
-              <button class="btn alt" id="btnDashboard" type="button">Entrar al dashboard</button>
+              <a class="btn alt" href="dashboard.html">Entrar al dashboard</a>
             </div>
 
             <div class="chips" aria-label="Highlights">
@@ -677,8 +683,8 @@
                 </div>
               </div>
 
-              <div class="fine">
-                * Cifras y tiempos referenciales para beta. El rendimiento depende del tamaño del audio y la carga del servidor.
+              <div class="finePrint">
+                * Cifras y tiempos referenciales para beta. Depende del tamaño del audio y la carga del servidor.
               </div>
             </div>
           </aside>
@@ -691,18 +697,27 @@
 
         <div class="cards">
           <div class="card">
-            <div class="kicker"><div class="icon">1</div><h3>Sube tu track</h3></div>
-            <p>WAV, MP3 y más formatos. Tu archivo se procesa automáticamente en la nube.</p>
+            <div class="kicker">
+              <div class="icon">1</div>
+              <h3>Sube tu track</h3>
+            </div>
+            <p>WAV o MP3. Luego limitamos tamaño/duración en backend.</p>
           </div>
 
           <div class="card">
-            <div class="kicker"><div class="icon">2</div><h3>Elige el estilo</h3></div>
-            <p>Presets por carácter (Clean, Club, Warm, Bright, Heavy) + intensidad.</p>
+            <div class="kicker">
+              <div class="icon">2</div>
+              <h3>Elige el estilo</h3>
+            </div>
+            <p>Presets por carácter + intensidad para el master.</p>
           </div>
 
           <div class="card">
-            <div class="kicker"><div class="icon">3</div><h3>Descarga y publica</h3></div>
-            <p>Compara con A/B y descarga una versión lista para distribución.</p>
+            <div class="kicker">
+              <div class="icon">3</div>
+              <h3>Descarga y publica</h3>
+            </div>
+            <p>A/B y descarga lista para distribución.</p>
           </div>
         </div>
       </section>
@@ -713,25 +728,34 @@
 
         <div class="cards">
           <div class="card">
-            <div class="kicker"><div class="icon">A</div><h3>Presets por género</h3></div>
-            <p>Ajustes optimizados según el carácter de tu canción.</p>
+            <div class="kicker">
+              <div class="icon">A</div>
+              <h3>Presets por género</h3>
+            </div>
+            <p>Clean, Club, Warm, Bright, Heavy (puedes agregar más).</p>
           </div>
 
           <div class="card">
-            <div class="kicker"><div class="icon">I</div><h3>Intensidad ajustable</h3></div>
-            <p>Define cuánta compresión y carácter quieres aplicar.</p>
+            <div class="kicker">
+              <div class="icon">I</div>
+              <h3>Intensidad ajustable</h3>
+            </div>
+            <p>Define cuánta compresión/saturación quieres en el resultado.</p>
           </div>
 
           <div class="card">
-            <div class="kicker"><div class="icon">Q</div><h3>Exportación lista</h3></div>
-            <p>WAV o MP3 preparados para distribución digital.</p>
+            <div class="kicker">
+              <div class="icon">Q</div>
+              <h3>Exportación lista</h3>
+            </div>
+            <p>WAV / MP3 listos para Spotify / YouTube / Apple Music.</p>
           </div>
         </div>
       </section>
 
       <section class="section" id="precios">
         <h2 class="sectionTitle">Precios</h2>
-        <p class="sectionLead">Planes simples. En beta el acceso es libre.</p>
+        <p class="sectionLead">Modelo demo. Luego conectas Stripe o créditos.</p>
 
         <div class="cards">
           <div class="card plan">
@@ -739,7 +763,9 @@
             <h3>Free</h3>
             <div class="price">$0</div>
             <div class="meta">2 masters/mes • MP3 • Presets básicos</div>
-            <div style="margin-top:auto;"><a class="btn alt" href="master.html">Probar</a></div>
+            <div style="margin-top:auto;">
+              <a class="btn alt" href="master.html">Probar</a>
+            </div>
           </div>
 
           <div class="card plan">
@@ -747,7 +773,9 @@
             <h3>Pro</h3>
             <div class="price">$12</div>
             <div class="meta">20 masters/mes • WAV 24-bit • A/B • Targets</div>
-            <div style="margin-top:auto;"><button class="btn primary" type="button" id="btnChoosePro">Elegir Pro</button></div>
+            <div style="margin-top:auto;">
+              <button class="btn primary" type="button" id="btnChoosePro">Elegir Pro</button>
+            </div>
           </div>
 
           <div class="card plan">
@@ -755,14 +783,16 @@
             <h3>Studio</h3>
             <div class="price">$29</div>
             <div class="meta">Ilimitado* • Prioridad • API / Integración</div>
-            <div style="margin-top:auto;"><button class="btn primary" type="button" id="btnChooseStudio">Hablar con ventas</button></div>
+            <div style="margin-top:auto;">
+              <button class="btn primary" type="button" id="btnChooseStudio">Hablar con ventas</button>
+            </div>
           </div>
         </div>
       </section>
 
       <footer>
         <div class="footRow">
-          <div>© <span id="year"></span> WarMaster — beta1.1 estable</div>
+          <div>© <span id="year"></span> WarMaster — beta1.1</div>
           <div class="footLinks">
             <a href="master.html">Nuevo master</a>
             <a href="dashboard.html">Dashboard</a>
@@ -770,67 +800,64 @@
           </div>
         </div>
       </footer>
+
     </div>
   </main>
 
-  <!-- ===== MODAL LOGIN ===== -->
-  <div class="modalOverlay" id="loginModal" aria-hidden="true">
+  <!-- MODAL LOGIN -->
+  <div class="modalOverlay" id="loginOverlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-label="Iniciar sesión">
       <div class="modalHead">
-        <div class="modalTitle"><span class="miniLogo" aria-hidden="true"></span> Iniciar sesión</div>
-        <button class="closeBtn" id="closeLogin" type="button">✕</button>
+        <div class="modalTitle"><span class="miniLogo"></span> Iniciar sesión</div>
+        <button class="closeBtn" type="button" data-close="login">✕</button>
       </div>
       <div class="modalBody">
         <div class="field">
           <label>Email</label>
-          <input id="loginEmail" type="email" placeholder="tu@email.com" autocomplete="email">
+          <input id="loginEmail" type="email" placeholder="tu@email.com" />
         </div>
         <div class="field">
           <label>Contraseña</label>
-          <input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password">
-        </div>
-        <div class="helpRow">
-          <span>Demo beta: login falso</span>
-          <span class="link" id="goRegister">Crear cuenta</span>
+          <input id="loginPass" type="password" placeholder="••••••••" />
         </div>
         <div class="modalActions">
-          <button class="btn" id="btnLoginCancel" type="button">Cancelar</button>
-          <button class="btn primary" id="btnLoginDo" type="button">Entrar</button>
+          <button class="btn neon" type="button" data-switch="register">Crear cuenta</button>
+          <button class="btn primary" type="button" id="btnLoginSubmit">Entrar</button>
         </div>
-        <div class="finePrint">En beta1.1 se guarda sesión en el navegador (localStorage).</div>
+        <div class="finePrint">
+          * Demo UI (beta1.1). Aún no hay usuarios reales.
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- ===== MODAL REGISTER ===== -->
-  <div class="modalOverlay" id="registerModal" aria-hidden="true">
+  <!-- MODAL REGISTER -->
+  <div class="modalOverlay" id="registerOverlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-label="Crear cuenta">
       <div class="modalHead">
-        <div class="modalTitle"><span class="miniLogo" aria-hidden="true"></span> Crear cuenta</div>
-        <button class="closeBtn" id="closeRegister" type="button">✕</button>
+        <div class="modalTitle"><span class="miniLogo"></span> Crear cuenta</div>
+        <button class="closeBtn" type="button" data-close="register">✕</button>
       </div>
       <div class="modalBody">
         <div class="field">
           <label>Nombre</label>
-          <input id="regName" type="text" placeholder="Tu nombre" autocomplete="name">
+          <input id="regName" type="text" placeholder="Tu nombre" />
         </div>
         <div class="field">
           <label>Email</label>
-          <input id="regEmail" type="email" placeholder="tu@email.com" autocomplete="email">
+          <input id="regEmail" type="email" placeholder="tu@email.com" />
         </div>
         <div class="field">
           <label>Contraseña</label>
-          <input id="regPass" type="password" placeholder="••••••••" autocomplete="new-password">
-        </div>
-        <div class="helpRow">
-          <span>Demo beta: registro falso</span>
-          <span class="link" id="goLogin">Ya tengo cuenta</span>
+          <input id="regPass" type="password" placeholder="••••••••" />
         </div>
         <div class="modalActions">
-          <button class="btn" id="btnRegCancel" type="button">Cancelar</button>
-          <button class="btn primary" id="btnRegDo" type="button">Crear</button>
+          <button class="btn neon" type="button" data-switch="login">Ya tengo cuenta</button>
+          <button class="btn primary" type="button" id="btnRegisterSubmit">Crear</button>
         </div>
-        <div class="finePrint">En beta1.1 la cuenta es simulada para UI/flujo.</div>
+        <div class="finePrint">
+          * Demo UI (beta1.1). Más adelante conectamos FastAPI + DB.
+        </div>
       </div>
     </div>
   </div>
@@ -838,72 +865,61 @@
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
 
-    const loginModal = document.getElementById("loginModal");
-    const registerModal = document.getElementById("registerModal");
+    const loginOverlay = document.getElementById("loginOverlay");
+    const registerOverlay = document.getElementById("registerOverlay");
 
-    function openModal(el){
-      el.classList.add("open");
-      el.setAttribute("aria-hidden","false");
+    function openOverlay(which){
+      if(which === "login"){
+        loginOverlay.classList.add("open");
+        loginOverlay.setAttribute("aria-hidden","false");
+        registerOverlay.classList.remove("open");
+        registerOverlay.setAttribute("aria-hidden","true");
+      } else {
+        registerOverlay.classList.add("open");
+        registerOverlay.setAttribute("aria-hidden","false");
+        loginOverlay.classList.remove("open");
+        loginOverlay.setAttribute("aria-hidden","true");
+      }
     }
-    function closeModal(el){
+    function closeOverlay(which){
+      const el = (which === "login") ? loginOverlay : registerOverlay;
       el.classList.remove("open");
       el.setAttribute("aria-hidden","true");
     }
 
-    // Open buttons
-    document.getElementById("btnLogin").addEventListener("click", ()=> openModal(loginModal));
-    document.getElementById("btnRegister").addEventListener("click", ()=> openModal(registerModal));
+    document.getElementById("btnLogin").addEventListener("click", ()=> openOverlay("login"));
+    document.getElementById("btnRegister").addEventListener("click", ()=> openOverlay("register"));
 
-    // Close buttons
-    document.getElementById("closeLogin").addEventListener("click", ()=> closeModal(loginModal));
-    document.getElementById("closeRegister").addEventListener("click", ()=> closeModal(registerModal));
-    document.getElementById("btnLoginCancel").addEventListener("click", ()=> closeModal(loginModal));
-    document.getElementById("btnRegCancel").addEventListener("click", ()=> closeModal(registerModal));
-
-    // Click outside closes
-    loginModal.addEventListener("click", (e)=> { if(e.target === loginModal) closeModal(loginModal); });
-    registerModal.addEventListener("click", (e)=> { if(e.target === registerModal) closeModal(registerModal); });
-
-    // Switch links
-    document.getElementById("goRegister").addEventListener("click", ()=>{
-      closeModal(loginModal);
-      openModal(registerModal);
-    });
-    document.getElementById("goLogin").addEventListener("click", ()=>{
-      closeModal(registerModal);
-      openModal(loginModal);
+    document.querySelectorAll("[data-close]").forEach(btn=>{
+      btn.addEventListener("click", ()=> closeOverlay(btn.getAttribute("data-close")));
     });
 
-    // Fake auth
-    function setSession(email){
-      localStorage.setItem("warmaster_logged", "true");
-      localStorage.setItem("warmaster_email", email || "");
-    }
+    document.querySelectorAll("[data-switch]").forEach(btn=>{
+      btn.addEventListener("click", ()=> openOverlay(btn.getAttribute("data-switch")));
+    });
 
-    document.getElementById("btnLoginDo").addEventListener("click", ()=>{
-      const email = document.getElementById("loginEmail").value.trim();
-      setSession(email);
-      closeModal(loginModal);
+    [loginOverlay, registerOverlay].forEach(ov=>{
+      ov.addEventListener("click", (e)=>{
+        if(e.target === ov){
+          ov.classList.remove("open");
+          ov.setAttribute("aria-hidden","true");
+        }
+      });
+    });
+
+    // Demo actions
+    document.getElementById("btnLoginSubmit").addEventListener("click", ()=>{
+      alert("Login demo (beta1.1). Luego conectamos usuarios reales.");
+      closeOverlay("login");
       window.location.href = "dashboard.html";
     });
-
-    document.getElementById("btnRegDo").addEventListener("click", ()=>{
-      const email = document.getElementById("regEmail").value.trim();
-      setSession(email);
-      closeModal(registerModal);
+    document.getElementById("btnRegisterSubmit").addEventListener("click", ()=>{
+      alert("Registro demo (beta1.1). Luego conectamos usuarios reales.");
+      closeOverlay("register");
       window.location.href = "dashboard.html";
     });
-
-    // Dashboard button (if logged -> go, else open login)
-    document.getElementById("btnDashboard").addEventListener("click", ()=>{
-      const ok = localStorage.getItem("warmaster_logged") === "true";
-      if(ok) window.location.href = "dashboard.html";
-      else openModal(loginModal);
-    });
-
-    // Pricing buttons demo
-    document.getElementById("btnChoosePro").addEventListener("click", ()=> openModal(loginModal));
-    document.getElementById("btnChooseStudio").addEventListener("click", ()=> alert("Demo: ventas/Stripe en beta2."));
+    document.getElementById("btnChoosePro").addEventListener("click", ()=> alert("Checkout demo. Luego conectamos Stripe."));
+    document.getElementById("btnChooseStudio").addEventListener("click", ()=> alert("Ventas demo. Luego conectamos contacto/Stripe."));
   </script>
 </body>
 </html>
