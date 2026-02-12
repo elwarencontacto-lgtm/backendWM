@@ -15,6 +15,7 @@
       --b:#00d7ff;
       --c:#00ff9a;
       --radius: 22px;
+      --shadow: 0 24px 70px rgba(0,0,0,.55);
     }
     *{ box-sizing:border-box; }
     body{
@@ -44,6 +45,7 @@
       align-items:center;
       gap:14px;
       padding:16px 0;
+      flex-wrap:wrap;
     }
     .brand{
       font-size:22px;
@@ -83,15 +85,16 @@
       justify-content:center;
       user-select:none;
       gap:10px;
-      transition: background .12s ease, border-color .12s ease, transform .12s ease;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
     }
     .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.22); }
     .btn.primary{
       border:none;
       background: linear-gradient(90deg, rgba(138,92,255,.95), rgba(0,215,255,.95));
       color:#061018;
+      box-shadow: var(--shadow);
     }
-    .btn:disabled{ opacity:.6; cursor:not-allowed; transform:none; }
+    .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
     .ghost{ background: transparent; }
 
     main{ padding: 26px 0 70px; }
@@ -110,7 +113,7 @@
       border-radius: var(--radius);
       border: 1px solid rgba(255,255,255,.12);
       background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
-      box-shadow: 0 24px 70px rgba(0,0,0,.55);
+      box-shadow: var(--shadow);
       overflow:hidden;
       position:relative;
     }
@@ -212,82 +215,50 @@
       transition: width .25s ease;
     }
     .ptext{
-      min-width: 120px;
+      min-width: 140px;
       text-align:right;
       font-size: 12px;
       color: rgba(233,237,247,.8);
       font-weight: 900;
     }
 
-    /* Caja de estado (errores/ok) */
+    /* Estado bonito */
     .statusBox{
-      margin-top:12px;
+      margin-top: 12px;
       border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.16);
       padding: 12px;
       display:none;
-      gap: 10px;
+      gap:10px;
       align-items:flex-start;
     }
     .statusBox.show{ display:flex; }
-    .statusIcon{
-      width: 28px; height: 28px;
-      border-radius: 12px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight: 900;
+    .statusDot{
+      width: 10px; height: 10px; border-radius: 999px;
+      margin-top: 4px;
+      background: rgba(233,237,247,.35);
+      box-shadow: 0 0 0 6px rgba(233,237,247,.06);
       flex: 0 0 auto;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.20);
-      color: rgba(233,237,247,.9);
-      margin-top: 1px;
     }
-    .statusBody{ flex:1; }
-    .statusTitle{
-      font-size: 12px;
-      font-weight: 900;
-      letter-spacing:.2px;
-      margin: 0;
-      color: rgba(233,237,247,.92);
-    }
-    .statusMsg{
-      margin-top: 6px;
-      color: rgba(233,237,247,.75);
-      font-size: 12px;
-      line-height: 1.55;
+    .statusDot.ok{ background: rgba(0,255,154,.80); box-shadow: 0 0 0 6px rgba(0,255,154,.10); }
+    .statusDot.warn{ background: rgba(0,215,255,.85); box-shadow: 0 0 0 6px rgba(0,215,255,.10); }
+    .statusDot.err{ background: rgba(255,120,120,.85); box-shadow: 0 0 0 6px rgba(255,120,120,.10); }
+    .statusText{
+      font-size: 13px;
+      line-height: 1.5;
+      color: rgba(233,237,247,.88);
       white-space: pre-wrap;
       word-break: break-word;
     }
-    .statusBox.err{
-      border-color: rgba(255,120,120,.30);
-      background: rgba(255,120,120,.07);
-    }
-    .statusBox.err .statusIcon{
-      border-color: rgba(255,120,120,.35);
-      background: rgba(255,120,120,.10);
-      color: rgba(255,220,220,.95);
-    }
-    .statusBox.ok{
-      border-color: rgba(0,255,154,.25);
-      background: rgba(0,255,154,.06);
-    }
-    .statusBox.ok .statusIcon{
-      border-color: rgba(0,255,154,.35);
-      background: rgba(0,255,154,.10);
-      color: rgba(233,255,245,.95);
-    }
-    .statusRow{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-      margin-top: 10px;
+    .statusTitle{
+      font-weight: 900;
+      letter-spacing:.2px;
+      margin-bottom: 2px;
     }
 
     /* A/B */
-    .hidden{ display:none !important; }
+    .hidden{ display:none; }
     .abCard{
       margin-top:14px;
       border-radius: 18px;
@@ -331,7 +302,8 @@
       gap:10px;
       align-items:center;
     }
-    .abPlay{
+
+    .iconBtn{
       width:46px;
       height:38px;
       border-radius: 14px;
@@ -339,9 +311,15 @@
       align-items:center;
       justify-content:center;
       font-weight: 900;
-      padding:0;
-      color:#061018;
+      padding: 0;
     }
+    .iconBtn svg{
+      width: 18px;
+      height: 18px;
+      display:block;
+      fill: currentColor;
+    }
+
     .abTimeline{ flex:1; min-width: 180px; }
     .abTime{
       font-size: 11px;
@@ -353,10 +331,12 @@
 
     .disabled{ opacity:.6; pointer-events:none; }
 
-    /* Iconos */
-    .ico{ display:inline-flex; align-items:center; justify-content:center; }
-    #btnABStop{ color: rgba(233,237,247,.92); }
-    #btnABStop:hover{ color: rgba(233,237,247,1); }
+    .miniNote{
+      margin-top:10px;
+      font-size: 12px;
+      color: rgba(233,237,247,.62);
+      line-height: 1.5;
+    }
   </style>
 </head>
 
@@ -395,10 +375,11 @@
         <div class="split">
           <div class="field">
             <label for="file">Archivo</label>
-            <input type="text" id="file" placeholder="Arrastra aquí o elige un archivo" readonly />
+            <input type="text" id="file" placeholder="Elige un archivo de audio" readonly />
             <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
               <button class="btn" type="button" id="btnPick">Seleccionar</button>
             </div>
+            <div class="miniNote" id="fileMeta"></div>
           </div>
 
           <div class="field">
@@ -418,6 +399,10 @@
             <div style="display:flex; justify-content:space-between; font-size:12px; color:rgba(233,237,247,.65); margin-top:6px;">
               <span>Suave</span><span>Agresiva</span>
             </div>
+
+            <div class="miniNote">
+              Límite recomendado UI: <b>100MB</b> y <b>6 minutos</b>.
+            </div>
           </div>
         </div>
 
@@ -425,21 +410,16 @@
           <button class="btn primary" type="button" id="btnStartJob" disabled>Renderizar</button>
         </div>
 
-        <!-- Progreso -->
         <div class="progressWrap" id="progressWrap" aria-live="polite">
           <div class="bar"><div class="fill" id="progressFill"></div></div>
           <div class="ptext" id="progressText">Listo</div>
         </div>
 
-        <!-- Status (errores/ok) -->
         <div class="statusBox" id="statusBox" role="status" aria-live="polite">
-          <div class="statusIcon" id="statusIcon">i</div>
-          <div class="statusBody">
-            <p class="statusTitle" id="statusTitle">Estado</p>
-            <div class="statusMsg" id="statusMsg">—</div>
-            <div class="statusRow">
-              <button class="btn" type="button" id="btnStatusClose">Cerrar</button>
-            </div>
+          <span class="statusDot" id="statusDot" aria-hidden="true"></span>
+          <div class="statusText" id="statusText">
+            <div class="statusTitle" id="statusTitle">Estado</div>
+            <div id="statusMsg">Listo.</div>
           </div>
         </div>
 
@@ -456,17 +436,13 @@
             </div>
 
             <div class="abTransport">
-              <button class="btn primary abPlay" type="button" id="btnABPlay" aria-label="Reproducir / Pausar">
-                <span class="ico" id="icoPlay">
-                  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                    <path fill="currentColor" d="M8 5v14l11-7z"></path>
-                  </svg>
-                </span>
-                <span class="ico hidden" id="icoPause">
-                  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                    <path fill="currentColor" d="M6 5h4v14H6zM14 5h4v14h-4z"></path>
-                  </svg>
-                </span>
+              <button class="btn primary iconBtn" type="button" id="btnABPlay" title="Play/Pause" aria-label="Play/Pause">
+                <svg id="icoPlay" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8 5v14l11-7z"></path>
+                </svg>
+                <svg id="icoPause" viewBox="0 0 24 24" aria-hidden="true" style="display:none">
+                  <path d="M6 5h4v14H6zM14 5h4v14h-4z"></path>
+                </svg>
               </button>
 
               <div class="abTimeline">
@@ -474,9 +450,9 @@
                 <input id="abSeek" type="range" min="0" max="1000" value="0" />
               </div>
 
-              <button class="btn abBtn" type="button" id="btnABStop" aria-label="Detener">
-                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                  <path fill="currentColor" d="M7 7h10v10H7z"></path>
+              <button class="btn iconBtn" type="button" id="btnABStop" title="Stop" aria-label="Stop">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M7 7h10v10H7z"></path>
                 </svg>
               </button>
             </div>
@@ -495,32 +471,30 @@
 </main>
 
 <script>
-  // ===== API_BASE: querystring ?api=... o mismo dominio =====
   function getApiBase(){
     const qs = new URLSearchParams(location.search);
     const fromQs = (qs.get("api") || "").trim();
     if (fromQs) return fromQs.replace(/\/+$/,"");
-    return location.origin; // mismo dominio por defecto
+    return location.origin;
   }
   const API_BASE = getApiBase();
 
-  // ===== DOM =====
   const fileInput   = document.getElementById("fileInput");
   const fileField   = document.getElementById("file");
   const btnPick     = document.getElementById("btnPick");
   const btnStartJob = document.getElementById("btnStartJob");
   const preset      = document.getElementById("preset");
   const intensity   = document.getElementById("intensity2");
+  const fileMeta    = document.getElementById("fileMeta");
 
   const progressWrap = document.getElementById("progressWrap");
   const progressFill = document.getElementById("progressFill");
   const progressText = document.getElementById("progressText");
 
   const statusBox = document.getElementById("statusBox");
-  const statusIcon = document.getElementById("statusIcon");
+  const statusDot = document.getElementById("statusDot");
   const statusTitle = document.getElementById("statusTitle");
   const statusMsg = document.getElementById("statusMsg");
-  const btnStatusClose = document.getElementById("btnStatusClose");
 
   const abWrapper   = document.getElementById("abWrapper");
   const btnABOriginal = document.getElementById("btnABOriginal");
@@ -532,14 +506,13 @@
   const abTime        = document.getElementById("abTime");
   const btnDownloadMaster = document.getElementById("btnDownloadMaster");
 
+  const icoPlay  = document.getElementById("icoPlay");
+  const icoPause = document.getElementById("icoPause");
+
   const audioOriginal = document.getElementById("audioOriginal");
   const audioPreview  = document.getElementById("audioPreview");
   const audioMaster   = document.getElementById("audioMaster");
 
-  const icoPlay = document.getElementById("icoPlay");
-  const icoPause = document.getElementById("icoPause");
-
-  // ===== State =====
   let currentFile = null;
   let activeAudio = audioPreview;
 
@@ -547,33 +520,37 @@
   let previewObjectUrl = null;
   let masterObjectUrl = null;
 
-  // ===== Helpers UI status =====
-  function showStatus(type, title, msg){
+  function revokeUrlSafe(u){
+    try{ if(u) URL.revokeObjectURL(u); }catch(e){}
+  }
+
+  function showStatus(kind, title, msg){
     if (!statusBox) return;
-    statusBox.classList.remove("ok","err");
     statusBox.classList.add("show");
-    if (type === "ok") statusBox.classList.add("ok");
-    if (type === "err") statusBox.classList.add("err");
-
+    statusDot.className = "statusDot" + (kind ? (" " + kind) : "");
     if (statusTitle) statusTitle.textContent = title || "Estado";
-    if (statusMsg) statusMsg.textContent = msg || "—";
+    if (statusMsg) statusMsg.textContent = msg || "";
+  }
 
-    if (statusIcon){
-      statusIcon.textContent = type === "ok" ? "✓" : (type === "err" ? "!" : "i");
-    }
+  function clearStatus(){
+    if (!statusBox) return;
+    statusBox.classList.remove("show");
+    statusDot.className = "statusDot";
   }
-  function hideStatus(){
-    statusBox?.classList.remove("show","ok","err");
-  }
-  btnStatusClose?.addEventListener("click", hideStatus);
 
   function progressSet(pct, text){
-    progressWrap?.classList.add("show");
+    if (!progressWrap) return;
+    progressWrap.classList.add("show");
     if (progressFill) progressFill.style.width = `${Math.max(0, Math.min(100, pct))}%`;
     if (progressText) progressText.textContent = text || "";
   }
 
-  // ===== Preview engine =====
+  function progressReset(){
+    progressWrap?.classList.remove("show");
+    if (progressFill) progressFill.style.width = "0%";
+    if (progressText) progressText.textContent = "Listo";
+  }
+
   let audioCtx = null;
   let sourceNode = null;
   let gainNode = null;
@@ -619,7 +596,6 @@
     gainNode.gain.value = 1 + v * 0.8;
   }
 
-  // ===== A/B UI =====
   function fmtTime(s){
     s = Math.max(0, Math.floor(s || 0));
     const m = Math.floor(s/60);
@@ -635,14 +611,19 @@
     if (abSeek && dur > 0) abSeek.value = Math.floor((cur/dur)*1000);
   }
 
+  function setPlayIcon(isPlaying){
+    if (!icoPlay || !icoPause) return;
+    icoPlay.style.display = isPlaying ? "none" : "block";
+    icoPause.style.display = isPlaying ? "block" : "none";
+  }
+
   function stopAll(){
     [audioOriginal,audioPreview,audioMaster].forEach(a=>{
       if(!a) return;
       a.pause();
       a.currentTime = 0;
     });
-    icoPause?.classList.add("hidden");
-    icoPlay?.classList.remove("hidden");
+    setPlayIcon(false);
   }
 
   function setPressed(which){
@@ -691,12 +672,10 @@
 
     if (activeAudio.paused){
       await activeAudio.play();
-      icoPlay?.classList.add("hidden");
-      icoPause?.classList.remove("hidden");
+      setPlayIcon(true);
     } else {
       activeAudio.pause();
-      icoPause?.classList.add("hidden");
-      icoPlay?.classList.remove("hidden");
+      setPlayIcon(false);
     }
   });
 
@@ -714,39 +693,37 @@
     if(!a) return;
     a.addEventListener("timeupdate", syncUI);
     a.addEventListener("loadedmetadata", syncUI);
-    a.addEventListener("ended", ()=> {
-      icoPause?.classList.add("hidden");
-      icoPlay?.classList.remove("hidden");
-    });
+    a.addEventListener("ended", ()=> setPlayIcon(false));
+    a.addEventListener("pause", ()=> { if (a === activeAudio) setPlayIcon(false); });
+    a.addEventListener("play",  ()=> { if (a === activeAudio) setPlayIcon(true); });
   });
 
-  // ===== Upload =====
   function pick(){ fileInput?.click(); }
   btnPick?.addEventListener("click", pick);
 
-  function revokeUrlSafe(u){
-    try{ if(u) URL.revokeObjectURL(u); }catch(e){}
-  }
+  function bytesToMB(b){ return (b / (1024*1024)).toFixed(2); }
 
-  fileInput?.addEventListener("change", (e) => {
-    hideStatus();
-
+  fileInput?.addEventListener("change", async (e) => {
     currentFile = e.target.files?.[0] || null;
 
     if (fileField) fileField.value = currentFile ? currentFile.name : "";
     if (btnStartJob) btnStartJob.disabled = !currentFile;
 
-    if (!currentFile) return;
+    clearStatus();
+    progressReset();
+
+    if (!currentFile){
+      if (fileMeta) fileMeta.textContent = "";
+      return;
+    }
 
     abWrapper?.classList.remove("hidden");
 
-    // revoke prev urls
     revokeUrlSafe(originalObjectUrl);
     revokeUrlSafe(previewObjectUrl);
     revokeUrlSafe(masterObjectUrl);
     originalObjectUrl = previewObjectUrl = masterObjectUrl = null;
 
-    // original/preview
     originalObjectUrl = URL.createObjectURL(currentFile);
     previewObjectUrl  = URL.createObjectURL(currentFile);
 
@@ -760,34 +737,37 @@
     applyPreset();
     applyIntensity();
 
-    // reset master
     audioMaster.removeAttribute("src");
     audioMaster.load();
     if (btnABMaster) btnABMaster.disabled = true;
 
-    // reset download
     if (btnDownloadMaster) {
       btnDownloadMaster.href = "#";
       btnDownloadMaster.classList.add("disabled");
       btnDownloadMaster.setAttribute("aria-disabled","true");
     }
 
-    // reset progress
-    progressWrap?.classList.remove("show");
-    if (progressFill) progressFill.style.width = "0%";
-    if (progressText) progressText.textContent = "Listo";
-
-    // reset icons
-    icoPause?.classList.add("hidden");
-    icoPlay?.classList.remove("hidden");
-
     setActive(audioPreview, "preview");
+    stopAll();
+
+    const tmp = new Audio();
+    tmp.src = originalObjectUrl;
+    tmp.preload = "metadata";
+    tmp.addEventListener("loadedmetadata", () => {
+      const dur = isFinite(tmp.duration) ? tmp.duration : 0;
+      const min = Math.floor(dur/60);
+      const sec = Math.floor(dur%60);
+      if (fileMeta){
+        fileMeta.innerHTML =
+          `<span style="color:rgba(233,237,247,.75);font-weight:900">Tamaño:</span> ${bytesToMB(currentFile.size)} MB · ` +
+          `<span style="color:rgba(233,237,247,.75);font-weight:900">Duración:</span> ${min}:${String(sec).padStart(2,"0")}`;
+      }
+    });
   });
 
   intensity?.addEventListener("input", applyIntensity);
   preset?.addEventListener("change", applyPreset);
 
-  // ===== Fetch with timeout =====
   async function fetchWithTimeout(url, options, timeoutMs){
     const controller = new AbortController();
     const t = setTimeout(()=> controller.abort("timeout"), timeoutMs);
@@ -799,9 +779,19 @@
     }
   }
 
-  // ===== Render real (POST correcto) =====
+  // === UPGRADE: errores 400 => warning; 500+ => error ===
+  async function readBackendError(res){
+    const ct = (res.headers.get("content-type") || "").toLowerCase();
+    if (ct.includes("application/json")){
+      const j = await res.json().catch(()=> null);
+      if (j && typeof j.detail !== "undefined") return String(j.detail);
+      return JSON.stringify(j || {}).slice(0, 600);
+    }
+    const t = await res.text().catch(()=> "");
+    return (t || "Error desconocido.").slice(0, 600);
+  }
+
   btnStartJob?.addEventListener("click", async () => {
-    hideStatus();
     if (!currentFile) return;
 
     const old = btnStartJob.textContent;
@@ -809,6 +799,8 @@
     btnStartJob.disabled = true;
 
     try{
+      clearStatus();
+
       try{ if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume(); } catch(e){}
 
       const fd = new FormData();
@@ -823,30 +815,25 @@
 
       progressSet(55, "Procesando…");
 
-      const ct = (res.headers.get("content-type") || "").toLowerCase();
-
       if (!res.ok) {
-        const txt = await res.text().catch(()=> "");
-        showStatus("err", "No se pudo renderizar", `Código: ${res.status}\n\n${txt.slice(0, 800) || "Respuesta vacía del servidor."}`);
-        progressSet(0, "Error");
-        return;
-      }
+        const msg = await readBackendError(res);
 
-      if (ct.includes("application/json")) {
-        const txt = await res.text().catch(()=> "");
-        showStatus("err", "Respuesta inesperada", `El backend devolvió JSON (no audio).\n\n${txt.slice(0, 800)}`);
+        if (res.status >= 400 && res.status < 500){
+          showStatus("warn", `Aviso (${res.status})`, msg);
+        } else {
+          showStatus("err", `Error (${res.status})`, msg);
+        }
         progressSet(0, "Error");
         return;
       }
 
       const blob = await res.blob();
       if (!blob || blob.size < 1024) {
-        showStatus("err", "Master vacío", `El archivo recibido es muy pequeño.\nTamaño: ${blob ? blob.size : 0} bytes`);
+        showStatus("err", "Error", `El master llegó vacío o muy pequeño (${blob ? blob.size : 0} bytes).`);
         progressSet(0, "Error");
         return;
       }
 
-      // set master url
       revokeUrlSafe(masterObjectUrl);
       masterObjectUrl = URL.createObjectURL(blob);
 
@@ -863,14 +850,13 @@
       }
 
       progressSet(100, "Listo ✅");
-      showStatus("ok", "Master listo", "Ya puedes escuchar el resultado (Master) y descargarlo.");
+      showStatus("ok", "Éxito", "Master generado. Puedes escucharlo en A/B y descargarlo.");
 
     } catch (err) {
       const msg = (err && (err.name === "AbortError" || err === "timeout"))
-        ? "Tiempo de espera agotado. El backend está demorando o está colgado."
+        ? "Tiempo de espera agotado (180s). El backend está demorando o colgado."
         : ("Error de red/JS: " + (err?.message || String(err)));
-
-      showStatus("err", "Error de conexión", msg);
+      showStatus("err", "Error", msg);
       progressSet(0, "Error");
     } finally {
       btnStartJob.textContent = old;
