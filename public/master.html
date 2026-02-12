@@ -83,13 +83,15 @@
       justify-content:center;
       user-select:none;
       gap:10px;
+      transition: background .12s ease, border-color .12s ease, transform .12s ease;
     }
-    .btn:hover{ background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.22); }
+    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.22); }
     .btn.primary{
       border:none;
       background: linear-gradient(90deg, rgba(138,92,255,.95), rgba(0,215,255,.95));
       color:#061018;
     }
+    .btn:disabled{ opacity:.6; cursor:not-allowed; transform:none; }
     .ghost{ background: transparent; }
 
     main{ padding: 26px 0 70px; }
@@ -217,6 +219,73 @@
       font-weight: 900;
     }
 
+    /* Caja de estado (errores/ok) */
+    .statusBox{
+      margin-top:12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      padding: 12px;
+      display:none;
+      gap: 10px;
+      align-items:flex-start;
+    }
+    .statusBox.show{ display:flex; }
+    .statusIcon{
+      width: 28px; height: 28px;
+      border-radius: 12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 900;
+      flex: 0 0 auto;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.20);
+      color: rgba(233,237,247,.9);
+      margin-top: 1px;
+    }
+    .statusBody{ flex:1; }
+    .statusTitle{
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing:.2px;
+      margin: 0;
+      color: rgba(233,237,247,.92);
+    }
+    .statusMsg{
+      margin-top: 6px;
+      color: rgba(233,237,247,.75);
+      font-size: 12px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .statusBox.err{
+      border-color: rgba(255,120,120,.30);
+      background: rgba(255,120,120,.07);
+    }
+    .statusBox.err .statusIcon{
+      border-color: rgba(255,120,120,.35);
+      background: rgba(255,120,120,.10);
+      color: rgba(255,220,220,.95);
+    }
+    .statusBox.ok{
+      border-color: rgba(0,255,154,.25);
+      background: rgba(0,255,154,.06);
+    }
+    .statusBox.ok .statusIcon{
+      border-color: rgba(0,255,154,.35);
+      background: rgba(0,255,154,.10);
+      color: rgba(233,255,245,.95);
+    }
+    .statusRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      margin-top: 10px;
+    }
+
     /* A/B */
     .hidden{ display:none !important; }
     .abCard{
@@ -271,6 +340,7 @@
       justify-content:center;
       font-weight: 900;
       padding:0;
+      color:#061018;
     }
     .abTimeline{ flex:1; min-width: 180px; }
     .abTime{
@@ -283,9 +353,8 @@
 
     .disabled{ opacity:.6; pointer-events:none; }
 
-    /* Iconos blanco/negro (sin emojis) */
+    /* Iconos */
     .ico{ display:inline-flex; align-items:center; justify-content:center; }
-    .abPlay{ color:#061018; } /* botón primary */
     #btnABStop{ color: rgba(233,237,247,.92); }
     #btnABStop:hover{ color: rgba(233,237,247,1); }
   </style>
@@ -319,7 +388,7 @@
     <section class="card">
       <div class="card-h">
         <h2>Nuevo master</h2>
-        <span style="font-size:12px;color:rgba(233,237,247,.7);font-weight:900;">beta1.1</span>
+        <span style="font-size:12px;color:rgba(233,237,247,.7);font-weight:900;">beta1.2</span>
       </div>
 
       <div class="card-b">
@@ -356,10 +425,22 @@
           <button class="btn primary" type="button" id="btnStartJob" disabled>Renderizar</button>
         </div>
 
-        <!-- Progreso UI (simulado) -->
+        <!-- Progreso -->
         <div class="progressWrap" id="progressWrap" aria-live="polite">
           <div class="bar"><div class="fill" id="progressFill"></div></div>
           <div class="ptext" id="progressText">Listo</div>
+        </div>
+
+        <!-- Status (errores/ok) -->
+        <div class="statusBox" id="statusBox" role="status" aria-live="polite">
+          <div class="statusIcon" id="statusIcon">i</div>
+          <div class="statusBody">
+            <p class="statusTitle" id="statusTitle">Estado</p>
+            <div class="statusMsg" id="statusMsg">—</div>
+            <div class="statusRow">
+              <button class="btn" type="button" id="btnStatusClose">Cerrar</button>
+            </div>
+          </div>
         </div>
 
         <div id="abWrapper" class="hidden">
@@ -435,6 +516,12 @@
   const progressFill = document.getElementById("progressFill");
   const progressText = document.getElementById("progressText");
 
+  const statusBox = document.getElementById("statusBox");
+  const statusIcon = document.getElementById("statusIcon");
+  const statusTitle = document.getElementById("statusTitle");
+  const statusMsg = document.getElementById("statusMsg");
+  const btnStatusClose = document.getElementById("btnStatusClose");
+
   const abWrapper   = document.getElementById("abWrapper");
   const btnABOriginal = document.getElementById("btnABOriginal");
   const btnABPreview  = document.getElementById("btnABPreview");
@@ -459,6 +546,32 @@
   let originalObjectUrl = null;
   let previewObjectUrl = null;
   let masterObjectUrl = null;
+
+  // ===== Helpers UI status =====
+  function showStatus(type, title, msg){
+    if (!statusBox) return;
+    statusBox.classList.remove("ok","err");
+    statusBox.classList.add("show");
+    if (type === "ok") statusBox.classList.add("ok");
+    if (type === "err") statusBox.classList.add("err");
+
+    if (statusTitle) statusTitle.textContent = title || "Estado";
+    if (statusMsg) statusMsg.textContent = msg || "—";
+
+    if (statusIcon){
+      statusIcon.textContent = type === "ok" ? "✓" : (type === "err" ? "!" : "i");
+    }
+  }
+  function hideStatus(){
+    statusBox?.classList.remove("show","ok","err");
+  }
+  btnStatusClose?.addEventListener("click", hideStatus);
+
+  function progressSet(pct, text){
+    progressWrap?.classList.add("show");
+    if (progressFill) progressFill.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+    if (progressText) progressText.textContent = text || "";
+  }
 
   // ===== Preview engine =====
   let audioCtx = null;
@@ -616,6 +729,8 @@
   }
 
   fileInput?.addEventListener("change", (e) => {
+    hideStatus();
+
     currentFile = e.target.files?.[0] || null;
 
     if (fileField) fileField.value = currentFile ? currentFile.name : "";
@@ -684,15 +799,9 @@
     }
   }
 
-  function progressSet(pct, text){
-    if (!progressWrap) return;
-    progressWrap.classList.add("show");
-    if (progressFill) progressFill.style.width = `${Math.max(0, Math.min(100, pct))}%`;
-    if (progressText) progressText.textContent = text || "";
-  }
-
   // ===== Render real (POST correcto) =====
   btnStartJob?.addEventListener("click", async () => {
+    hideStatus();
     if (!currentFile) return;
 
     const old = btnStartJob.textContent;
@@ -700,7 +809,6 @@
     btnStartJob.disabled = true;
 
     try{
-      // gesto -> resume
       try{ if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume(); } catch(e){}
 
       const fd = new FormData();
@@ -719,21 +827,21 @@
 
       if (!res.ok) {
         const txt = await res.text().catch(()=> "");
-        alert("Render falló (" + res.status + ").\n" + txt.slice(0,400));
+        showStatus("err", "No se pudo renderizar", `Código: ${res.status}\n\n${txt.slice(0, 800) || "Respuesta vacía del servidor."}`);
         progressSet(0, "Error");
         return;
       }
 
       if (ct.includes("application/json")) {
         const txt = await res.text().catch(()=> "");
-        alert("El backend devolvió JSON (no audio). Revisa /api/master.\n" + txt.slice(0,400));
+        showStatus("err", "Respuesta inesperada", `El backend devolvió JSON (no audio).\n\n${txt.slice(0, 800)}`);
         progressSet(0, "Error");
         return;
       }
 
       const blob = await res.blob();
       if (!blob || blob.size < 1024) {
-        alert("El master llegó vacío o muy pequeño. (blob: " + (blob ? blob.size : 0) + " bytes)");
+        showStatus("err", "Master vacío", `El archivo recibido es muy pequeño.\nTamaño: ${blob ? blob.size : 0} bytes`);
         progressSet(0, "Error");
         return;
       }
@@ -755,12 +863,14 @@
       }
 
       progressSet(100, "Listo ✅");
+      showStatus("ok", "Master listo", "Ya puedes escuchar el resultado (Master) y descargarlo.");
 
     } catch (err) {
       const msg = (err && (err.name === "AbortError" || err === "timeout"))
-        ? "Tiempo de espera agotado. El backend está demorando o colgado."
+        ? "Tiempo de espera agotado. El backend está demorando o está colgado."
         : ("Error de red/JS: " + (err?.message || String(err)));
-      alert(msg);
+
+      showStatus("err", "Error de conexión", msg);
       progressSet(0, "Error");
     } finally {
       btnStartJob.textContent = old;
