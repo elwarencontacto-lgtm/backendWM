@@ -39,6 +39,8 @@ header{
   justify-content:space-between;
   align-items:center;
   padding:16px 0;
+  gap:12px;
+  flex-wrap:wrap;
 }
 .brand{
   font-size:20px;
@@ -62,6 +64,11 @@ header{
   color:var(--text);
   cursor:pointer;
   font-weight:900;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
 }
 .btn.primary{
   border:none;
@@ -75,9 +82,7 @@ main{padding:30px 0 80px}
   background:rgba(255,255,255,.05);
   padding:20px;
 }
-.field{
-  margin-bottom:16px;
-}
+.field{margin-bottom:16px}
 label{
   display:block;
   font-size:12px;
@@ -93,10 +98,7 @@ input[type="text"], select{
   background:rgba(0,0,0,.3);
   color:var(--text);
 }
-input[type="range"]{
-  width:100%;
-  accent-color:var(--b);
-}
+input[type="range"]{width:100%;accent-color:var(--b)}
 .row{
   display:flex;
   justify-content:flex-end;
@@ -105,10 +107,18 @@ input[type="range"]{
   flex-wrap:wrap;
 }
 .hidden{display:none}
-.progressBar{
+
+.progressWrap{
   margin-top:14px;
-  height:8px;
-  border-radius:8px;
+  display:none;
+  gap:10px;
+  align-items:center;
+}
+.progressWrap.show{display:flex}
+.progressBar{
+  flex:1;
+  height:10px;
+  border-radius:10px;
   background:rgba(255,255,255,.08);
   overflow:hidden;
 }
@@ -116,178 +126,262 @@ input[type="range"]{
   height:100%;
   width:0%;
   background:linear-gradient(90deg,var(--a),var(--b));
-  transition:width .3s ease;
+  transition:width .25s ease;
 }
+.progressText{
+  min-width:92px;
+  text-align:right;
+  font-size:12px;
+  color:rgba(233,237,247,.8);
+  font-weight:900;
+}
+
 .abSection{
   margin-top:20px;
+  border-top:1px solid rgba(255,255,255,.10);
+  padding-top:16px;
 }
-audio{width:100%;margin-top:10px}
+.abBtns{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+  margin-bottom:10px;
+}
+audio{width:100%;margin-top:6px}
+.small{
+  font-size:12px;
+  color:rgba(233,237,247,.65);
+  margin-top:10px;
+  line-height:1.5;
+}
 </style>
 </head>
 
 <body>
 <header>
-<div class="wrap">
-<div class="nav">
-<a class="brand" href="index.html">
-War<span class="grad">Master</span>
-</a>
-<a class="btn" href="dashboard.html">Dashboard</a>
-</div>
-</div>
+  <div class="wrap">
+    <div class="nav">
+      <a class="brand" href="index.html">War<span class="grad">Master</span></a>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a class="btn" href="dashboard.html">Dashboard</a>
+        <a class="btn" href="index.html">Landing</a>
+      </div>
+    </div>
+  </div>
 </header>
 
 <main>
-<div class="wrap">
+  <div class="wrap">
+    <h1 style="margin:0 0 14px;">Masterizado</h1>
 
-<h1>Masterizado</h1>
+    <section class="card">
 
-<section class="card">
+      <div class="field">
+        <label>Archivo</label>
+        <input type="text" id="fileName" readonly placeholder="Selecciona un archivo"/>
+        <div class="row" style="justify-content:flex-start;">
+          <button class="btn" id="btnPick" type="button">Seleccionar</button>
+        </div>
+        <input type="file" id="fileInput" accept="audio/*" hidden/>
+        <div class="small">Tip: en beta2 pondremos límite 100MB + 10 min.</div>
+      </div>
 
-<div class="field">
-<label>Archivo</label>
-<input type="text" id="fileName" readonly placeholder="Selecciona un archivo"/>
-<button class="btn" id="btnPick">Seleccionar</button>
-<input type="file" id="fileInput" accept="audio/*" hidden/>
-</div>
+      <div class="field">
+        <label>Preset</label>
+        <select id="preset">
+          <option value="clean">Clean</option>
+          <option value="club">Club</option>
+          <option value="warm">Warm</option>
+          <option value="bright">Bright</option>
+          <option value="heavy">Heavy</option>
+        </select>
+      </div>
 
-<div class="field">
-<label>Preset</label>
-<select id="preset">
-<option value="clean">Clean</option>
-<option value="club">Club</option>
-<option value="warm">Warm</option>
-<option value="bright">Bright</option>
-<option value="heavy">Heavy</option>
-</select>
-</div>
+      <div class="field">
+        <label>Intensidad</label>
+        <input type="range" id="intensity" min="0" max="100" value="55"/>
+      </div>
 
-<div class="field">
-<label>Intensidad</label>
-<input type="range" id="intensity" min="0" max="100" value="55"/>
-</div>
+      <div class="progressWrap" id="progressWrap" aria-live="polite">
+        <div class="progressBar"><div class="progressFill" id="progressFill"></div></div>
+        <div class="progressText" id="progressText">0%</div>
+      </div>
 
-<div class="progressBar hidden" id="progressBar">
-<div class="progressFill" id="progressFill"></div>
-</div>
+      <div class="row">
+        <button class="btn primary" id="btnRender" disabled type="button">Renderizar</button>
+      </div>
 
-<div class="row">
-<button class="btn primary" id="btnRender" disabled>Renderizar</button>
-</div>
+      <div class="abSection hidden" id="abSection">
+        <h3 style="margin:0 0 10px;">Escucha A/B</h3>
 
-<div class="abSection hidden" id="abSection">
-<h3>Escucha A/B</h3>
-<button class="btn" id="btnOriginal">Original</button>
-<button class="btn" id="btnMaster" disabled>Master</button>
-<a class="btn" id="btnDownload" download="warmaster_master.wav">Descargar</a>
+        <div class="abBtns">
+          <button class="btn" id="btnOriginal" type="button">Original</button>
+          <button class="btn" id="btnMaster" type="button" disabled>Master</button>
+          <a class="btn primary" id="btnDownload" href="#" download="warmaster_master.wav">Descargar</a>
+        </div>
 
-<audio id="audioPlayer" controls></audio>
-</div>
+        <audio id="audioPlayer" controls></audio>
+      </div>
 
-</section>
-
-</div>
+    </section>
+  </div>
 </main>
 
 <script>
-const fileInput=document.getElementById("fileInput");
-const btnPick=document.getElementById("btnPick");
-const fileName=document.getElementById("fileName");
-const btnRender=document.getElementById("btnRender");
-const preset=document.getElementById("preset");
-const intensity=document.getElementById("intensity");
-const progressBar=document.getElementById("progressBar");
-const progressFill=document.getElementById("progressFill");
-const abSection=document.getElementById("abSection");
-const audioPlayer=document.getElementById("audioPlayer");
-const btnOriginal=document.getElementById("btnOriginal");
-const btnMaster=document.getElementById("btnMaster");
-const btnDownload=document.getElementById("btnDownload");
+  const fileInput = document.getElementById("fileInput");
+  const btnPick   = document.getElementById("btnPick");
+  const fileName  = document.getElementById("fileName");
+  const btnRender = document.getElementById("btnRender");
+  const preset    = document.getElementById("preset");
+  const intensity = document.getElementById("intensity");
 
-let currentFile=null;
-let originalURL=null;
-let masterURL=null;
+  const progressWrap = document.getElementById("progressWrap");
+  const progressFill = document.getElementById("progressFill");
+  const progressText = document.getElementById("progressText");
 
-btnPick.onclick=()=>fileInput.click();
+  const abSection   = document.getElementById("abSection");
+  const audioPlayer = document.getElementById("audioPlayer");
+  const btnOriginal = document.getElementById("btnOriginal");
+  const btnMaster   = document.getElementById("btnMaster");
+  const btnDownload = document.getElementById("btnDownload");
 
-fileInput.onchange=(e)=>{
-currentFile=e.target.files[0];
-if(!currentFile)return;
-fileName.value=currentFile.name;
-btnRender.disabled=false;
-originalURL=URL.createObjectURL(currentFile);
-audioPlayer.src=originalURL;
-abSection.classList.remove("hidden");
-btnMaster.disabled=true;
-};
+  let currentFile = null;
+  let originalURL = null;
+  let masterURL   = null;
 
-function getApiBase(){
-const qs=new URLSearchParams(location.search);
-const fromQS=qs.get("api");
-return fromQS?fromQS.replace(/\/+$/,""):location.origin.replace(/\/+$/,"");
-}
-const API_BASE=getApiBase();
+  function setProgress(pct, label){
+    const v = Math.max(0, Math.min(100, pct|0));
+    progressWrap.classList.add("show");
+    progressFill.style.width = v + "%";
+    progressText.textContent = (label ? label : (v + "%"));
+  }
+  function hideProgressSoon(){
+    setTimeout(()=> progressWrap.classList.remove("show"), 900);
+  }
 
-async function fetchWithTimeout(url,options,timeout){
-const controller=new AbortController();
-const t=setTimeout(()=>controller.abort(),timeout);
-try{return await fetch(url,{...options,signal:controller.signal});}
-finally{clearTimeout(t);}
-}
+  // ✅ API_BASE robusto para Render
+  function getApiBase(){
+    const qs = new URLSearchParams(location.search);
+    const fromQS = (qs.get("api") || "").trim();
+    if (fromQS) return fromQS.replace(/\/+$/, "");
+    // fallback SIEMPRE al backend de producción
+    return "https://backendwm.onrender.com";
+  }
+  const API_BASE = getApiBase();
 
-btnRender.onclick=async()=>{
-if(!currentFile)return;
+  async function fetchWithTimeout(url, options, timeoutMs){
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), timeoutMs);
+    try{
+      return await fetch(url, { ...options, signal: controller.signal, mode: "cors" });
+    } finally {
+      clearTimeout(t);
+    }
+  }
 
-progressBar.classList.remove("hidden");
-progressFill.style.width="20%";
+  btnPick.addEventListener("click", () => fileInput.click());
 
-btnRender.disabled=true;
-btnRender.textContent="Procesando...";
+  fileInput.addEventListener("change", (e) => {
+    currentFile = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+    if (!currentFile) return;
 
-try{
-const fd=new FormData();
-fd.append("file",currentFile);
-fd.append("preset",preset.value);
-fd.append("intensity",intensity.value);
+    fileName.value = currentFile.name;
+    btnRender.disabled = false;
 
-const res=await fetchWithTimeout(
-API_BASE+"/api/master",
-{method:"POST",body:fd},
-180000
-);
+    // limpiar urls anteriores
+    if (originalURL) { URL.revokeObjectURL(originalURL); originalURL = null; }
+    if (masterURL)   { URL.revokeObjectURL(masterURL);   masterURL   = null; }
 
-progressFill.style.width="70%";
+    originalURL = URL.createObjectURL(currentFile);
+    audioPlayer.src = originalURL;
 
-if(!res.ok){
-const txt=await res.text();
-alert("Error:\n"+txt);
-return;
-}
+    abSection.classList.remove("hidden");
+    btnMaster.disabled = true;
 
-const blob=await res.blob();
-if(blob.size<1024){
-alert("Archivo master inválido.");
-return;
-}
+    btnDownload.href = "#";
+    btnDownload.setAttribute("aria-disabled", "true");
+    setProgress(0, "Listo");
+    hideProgressSoon();
+  });
 
-if(masterURL)URL.revokeObjectURL(masterURL);
-masterURL=URL.createObjectURL(blob);
+  btnRender.addEventListener("click", async () => {
+    if (!currentFile) return;
 
-btnMaster.disabled=false;
-btnDownload.href=masterURL;
-progressFill.style.width="100%";
+    btnRender.disabled = true;
+    btnRender.textContent = "Procesando…";
+    setProgress(10, "Subiendo…");
 
-}catch(err){
-alert("Error de red/JS: "+err.message);
-}finally{
-btnRender.disabled=false;
-btnRender.textContent="Renderizar";
-setTimeout(()=>progressBar.classList.add("hidden"),1000);
-}
-};
+    try{
+      const fd = new FormData();
+      fd.append("file", currentFile);
+      fd.append("preset", preset.value);
+      fd.append("intensity", intensity.value);
 
-btnOriginal.onclick=()=>audioPlayer.src=originalURL;
-btnMaster.onclick=()=>audioPlayer.src=masterURL;
+      const url = API_BASE.replace(/\/+$/, "") + "/api/master";
+      console.log("[WarMaster] POST", url, "file:", currentFile.name, "bytes:", currentFile.size);
+
+      setProgress(25, "Enviando…");
+
+      const res = await fetchWithTimeout(url, { method: "POST", body: fd }, 180000);
+
+      setProgress(70, "Procesando…");
+
+      const ct = (res.headers.get("content-type") || "").toLowerCase();
+
+      if (!res.ok){
+        const txt = await res.text().catch(()=> "");
+        alert(`Render falló (${res.status}).\n${txt.slice(0,700)}`);
+        return;
+      }
+
+      if (ct.includes("application/json")){
+        const txt = await res.text().catch(()=> "");
+        alert("El backend devolvió JSON (no audio).\n" + txt.slice(0,700));
+        return;
+      }
+
+      const blob = await res.blob();
+      if (!blob || blob.size < 1024){
+        alert("El master llegó vacío o muy pequeño.");
+        return;
+      }
+
+      if (masterURL) { URL.revokeObjectURL(masterURL); masterURL = null; }
+      masterURL = URL.createObjectURL(blob);
+
+      btnMaster.disabled = false;
+      btnDownload.href = masterURL;
+      btnDownload.setAttribute("aria-disabled", "false");
+
+      setProgress(100, "Listo ✅");
+      console.log("[WarMaster] OK blob bytes:", blob.size);
+
+    } catch (err) {
+      console.error("[WarMaster] fetch error:", err);
+
+      // mensaje más útil
+      const msg =
+        (err && err.name === "AbortError")
+          ? "Tiempo de espera agotado (3 min). El servidor demoró demasiado."
+          : "Error de red/JS: Failed to fetch.\n\n✅ Revisa que estás abriendo este master desde el servidor (no como archivo local) y que /api/health responde.";
+
+      alert(msg);
+
+    } finally {
+      btnRender.disabled = !currentFile;
+      btnRender.textContent = "Renderizar";
+      hideProgressSoon();
+    }
+  });
+
+  btnOriginal.addEventListener("click", () => {
+    if (originalURL) audioPlayer.src = originalURL;
+  });
+
+  btnMaster.addEventListener("click", () => {
+    if (masterURL) audioPlayer.src = masterURL;
+  });
 </script>
 
 </body>
