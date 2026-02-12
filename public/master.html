@@ -82,6 +82,7 @@
       align-items:center;
       justify-content:center;
       user-select:none;
+      gap:10px;
     }
     .btn:hover{ background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.22); }
     .btn.primary{
@@ -183,9 +184,41 @@
       margin-top: 10px;
     }
 
-    .hidden{ display:none; }
-    .disabled{ opacity:.6; pointer-events:none; }
+    /* Progreso */
+    .progressWrap{
+      margin-top:12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.16);
+      padding: 12px;
+      display:none;
+      gap: 10px;
+      align-items:center;
+    }
+    .progressWrap.show{ display:flex; }
+    .bar{
+      flex: 1;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      overflow:hidden;
+    }
+    .fill{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(138,92,255,.95), rgba(0,215,255,.95));
+      transition: width .25s ease;
+    }
+    .ptext{
+      min-width: 120px;
+      text-align:right;
+      font-size: 12px;
+      color: rgba(233,237,247,.8);
+      font-weight: 900;
+    }
 
+    /* A/B */
+    .hidden{ display:none; }
     .abCard{
       margin-top:14px;
       border-radius: 18px;
@@ -247,35 +280,7 @@
     }
     #abSeek{ width:100%; accent-color: var(--b); }
 
-    .statusWrap{
-      margin-top: 12px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.18);
-      padding: 10px 12px;
-      font-size: 12px;
-      color: rgba(233,237,247,.72);
-      display:flex;
-      justify-content:space-between;
-      gap: 10px;
-      align-items:center;
-      flex-wrap:wrap;
-    }
-    .bar{
-      flex: 1;
-      min-width: 180px;
-      height: 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.08);
-      overflow:hidden;
-    }
-    .bar > i{
-      display:block;
-      height:100%;
-      width: 0%;
-      background: linear-gradient(90deg, rgba(138,92,255,.95), rgba(0,215,255,.95));
-      transition: width .25s ease;
-    }
+    .disabled{ opacity:.6; pointer-events:none; }
   </style>
 </head>
 
@@ -304,7 +309,7 @@
       </div>
     </div>
 
-    <section class="card" id="newMasterCard">
+    <section class="card">
       <div class="card-h">
         <h2>Nuevo master</h2>
         <span style="font-size:12px;color:rgba(233,237,247,.7);font-weight:900;">beta1.1</span>
@@ -340,14 +345,14 @@
           </div>
         </div>
 
-        <!-- Barra estado -->
-        <div class="statusWrap" id="statusWrap">
-          <span id="statusText">Listo para renderizar</span>
-          <div class="bar" aria-label="Progreso"><i id="statusBar"></i></div>
-        </div>
-
         <div class="row">
           <button class="btn primary" type="button" id="btnStartJob" disabled>Renderizar</button>
+        </div>
+
+        <!-- Progreso UI (simulado) -->
+        <div class="progressWrap" id="progressWrap" aria-live="polite">
+          <div class="bar"><div class="fill" id="progressFill"></div></div>
+          <div class="ptext" id="progressText">Listo</div>
         </div>
 
         <div id="abWrapper" class="hidden">
@@ -378,6 +383,7 @@
             <audio id="audioMaster" preload="metadata"></audio>
           </div>
         </div>
+
       </div>
     </section>
 
@@ -386,17 +392,26 @@
 </main>
 
 <script>
+  // ===== API_BASE: querystring ?api=... o mismo dominio =====
+  function getApiBase(){
+    const qs = new URLSearchParams(location.search);
+    const fromQs = (qs.get("api") || "").trim();
+    if (fromQs) return fromQs.replace(/\/+$/,"");
+    return location.origin; // mismo dominio por defecto
+  }
+  const API_BASE = getApiBase();
+
   // ===== DOM =====
   const fileInput   = document.getElementById("fileInput");
   const fileField   = document.getElementById("file");
   const btnPick     = document.getElementById("btnPick");
   const btnStartJob = document.getElementById("btnStartJob");
-
   const preset      = document.getElementById("preset");
   const intensity   = document.getElementById("intensity2");
 
-  const statusText  = document.getElementById("statusText");
-  const statusBar   = document.getElementById("statusBar");
+  const progressWrap = document.getElementById("progressWrap");
+  const progressFill = document.getElementById("progressFill");
+  const progressText = document.getElementById("progressText");
 
   const abWrapper   = document.getElementById("abWrapper");
   const btnABOriginal = document.getElementById("btnABOriginal");
@@ -417,13 +432,8 @@
   let activeAudio = audioPreview;
 
   let originalObjectUrl = null;
-  let previewObjectUrl  = null;
-  let masterObjectUrl   = null;
-
-  function setStatus(pct, text){
-    if (statusBar) statusBar.style.width = `${Math.max(0, Math.min(100, pct|0))}%`;
-    if (statusText) statusText.textContent = text || "";
-  }
+  let previewObjectUrl = null;
+  let masterObjectUrl = null;
 
   // ===== Preview engine =====
   let audioCtx = null;
@@ -434,7 +444,6 @@
 
   function initPreviewEngine(){
     if (!audioPreview) return;
-
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (!sourceNode) sourceNode = audioCtx.createMediaElementSource(audioPreview);
 
@@ -536,7 +545,9 @@
   });
 
   btnABPlay?.addEventListener("click", async ()=>{
-    try{ if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume(); } catch(e){}
+    try{
+      if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume();
+    } catch(e){}
     if (!activeAudio) return;
 
     if (activeAudio.paused){
@@ -569,6 +580,10 @@
   function pick(){ fileInput?.click(); }
   btnPick?.addEventListener("click", pick);
 
+  function revokeUrlSafe(u){
+    try{ if(u) URL.revokeObjectURL(u); }catch(e){}
+  }
+
   fileInput?.addEventListener("change", (e) => {
     currentFile = e.target.files?.[0] || null;
 
@@ -579,9 +594,13 @@
 
     abWrapper?.classList.remove("hidden");
 
-    // revoke previous
-    if (originalObjectUrl) URL.revokeObjectURL(originalObjectUrl);
-    if (previewObjectUrl)  URL.revokeObjectURL(previewObjectUrl);
+    // revoke prev urls
+    revokeUrlSafe(originalObjectUrl);
+    revokeUrlSafe(previewObjectUrl);
+    revokeUrlSafe(masterObjectUrl);
+    originalObjectUrl = previewObjectUrl = masterObjectUrl = null;
+
+    // original/preview
     originalObjectUrl = URL.createObjectURL(currentFile);
     previewObjectUrl  = URL.createObjectURL(currentFile);
 
@@ -596,53 +615,57 @@
     applyIntensity();
 
     // reset master
-    if (masterObjectUrl) { URL.revokeObjectURL(masterObjectUrl); masterObjectUrl = null; }
     audioMaster.removeAttribute("src");
     audioMaster.load();
     if (btnABMaster) btnABMaster.disabled = true;
 
+    // reset download
     if (btnDownloadMaster) {
       btnDownloadMaster.href = "#";
       btnDownloadMaster.classList.add("disabled");
       btnDownloadMaster.setAttribute("aria-disabled","true");
     }
 
-    setStatus(0, "Listo para renderizar");
+    // reset progress
+    progressWrap?.classList.remove("show");
+    if (progressFill) progressFill.style.width = "0%";
+    if (progressText) progressText.textContent = "Listo";
+
     setActive(audioPreview, "preview");
   });
 
   intensity?.addEventListener("input", applyIntensity);
   preset?.addEventListener("change", applyPreset);
 
-  // ===== Render real =====
+  // ===== Fetch with timeout =====
   async function fetchWithTimeout(url, options, timeoutMs){
     const controller = new AbortController();
     const t = setTimeout(()=> controller.abort("timeout"), timeoutMs);
     try{
-      return await fetch(url, { ...options, signal: controller.signal });
+      const res = await fetch(url, { ...options, signal: controller.signal });
+      return res;
     } finally {
       clearTimeout(t);
     }
   }
 
-  // API_BASE: ?api=... o mismo dominio
-  function getApiBase(){
-    const qs = new URLSearchParams(location.search);
-    const api = (qs.get("api") || "").trim();
-    if (api) return api.replace(/\/+$/,"");
-    return location.origin.replace(/\/+$/,"");
+  function progressSet(pct, text){
+    if (!progressWrap) return;
+    progressWrap.classList.add("show");
+    if (progressFill) progressFill.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+    if (progressText) progressText.textContent = text || "";
   }
-  const API_BASE = getApiBase();
 
+  // ===== Render real (POST correcto) =====
   btnStartJob?.addEventListener("click", async () => {
     if (!currentFile) return;
 
     const old = btnStartJob.textContent;
     btnStartJob.textContent = "Procesando…";
     btnStartJob.disabled = true;
-    setStatus(12, "Subiendo…");
 
     try{
+      // gesto -> resume
       try{ if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume(); } catch(e){}
 
       const fd = new FormData();
@@ -650,36 +673,38 @@
       fd.append("preset", preset?.value || "clean");
       fd.append("intensity", String(intensity?.value || 55));
 
-      setStatus(28, "Enviando a servidor…");
+      progressSet(10, "Subiendo…");
 
-      const res = await fetchWithTimeout(`${API_BASE}/api/master`, { method: "POST", body: fd }, 180000);
+      const url = `${API_BASE}/api/master`;
+      const res = await fetchWithTimeout(url, { method: "POST", body: fd }, 180000);
 
-      setStatus(70, "Renderizando…");
+      progressSet(55, "Procesando…");
 
       const ct = (res.headers.get("content-type") || "").toLowerCase();
 
       if (!res.ok) {
         const txt = await res.text().catch(()=> "");
         alert("Render falló (" + res.status + ").\n" + txt.slice(0,400));
-        setStatus(0, "Error de render");
+        progressSet(0, "Error");
         return;
       }
 
       if (ct.includes("application/json")) {
         const txt = await res.text().catch(()=> "");
-        alert("El backend devolvió JSON (no audio).\n" + txt.slice(0,400));
-        setStatus(0, "Error (JSON)");
+        alert("El backend devolvió JSON (no audio). Revisa /api/master.\n" + txt.slice(0,400));
+        progressSet(0, "Error");
         return;
       }
 
       const blob = await res.blob();
       if (!blob || blob.size < 1024) {
-        alert("El master llegó vacío o muy pequeño.");
-        setStatus(0, "Master vacío");
+        alert("El master llegó vacío o muy pequeño. (blob: " + (blob ? blob.size : 0) + " bytes)");
+        progressSet(0, "Error");
         return;
       }
 
-      if (masterObjectUrl) URL.revokeObjectURL(masterObjectUrl);
+      // set master url
+      revokeUrlSafe(masterObjectUrl);
       masterObjectUrl = URL.createObjectURL(blob);
 
       audioMaster.src = masterObjectUrl;
@@ -694,29 +719,19 @@
         btnDownloadMaster.setAttribute("aria-disabled","false");
       }
 
-      setStatus(100, "Listo ✅");
+      progressSet(100, "Listo ✅");
 
     } catch (err) {
       const msg = (err && (err.name === "AbortError" || err === "timeout"))
-        ? "Tiempo de espera agotado (3 min)."
+        ? "Tiempo de espera agotado. El backend está demorando o colgado."
         : ("Error de red/JS: " + (err?.message || String(err)));
       alert(msg);
-      setStatus(0, "Error de red");
+      progressSet(0, "Error");
     } finally {
       btnStartJob.textContent = old;
       btnStartJob.disabled = !currentFile;
     }
   });
-
-  // cleanup on page unload
-  window.addEventListener("beforeunload", () => {
-    try{
-      if (originalObjectUrl) URL.revokeObjectURL(originalObjectUrl);
-      if (previewObjectUrl)  URL.revokeObjectURL(previewObjectUrl);
-      if (masterObjectUrl)   URL.revokeObjectURL(masterObjectUrl);
-    }catch(e){}
-  });
 </script>
-
 </body>
 </html>
