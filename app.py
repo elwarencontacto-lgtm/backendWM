@@ -1,21 +1,21 @@
 import uuid
+import shutil
 import subprocess
 from pathlib import Path
 
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import FileResponse, RedirectResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from starlette.background import BackgroundTask
-from starlette.middleware.base import BaseHTTPMiddleware
 
 
 # =========================
-# Config
+# CONFIG
 # =========================
-MAX_UPLOAD_MB = 100
-MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024
 
+MAX_FILE_SIZE_MB = 100
+MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
 MAX_DURATION_SECONDS = 6 * 60  # 6 minutos
 
 BASE_DIR = Path(__file__).parent
@@ -25,11 +25,12 @@ TMP_DIR.mkdir(exist_ok=True)
 PUBLIC_DIR = BASE_DIR / "public"
 PUBLIC_DIR.mkdir(exist_ok=True)
 
+app = FastAPI()
+
 
 # =========================
-# App
+# CORS
 # =========================
-app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
@@ -41,8 +42,9 @@ app.add_middleware(
 
 
 # =========================
-# Helpers
+# UTILS
 # =========================
+
 def cleanup_files(*paths: Path) -> None:
     for p in paths:
         try:
@@ -52,44 +54,56 @@ def cleanup_files(*paths: Path) -> None:
             pass
 
 
-def safe_filename(name: str) -> str:
-    clean = "".join(c for c in (name or "") if c.isalnum() or c in "._-").strip("._-")
-    return clean or "audio.wav"
-
-
 def run_ffmpeg(cmd: list[str]) -> None:
     proc = subprocess.run(
         cmd,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        text=True,
+        text=True
     )
     if proc.returncode != 0:
-        raise HTTPException(status_code=500, detail=f"FFmpeg error:\n{proc.stderr[-8000:]}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"FFmpeg error:\n{proc.stderr[-8000:]}"
+        )
 
 
-def run_ffprobe_duration_seconds(path: Path) -> float:
+def safe_filename(name: str) -> str:
+    clean = "".join(c for c in (name or "") if c.isalnum() or c in "._-").strip("._-")
+    return clean or "audio.wav"
+
+
+def get_audio_duration_seconds(path: Path) -> float:
     """
-    Devuelve duración en segundos (float). Lanza HTTPException si no se puede leer.
+    Usa ffprobe para obtener duración real del audio
     """
     cmd = [
         "ffprobe",
         "-v", "error",
         "-show_entries", "format=duration",
         "-of", "default=noprint_wrappers=1:nokey=1",
-        str(path),
+        str(path)
     ]
-    proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    proc = subprocess.run(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True
+    )
+
     if proc.returncode != 0:
         raise HTTPException(
             status_code=400,
-            detail=f"No se pudo leer la duración del audio. (ffprobe)\n{proc.stderr[-2000:]}",
+            detail="No se pudo analizar la duración del archivo."
         )
-    out = (proc.stdout or "").strip()
+
     try:
-        return float(out)
-    except Exception:
-        raise HTTPException(status_code=400, detail="No se pudo interpretar la duración del audio.")
+        return float(proc.stdout.strip())
+    except:
+        raise HTTPException(
+            status_code=400,
+            detail="Duración inválida."
+        )
 
 
 def preset_chain(preset: str, intensity: int) -> str:
@@ -119,43 +133,10 @@ def preset_chain(preset: str, intensity: int) -> str:
     )
 
 
-def too_large_413(detail: str = "") -> JSONResponse:
-    msg = detail or f"Archivo demasiado grande. Máximo permitido: {MAX_UPLOAD_MB} MB."
-    return JSONResponse({"detail": msg}, status_code=413)
-
-
-def too_long_413(seconds: float) -> JSONResponse:
-    mm = int(seconds // 60)
-    ss = int(seconds % 60)
-    return JSONResponse(
-        {"detail": f"Audio demasiado largo ({mm}:{ss:02d}). Máximo permitido: 6:00 minutos."},
-        status_code=413,
-    )
-
-
 # =========================
-# A) Middleware: corta por Content-Length (si viene)
+# ENDPOINTS
 # =========================
-class MaxBodySizeMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        if request.url.path == "/api/master" and request.method.upper() == "POST":
-            cl = request.headers.get("content-length")
-            if cl:
-                try:
-                    if int(cl) > MAX_UPLOAD_BYTES:
-                        return too_large_413(
-                            f"Archivo demasiado grande (Content-Length={int(cl)}). Máximo: {MAX_UPLOAD_MB} MB."
-                        )
-                except ValueError:
-                    pass
-        return await call_next(request)
 
-app.add_middleware(MaxBodySizeMiddleware)
-
-
-# =========================
-# Routes
-# =========================
 @app.get("/api/health")
 def health():
     return {"ok": True}
@@ -165,7 +146,7 @@ def health():
 def master_get_hint():
     return JSONResponse(
         {"detail": "Method Not Allowed. Usa POST /api/master con form-data: file, preset, intensity."},
-        status_code=405,
+        status_code=405
     )
 
 
@@ -176,7 +157,7 @@ async def master(
     intensity: int = Form(55),
 ):
     if not file or not file.filename:
-        raise HTTPException(status_code=400, detail="Archivo inválido")
+        raise HTTPException(status_code=400, detail="Archivo inválido.")
 
     job_id = uuid.uuid4().hex[:8]
     safe_name = safe_filename(file.filename)
@@ -185,35 +166,42 @@ async def master(
     out_path = TMP_DIR / f"master_{job_id}.wav"
 
     # =========================
-    # B) Guardado con conteo real de bytes (corta aunque no exista Content-Length)
+    # GUARDAR ARCHIVO
     # =========================
-    written = 0
     try:
-        with in_path.open("wb") as out_f:
-            while True:
-                chunk = await file.read(1024 * 1024)  # 1MB
-                if not chunk:
-                    break
-                written += len(chunk)
-                if written > MAX_UPLOAD_BYTES:
-                    cleanup_files(in_path, out_path)
-                    return too_large_413(f"Archivo supera {MAX_UPLOAD_MB} MB.")
-                out_f.write(chunk)
+        with in_path.open("wb") as f:
+            shutil.copyfileobj(file.file, f)
     finally:
         try:
-            await file.close()
+            file.file.close()
         except Exception:
             pass
 
     # =========================
-    # 2) Límite de duración: 6 minutos (sin tocar HTML)
+    # VALIDAR TAMAÑO REAL
     # =========================
-    dur = run_ffprobe_duration_seconds(in_path)
-    if dur > MAX_DURATION_SECONDS:
-        cleanup_files(in_path, out_path)
-        return too_long_413(dur)
+    size_bytes = in_path.stat().st_size
+    if size_bytes > MAX_FILE_SIZE_BYTES:
+        cleanup_files(in_path)
+        raise HTTPException(
+            status_code=400,
+            detail=f"El archivo supera el límite de {MAX_FILE_SIZE_MB}MB."
+        )
 
-    # Render
+    # =========================
+    # VALIDAR DURACIÓN REAL
+    # =========================
+    duration = get_audio_duration_seconds(in_path)
+    if duration > MAX_DURATION_SECONDS:
+        cleanup_files(in_path)
+        raise HTTPException(
+            status_code=400,
+            detail="El audio supera el límite de 6 minutos."
+        )
+
+    # =========================
+    # PROCESAR MASTER
+    # =========================
     filters = preset_chain(preset, intensity)
 
     cmd = [
@@ -225,14 +213,17 @@ async def master(
         "-ar", "44100",
         "-ac", "2",
         "-sample_fmt", "s16",
-        str(out_path),
+        str(out_path)
     ]
 
     run_ffmpeg(cmd)
 
     if not out_path.exists() or out_path.stat().st_size < 1024:
         cleanup_files(in_path, out_path)
-        raise HTTPException(status_code=500, detail="Master no generado o vacío")
+        raise HTTPException(
+            status_code=500,
+            detail="Master no generado o vacío."
+        )
 
     return FileResponse(
         path=str(out_path),
@@ -246,5 +237,9 @@ async def master(
 def root():
     return RedirectResponse(url="/index.html")
 
+
+# =========================
+# STATIC
+# =========================
 
 app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="public")
