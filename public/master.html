@@ -44,7 +44,6 @@
       align-items:center;
       gap:14px;
       padding:16px 0;
-      flex-wrap:wrap;
     }
     .brand{
       font-size:22px;
@@ -84,15 +83,13 @@
       justify-content:center;
       user-select:none;
       gap:10px;
-      transition: transform .12s ease, background .12s ease, border-color .12s ease;
     }
-    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.22); }
+    .btn:hover{ background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.22); }
     .btn.primary{
       border:none;
       background: linear-gradient(90deg, rgba(138,92,255,.95), rgba(0,215,255,.95));
       color:#061018;
     }
-    .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
     .ghost{ background: transparent; }
 
     main{ padding: 26px 0 70px; }
@@ -213,131 +210,11 @@
       transition: width .25s ease;
     }
     .ptext{
-      min-width: 140px;
+      min-width: 120px;
       text-align:right;
       font-size: 12px;
       color: rgba(233,237,247,.8);
       font-weight: 900;
-    }
-
-    /* Aviso límites (bonito) */
-    .notice{
-      margin-top:12px;
-      border-radius: 16px;
-      border: 1px solid rgba(0,215,255,.22);
-      background: rgba(0,215,255,.06);
-      padding: 12px;
-      display:flex;
-      gap:10px;
-      align-items:flex-start;
-    }
-    .noticeIcon{
-      width: 22px;
-      height: 22px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, rgba(138,92,255,.95), rgba(0,215,255,.75));
-      border: 1px solid rgba(255,255,255,.14);
-      color:#061018;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight: 900;
-      flex: 0 0 auto;
-      margin-top: 1px;
-    }
-    .noticeTitle{
-      font-weight: 900;
-      font-size: 12px;
-      letter-spacing:.2px;
-      color: rgba(233,237,247,.92);
-    }
-    .noticeText{
-      margin-top:4px;
-      color: rgba(233,237,247,.75);
-      font-size: 12px;
-      line-height: 1.5;
-    }
-    .noticeMeta{
-      margin-top:8px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-    }
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      font-weight: 900;
-      font-size: 12px;
-      color: rgba(233,237,247,.9);
-      max-width: 100%;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-    }
-    .dot{
-      width:8px; height:8px;
-      border-radius:999px;
-      background: rgba(233,237,247,.45);
-    }
-    .dot.ok{ background: rgba(0,255,154,.75); box-shadow: 0 0 0 6px rgba(0,255,154,.12); }
-    .dot.warn{ background: rgba(255,205,110,.9); box-shadow: 0 0 0 6px rgba(255,205,110,.12); }
-    .dot.bad{ background: rgba(255,120,120,.9); box-shadow: 0 0 0 6px rgba(255,120,120,.12); }
-
-    /* Caja de estado / errores (bonita, sin alert) */
-    .statusBox{
-      margin-top:12px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.16);
-      padding: 12px;
-      display:none;
-      overflow:hidden;
-    }
-    .statusBox.show{ display:block; }
-    .statusHead{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      justify-content:space-between;
-      flex-wrap:wrap;
-    }
-    .statusLeft{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-      min-width: 220px;
-    }
-    .statusTitle{
-      font-weight: 900;
-      font-size: 12px;
-      letter-spacing:.2px;
-      color: rgba(233,237,247,.92);
-    }
-    .statusMsg{
-      margin-top:8px;
-      color: rgba(233,237,247,.78);
-      font-size: 12px;
-      line-height: 1.5;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-    .statusBox.ok{
-      border-color: rgba(0,255,154,.25);
-      background: rgba(0,255,154,.06);
-    }
-    .statusBox.warn{
-      border-color: rgba(255,205,110,.28);
-      background: rgba(255,205,110,.07);
-    }
-    .statusBox.bad{
-      border-color: rgba(255,120,120,.28);
-      background: rgba(255,120,120,.07);
     }
 
     /* A/B */
@@ -478,34 +355,19 @@
           <div class="ptext" id="progressText">Listo</div>
         </div>
 
-        <!-- Aviso límites (A) -->
-        <div class="notice" id="limitsNotice">
-          <div class="noticeIcon">!</div>
-          <div style="flex:1;">
-            <div class="noticeTitle">Límites beta</div>
-            <div class="noticeText">
-              Para que el render sea rápido y estable: <b>máx. 100MB</b> y <b>máx. 6 minutos</b>.
-              (Puedes igual intentar, pero si el servidor está cargado puede fallar.)
-            </div>
-            <div class="noticeMeta">
-              <span class="pill" id="pillSize"><span class="dot"></span> Tamaño: —</span>
-              <span class="pill" id="pillDur"><span class="dot"></span> Duración: —</span>
-              <span class="pill" id="pillTip"><span class="dot ok"></span> Tip: WAV/MP3/AAC/M4A</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Estado/errores bonitos (A) -->
-        <div class="statusBox" id="statusBox" aria-live="polite">
-          <div class="statusHead">
-            <div class="statusLeft">
-              <span class="pill" id="statusPill"><span class="dot"></span> Estado</span>
-              <span class="statusTitle" id="statusTitle">—</span>
-            </div>
-            <button class="btn" type="button" id="btnHideStatus">Ocultar</button>
-          </div>
-          <div class="statusMsg" id="statusMsg"></div>
-        </div>
+        <!-- ✅ Caja de estado / error (bonita, sin alert) -->
+        <div id="statusBox" style="
+          display:none;
+          margin-top:12px;
+          padding:12px;
+          border-radius:16px;
+          border:1px solid rgba(255,120,120,.35);
+          background:rgba(255,120,120,.08);
+          font-size:13px;
+          line-height:1.5;
+          color:rgba(233,237,247,.9);
+          font-weight:600;
+        "></div>
 
         <div id="abWrapper" class="hidden">
           <div class="abCard">
@@ -564,16 +426,7 @@
   const progressWrap = document.getElementById("progressWrap");
   const progressFill = document.getElementById("progressFill");
   const progressText = document.getElementById("progressText");
-
-  const statusBox = document.getElementById("statusBox");
-  const statusPill = document.getElementById("statusPill");
-  const statusTitle = document.getElementById("statusTitle");
-  const statusMsg = document.getElementById("statusMsg");
-  const btnHideStatus = document.getElementById("btnHideStatus");
-
-  const pillSize = document.getElementById("pillSize");
-  const pillDur  = document.getElementById("pillDur");
-  const pillTip  = document.getElementById("pillTip");
+  const statusBox    = document.getElementById("statusBox");
 
   const abWrapper   = document.getElementById("abWrapper");
   const btnABOriginal = document.getElementById("btnABOriginal");
@@ -603,84 +456,6 @@
   let gainNode = null;
   let bass = null;
   let treble = null;
-
-  const LIMIT_MB = 100;
-  const LIMIT_SEC = 6 * 60;
-
-  function setStatus(kind, title, msg){
-    if (!statusBox) return;
-    statusBox.classList.add("show");
-    statusBox.classList.remove("ok","warn","bad");
-    statusBox.classList.add(kind || "warn");
-
-    if (statusTitle) statusTitle.textContent = title || "Estado";
-    if (statusMsg) statusMsg.textContent = msg || "";
-
-    // pill
-    if (statusPill){
-      const dot = statusPill.querySelector(".dot");
-      if (dot){
-        dot.classList.remove("ok","warn","bad");
-        dot.classList.add(kind === "ok" ? "ok" : (kind === "bad" ? "bad" : "warn"));
-      }
-      statusPill.childNodes.forEach(()=>{});
-      statusPill.lastChild && (statusPill.lastChild.textContent = "");
-      statusPill.innerHTML = `<span class="dot ${kind === "ok" ? "ok" : (kind === "bad" ? "bad" : "warn")}"></span> ${kind === "ok" ? "OK" : (kind === "bad" ? "Error" : "Aviso")}`;
-    }
-  }
-
-  btnHideStatus?.addEventListener("click", ()=>{
-    statusBox?.classList.remove("show");
-  });
-
-  function progressSet(pct, text){
-    if (!progressWrap) return;
-    progressWrap.classList.add("show");
-    if (progressFill) progressFill.style.width = `${Math.max(0, Math.min(100, pct))}%`;
-    if (progressText) progressText.textContent = text || "";
-  }
-
-  function revokeUrlSafe(u){
-    try{ if(u) URL.revokeObjectURL(u); }catch(e){}
-  }
-
-  function fmtTime(s){
-    s = Math.max(0, Math.floor(s || 0));
-    const m = Math.floor(s/60);
-    const r = s%60;
-    return `${m}:${String(r).padStart(2,'0')}`;
-  }
-
-  function updateLimitPills(sizeBytes, durationSec){
-    // size
-    if (pillSize){
-      const mb = sizeBytes ? (sizeBytes / (1024*1024)) : 0;
-      const over = mb > LIMIT_MB;
-      pillSize.innerHTML = `<span class="dot ${over ? "bad" : "ok"}"></span> Tamaño: ${sizeBytes ? mb.toFixed(1) : "—"} MB`;
-    }
-    // duration
-    if (pillDur){
-      const over = durationSec && durationSec > LIMIT_SEC;
-      pillDur.innerHTML = `<span class="dot ${over ? "bad" : "ok"}"></span> Duración: ${durationSec ? fmtTime(durationSec) : "—"}`;
-    }
-
-    const overSize = sizeBytes && (sizeBytes / (1024*1024)) > LIMIT_MB;
-    const overDur  = durationSec && durationSec > LIMIT_SEC;
-
-    if (overSize || overDur){
-      setStatus(
-        "warn",
-        "Tu archivo supera los límites beta",
-        `Límites recomendados:\n• Máx. ${LIMIT_MB}MB\n• Máx. 6 minutos\n\nPuedes intentar, pero el render puede fallar si el servidor está cargado.`
-      );
-    } else {
-      // no molestar si está todo ok
-      if (statusBox?.classList.contains("show")){
-        // si el estado era warning por límites y ahora no, lo cerramos suavemente
-        // (no cerramos otros errores)
-      }
-    }
-  }
 
   function initPreviewEngine(){
     if (!audioPreview) return;
@@ -722,6 +497,13 @@
   }
 
   // ===== A/B UI =====
+  function fmtTime(s){
+    s = Math.max(0, Math.floor(s || 0));
+    const m = Math.floor(s/60);
+    const r = s%60;
+    return `${m}:${String(r).padStart(2,'0')}`;
+  }
+
   function syncUI(){
     if (!activeAudio) return;
     const dur = activeAudio.duration || 0;
@@ -813,21 +595,17 @@
   function pick(){ fileInput?.click(); }
   btnPick?.addEventListener("click", pick);
 
+  function revokeUrlSafe(u){
+    try{ if(u) URL.revokeObjectURL(u); }catch(e){}
+  }
+
   fileInput?.addEventListener("change", (e) => {
     currentFile = e.target.files?.[0] || null;
 
     if (fileField) fileField.value = currentFile ? currentFile.name : "";
     if (btnStartJob) btnStartJob.disabled = !currentFile;
 
-    // reset UI
-    progressWrap?.classList.remove("show");
-    if (progressFill) progressFill.style.width = "0%";
-    if (progressText) progressText.textContent = "Listo";
-
-    if (!currentFile){
-      updateLimitPills(0, 0);
-      return;
-    }
+    if (!currentFile) return;
 
     abWrapper?.classList.remove("hidden");
 
@@ -863,15 +641,16 @@
       btnDownloadMaster.setAttribute("aria-disabled","true");
     }
 
-    // límites: tamaño inmediato + duración cuando cargue metadata
-    updateLimitPills(currentFile.size, 0);
+    // reset progress
+    progressWrap?.classList.remove("show");
+    if (progressFill) progressFill.style.width = "0%";
+    if (progressText) progressText.textContent = "Listo";
 
-    const onMeta = () => {
-      const d = Number(audioPreview.duration || 0);
-      updateLimitPills(currentFile.size, d);
-      audioPreview.removeEventListener("loadedmetadata", onMeta);
-    };
-    audioPreview.addEventListener("loadedmetadata", onMeta);
+    // reset status box
+    if (statusBox) {
+      statusBox.style.display = "none";
+      statusBox.textContent = "";
+    }
 
     setActive(audioPreview, "preview");
   });
@@ -891,6 +670,23 @@
     }
   }
 
+  function progressSet(pct, text){
+    if (!progressWrap) return;
+    progressWrap.classList.add("show");
+    if (progressFill) progressFill.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+    if (progressText) progressText.textContent = text || "";
+  }
+
+  // ✅ NUEVO: estado bonito dentro de la UI (sin alert)
+  function showStatus(message){
+    if (!statusBox) return;
+    statusBox.style.display = "block";
+    statusBox.innerText = message;
+    setTimeout(()=>{
+      statusBox.style.display = "none";
+    }, 6000);
+  }
+
   // ===== Render real (POST correcto) =====
   btnStartJob?.addEventListener("click", async () => {
     if (!currentFile) return;
@@ -898,9 +694,6 @@
     const old = btnStartJob.textContent;
     btnStartJob.textContent = "Procesando…";
     btnStartJob.disabled = true;
-
-    // aviso nice
-    setStatus("warn", "Procesando", "Estamos subiendo y renderizando tu audio…");
 
     try{
       // gesto -> resume
@@ -911,7 +704,7 @@
       fd.append("preset", preset?.value || "clean");
       fd.append("intensity", String(intensity?.value || 55));
 
-      progressSet(12, "Subiendo…");
+      progressSet(10, "Subiendo…");
 
       const url = `${API_BASE}/api/master`;
       const res = await fetchWithTimeout(url, { method: "POST", body: fd }, 180000);
@@ -922,37 +715,22 @@
 
       if (!res.ok) {
         const txt = await res.text().catch(()=> "");
+        showStatus("❌ " + (txt ? txt.slice(0,400) : ("Render falló (" + res.status + ")")));
         progressSet(0, "Error");
-        setStatus(
-          "bad",
-          `Render falló (${res.status})`,
-          (txt && txt.trim())
-            ? txt.slice(0, 2000)
-            : "El servidor respondió con error. Intenta de nuevo o prueba con otro archivo."
-        );
         return;
       }
 
       if (ct.includes("application/json")) {
         const txt = await res.text().catch(()=> "");
+        showStatus("❌ El backend devolvió JSON (no audio). " + txt.slice(0,240));
         progressSet(0, "Error");
-        setStatus(
-          "bad",
-          "El backend devolvió JSON (no audio)",
-          (txt && txt.trim())
-            ? txt.slice(0, 2000)
-            : "Revisa tu endpoint /api/master. Debe devolver audio/wav (FileResponse)."
-        );
         return;
-      } 
+      }
+
       const blob = await res.blob();
       if (!blob || blob.size < 1024) {
+        showStatus("❌ El master llegó vacío o muy pequeño.");
         progressSet(0, "Error");
-        setStatus(
-          "bad",
-          "El master llegó vacío",
-          `El archivo generado es muy pequeño.\nTamaño: ${blob ? blob.size : 0} bytes\n\nPrueba con otro archivo o revisa FFmpeg en el backend.`
-        );
         return;
       }
 
@@ -973,20 +751,13 @@
       }
 
       progressSet(100, "Listo ✅");
-      setStatus("ok", "Render listo", "Ya puedes escuchar A/B y descargar tu master.");
 
     } catch (err) {
-      const isTimeout = (err && (err.name === "AbortError" || err === "timeout"));
-      const msg = isTimeout
-        ? "Tiempo de espera agotado (180s). El servidor puede estar lento o colgado."
-        : ("Error de red/JS: " + (err?.message || String(err)));
-
+      const msg = (err && (err.name === "AbortError" || err === "timeout"))
+        ? "⏳ El servidor tardó demasiado en responder."
+        : "❌ Error de red o procesamiento.";
+      showStatus(msg);
       progressSet(0, "Error");
-      setStatus(
-        "bad",
-        "No se pudo conectar (Failed to fetch)",
-        `${msg}\n\nTips:\n• Revisa que API_BASE sea correcto.\n• Si tu frontend está en otro dominio, usa ?api=https://backendwm.onrender.com\n• Verifica que /api/health responda OK.\n`
-      );
     } finally {
       btnStartJob.textContent = old;
       btnStartJob.disabled = !currentFile;
