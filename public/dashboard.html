@@ -20,6 +20,7 @@
       --radius2: 24px;
       --max: 1160px;
     }
+
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
     body{
@@ -33,6 +34,7 @@
         linear-gradient(180deg, var(--bg0), var(--bg1) 55%, #06070b);
       overflow-x:hidden;
     }
+
     a{ color:inherit; text-decoration:none; }
     .container{ width:min(var(--max), calc(100% - 40px)); margin:0 auto; }
 
@@ -63,6 +65,7 @@
       justify-content:space-between;
       padding: 14px 0;
       gap: 18px;
+      flex-wrap:wrap;
     }
 
     .brand{
@@ -82,14 +85,6 @@
       position: relative;
       overflow:hidden;
     }
-    .logo::after{
-      content:"";
-      position:absolute; inset:-30px;
-      background: conic-gradient(from 120deg, rgba(0,255,154,.0), rgba(0,255,154,.35), rgba(0,215,255,.0));
-      animation: spin 6s linear infinite;
-      opacity:.9;
-    }
-    @keyframes spin{ to{ transform: rotate(360deg); } }
 
     .grad{
       background: linear-gradient(90deg, rgba(138,92,255,1), rgba(0,215,255,1), rgba(0,255,154,1));
@@ -156,15 +151,6 @@
       overflow:hidden;
       position:relative;
     }
-    .card::before{
-      content:"";
-      position:absolute; inset:-1px;
-      background: radial-gradient(260px 160px at 20% 20%, rgba(138,92,255,.14), transparent 60%);
-      pointer-events:none;
-      opacity:.9;
-    }
-    .card > *{ position:relative; }
-
     .card-h{
       padding: 14px 14px 10px;
       border-bottom: 1px solid rgba(255,255,255,.08);
@@ -177,7 +163,9 @@
     }
     .card-b{ padding: 14px; }
 
-    .menu{ display:flex; flex-direction:column; gap: 8px; }
+    .menu{
+      display:flex; flex-direction:column; gap: 8px;
+    }
     .menu a{
       padding: 10px 12px;
       border-radius: 14px;
@@ -236,39 +224,16 @@
     .dot{ width:8px; height:8px; border-radius:999px; display:inline-block; background: rgba(233,237,247,.45); }
     .dot.ok{ background: rgba(0,255,154,.75); box-shadow: 0 0 0 6px rgba(0,255,154,.12); }
     .dot.run{ background: rgba(0,215,255,.85); box-shadow: 0 0 0 6px rgba(0,215,255,.12); }
-    .dot.fail{ background: rgba(255,120,120,.80); box-shadow: 0 0 0 6px rgba(255,120,120,.10); }
 
-    .split{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .field{
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-      padding: 12px;
-    }
-    .field label{
-      display:block;
+    footer{
+      padding: 18px 0 28px;
+      color: rgba(233,237,247,.55);
       font-size: 12px;
-      font-weight: 900;
-      color: rgba(233,237,247,.75);
-      margin-bottom: 6px;
     }
-    input[type="text"]{
-      width:100%;
-      padding: 10px 10px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.22);
-      color: var(--text);
-      outline:none;
-    }
-    .row{ display:flex; gap: 10px; flex-wrap: wrap; justify-content:flex-end; margin-top: 10px; }
-
-    footer{ padding: 18px 0 28px; color: rgba(233,237,247,.55); font-size: 12px; }
 
     @media (max-width: 980px){
       .layout{ grid-template-columns: 1fr; }
       .statgrid{ grid-template-columns: 1fr; }
-      .split{ grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -279,7 +244,7 @@
   <header>
     <div class="container">
       <div class="nav">
-        <a class="brand" href="index.html" id="linkHome" title="Volver al inicio">
+        <a class="brand" href="index.html" title="Volver al inicio">
           <span class="logo" aria-hidden="true"></span>
           <span>War<span class="grad">Master</span></span>
         </a>
@@ -287,7 +252,7 @@
         <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
           <span class="pill" title="Plan actual"><span class="dot run"></span> Pro (demo)</span>
           <button class="btn ghost" type="button" id="btnLogout">Cerrar sesión</button>
-          <button class="btn primary" type="button" id="btnNewMaster">Nuevo master</button>
+          <a class="btn primary" href="master.html">Nuevo master</a>
         </div>
       </div>
     </div>
@@ -301,7 +266,7 @@
           <p class="sub">Administra tus masters, revisa el estado de render y descarga versiones listas para publicar.</p>
         </div>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <a class="btn" href="index.html" id="linkLanding">Landing</a>
+          <a class="btn" href="index.html">Landing</a>
           <button class="btn" type="button" id="btnBilling">Plan y pagos</button>
         </div>
       </div>
@@ -320,18 +285,15 @@
             </div>
 
             <div style="margin-top:14px; color:rgba(233,237,247,.62); font-size:12px; line-height:1.5;">
-              <b>Tip:</b> cuando conectes backend, este panel puede consumir:
-              <span class="grad">/api/jobs</span> y <span class="grad">/api/download</span>.
+              <b>Tip:</b> este panel en beta2 consumirá:
+              <span class="grad">/api/jobs</span>, <span class="grad">/api/upload</span>, <span class="grad">/api/download</span>.
             </div>
           </div>
         </aside>
 
         <div style="display:flex; flex-direction:column; gap:16px;">
           <section id="overview" class="card">
-            <div class="card-h">
-              <h2>Resumen</h2>
-              <span class="pill"><span class="dot ok"></span> Todo OK</span>
-            </div>
+            <div class="card-h"><h2>Resumen</h2><span class="pill"><span class="dot ok"></span> Todo OK</span></div>
             <div class="card-b">
               <div class="statgrid">
                 <div class="stat"><div class="k">Masters este mes</div><div class="v">7 <small>/ 20</small></div></div>
@@ -349,13 +311,7 @@
             <div class="card-b" style="padding-top:6px;">
               <table>
                 <thead>
-                  <tr>
-                    <th>Track</th>
-                    <th>Estilo</th>
-                    <th>LUFS</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                  </tr>
+                  <tr><th>Track</th><th>Estilo</th><th>LUFS</th><th>Estado</th><th>Acciones</th></tr>
                 </thead>
                 <tbody id="jobsTbody"></tbody>
               </table>
@@ -363,38 +319,21 @@
           </section>
 
           <section id="library" class="card">
-            <div class="card-h">
-              <h2>Biblioteca</h2>
-              <button class="btn" type="button" id="btnExport">Exportar lista</button>
-            </div>
+            <div class="card-h"><h2>Biblioteca</h2><button class="btn" type="button" id="btnExport">Exportar lista</button></div>
             <div class="card-b" style="color:rgba(233,237,247,.78); font-size:13px; line-height:1.6;">
               Aquí puedes mostrar “masters guardados”, versiones (WAV/MP3), y links de descarga.
-              <div style="margin-top:10px;">
-                <span class="pill"><span class="dot ok"></span> Guardado automático</span>
-                <span class="pill" style="margin-left:8px;"><span class="dot"></span> Historial de versiones</span>
-              </div>
             </div>
           </section>
 
           <section id="settings" class="card">
             <div class="card-h"><h2>Ajustes rápidos</h2></div>
-            <div class="card-b">
-              <div class="split">
-                <div class="field"><label>Nombre</label><input type="text" value="Usuario WarMaster" /></div>
-                <div class="field"><label>Email</label><input type="text" value="usuario@warmaster.com" /></div>
-              </div>
-              <div class="row">
-                <button class="btn" type="button">Guardar</button>
-                <button class="btn" type="button">Cambiar contraseña</button>
-              </div>
+            <div class="card-b" style="color:rgba(233,237,247,.78); font-size:13px; line-height:1.6;">
+              Beta UI. En beta2: usuarios reales + historial real.
             </div>
           </section>
 
           <section id="support" class="card">
-            <div class="card-h">
-              <h2>Soporte</h2>
-              <a class="btn" href="index.html" id="linkFaq">Inicio</a>
-            </div>
+            <div class="card-h"><h2>Soporte</h2><a class="btn" href="index.html#como">Ayuda</a></div>
             <div class="card-b" style="color:rgba(233,237,247,.78); font-size:13px; line-height:1.6;">
               Agrega aquí un formulario o link a WhatsApp / correo / ticketera.
             </div>
@@ -407,18 +346,12 @@
   </main>
 
   <script>
-    function withSameQuery(path){ return path + (location.search || ""); }
-
-    // demo login (coherente con index)
-    if (localStorage.getItem("warmaster_logged") !== "true") {
-      window.location.href = withSameQuery("index.html");
-    }
-
-    document.getElementById("linkHome").href = withSameQuery("index.html");
-    document.getElementById("linkLanding").href = withSameQuery("index.html");
-    document.getElementById("linkFaq").href = withSameQuery("index.html");
-
     document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Auth fake
+    if (localStorage.getItem("warmaster_logged") !== "true"){
+      window.location.href = "index.html";
+    }
 
     const jobs = [
       { track: "Demo_01.wav", style: "Clean", lufs: "-10.2", status: "Listo", s: "ok" },
@@ -427,7 +360,7 @@
     ];
 
     const tbody = document.getElementById('jobsTbody');
-    function dotClass(s){ return s === "ok" ? "ok" : (s === "run" ? "run" : "fail"); }
+    function dotClass(s){ return s === "ok" ? "ok" : "run"; }
 
     function renderJobs(){
       tbody.innerHTML = jobs.map((j, idx) => `
@@ -445,16 +378,12 @@
     }
     renderJobs();
 
-    window.downloadJob = () => alert("Descarga demo. Conecta GET /api/download/:jobId");
-    window.duplicateJob = () => alert("Duplicar (demo). Puedes redirigir a master.html con parámetros del job.");
+    window.downloadJob = () => alert("Descarga demo. En beta2: GET /api/download/:jobId");
+    window.duplicateJob = () => alert("Duplicar demo. En beta2: guardar job real.");
 
     document.getElementById('btnRefresh').addEventListener('click', () => {
-      alert("Actualizar (demo). Conecta GET /api/jobs");
+      alert("Actualizar (demo). En beta2: GET /api/jobs");
       renderJobs();
-    });
-
-    document.getElementById('btnNewMaster').addEventListener('click', () => {
-      window.location.href = withSameQuery("master.html");
     });
 
     document.getElementById('btnBilling').addEventListener('click', () => alert("Plan y pagos (demo)."));
@@ -462,7 +391,8 @@
 
     document.getElementById('btnLogout').addEventListener('click', () => {
       localStorage.removeItem("warmaster_logged");
-      window.location.href = withSameQuery("index.html");
+      localStorage.removeItem("warmaster_email");
+      window.location.href = "index.html";
     });
   </script>
 </body>
