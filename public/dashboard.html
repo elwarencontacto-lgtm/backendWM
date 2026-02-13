@@ -4,7 +4,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>WarMaster — Dashboard</title>
-
   <style>
     :root{
       --bg0:#07080c;
@@ -14,13 +13,10 @@
       --a:#8a5cff;
       --b:#00d7ff;
       --c:#00ff9a;
-      --shadow: 0 18px 60px rgba(0,0,0,.55);
-      --radius: 18px;
-      --radius2: 24px;
-      --max: 1160px;
+      --radius:22px;
+      --shadow: 0 24px 70px rgba(0,0,0,.55);
     }
     *{ box-sizing:border-box; }
-    html,body{ height:100%; }
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
@@ -33,207 +29,206 @@
       overflow-x:hidden;
     }
     a{ color:inherit; text-decoration:none; }
-    .container{ width:min(var(--max), calc(100% - 40px)); margin:0 auto; }
-
     header{
       position: sticky;
       top:0;
-      z-index:50;
+      z-index:10;
       backdrop-filter: blur(14px);
       background: rgba(7,8,12,.55);
-      border-bottom: 1px solid rgba(255,255,255,.08);
+      border-bottom:1px solid rgba(255,255,255,.08);
     }
+    .wrap{ width:min(1180px, calc(100% - 40px)); margin:0 auto; }
     .nav{
       display:flex;
-      align-items:center;
       justify-content:space-between;
-      padding: 14px 0;
-      gap: 18px;
+      align-items:center;
+      gap:14px;
+      padding:16px 0;
       flex-wrap:wrap;
     }
     .brand{
-      display:flex; align-items:center; gap:10px;
-      font-weight: 820;
-      letter-spacing:.3px;
+      font-size:22px;
+      font-weight:950;
+      letter-spacing:.2px;
+      display:flex;
+      align-items:center;
+      gap:10px;
     }
-    .logo{
-      width: 36px; height:36px; border-radius: 12px;
+    .dotlogo{
+      width:34px;height:34px;border-radius:12px;
       background:
         radial-gradient(circle at 30% 30%, rgba(0,215,255,.95), transparent 55%),
         radial-gradient(circle at 70% 70%, rgba(138,92,255,.95), transparent 55%),
         linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.02));
-      border: 1px solid rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.12);
       box-shadow: 0 12px 40px rgba(0,0,0,.45);
     }
     .grad{
-      background: linear-gradient(90deg, rgba(138,92,255,1), rgba(0,215,255,1), rgba(0,255,154,1));
+      background:linear-gradient(90deg,var(--a),var(--b),var(--c));
       -webkit-background-clip:text;
       background-clip:text;
-      color: transparent;
+      color:transparent;
     }
     .btn{
-      border: 1px solid rgba(255,255,255,.14);
+      padding:10px 16px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
       background: rgba(255,255,255,.06);
       color: var(--text);
-      padding: 10px 14px;
-      border-radius: 14px;
-      font-weight: 720;
-      font-size: 14px;
       cursor:pointer;
-      display:inline-flex; align-items:center; gap:10px;
-      user-select:none;
+      font-weight:950;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
     }
+    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.22); }
     .btn.primary{
       border:none;
       background: linear-gradient(90deg, rgba(138,92,255,.95), rgba(0,215,255,.95));
-      color:#071018;
-      box-shadow: var(--shadow);
+      color:#061018;
+      box-shadow: 0 18px 60px rgba(0,0,0,.35);
     }
 
-    main{ padding: 22px 0 40px; }
+    main{ padding: 26px 0 80px; }
+    h1{ margin: 12px 0 0; font-size: 34px; letter-spacing:-.8px; }
+    .sub{ margin:8px 0 0; color: var(--muted); font-size: 14px; line-height:1.6; max-width: 72ch; }
 
-    .top{
-      display:flex; align-items:flex-end; justify-content:space-between;
-      gap: 18px; flex-wrap: wrap;
-      margin: 10px 0 16px;
+    .grid{
+      margin-top: 18px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
     }
-    h1{ margin:0; font-size: clamp(26px, 3.5vw, 34px); letter-spacing:-.6px; }
-    .sub{ margin: 6px 0 0; color: var(--muted); font-size: 13px; line-height:1.5; max-width: 70ch; }
+    @media (max-width: 980px){ .grid{ grid-template-columns: 1fr; } }
 
     .card{
-      border-radius: var(--radius2);
+      border-radius: var(--radius);
       border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.05);
-      box-shadow: 0 14px 50px rgba(0,0,0,.35);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      box-shadow: var(--shadow);
+      padding: 16px;
+      position:relative;
       overflow:hidden;
-      margin-bottom: 14px;
     }
-    .card-h{
-      padding: 14px 14px 10px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      display:flex; justify-content:space-between; gap: 10px; align-items:center;
+    .card::before{
+      content:"";
+      position:absolute; inset:-1px;
+      background:
+        radial-gradient(420px 220px at 20% 20%, rgba(138,92,255,.14), transparent 60%),
+        radial-gradient(420px 220px at 85% 30%, rgba(0,215,255,.10), transparent 60%),
+        radial-gradient(520px 240px at 40% 95%, rgba(0,255,154,.08), transparent 60%);
+      pointer-events:none;
+      opacity:.9;
     }
-    .card-h h2{ margin:0; font-size: 14px; letter-spacing:.2px; }
-    .card-b{ padding: 14px; }
+    .card > *{ position:relative; }
 
-    table{ width:100%; border-collapse: collapse; }
-    th, td{
-      padding: 10px 8px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
+    .k{ color: rgba(233,237,247,.65); font-weight:950; font-size:12px; letter-spacing:.2px; }
+    .v{ font-size: 22px; font-weight: 980; letter-spacing:-.4px; margin-top:6px; }
+
+    .table{
+      width:100%;
+      border-collapse: collapse;
+      margin-top: 10px;
       font-size: 13px;
-      text-align:left;
     }
-    th{ color: rgba(233,237,247,.70); font-weight: 900; font-size: 12px; letter-spacing:.2px; }
+    .table th, .table td{
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      padding: 10px 8px;
+      text-align:left;
+      color: rgba(233,237,247,.85);
+    }
+    .table th{
+      color: rgba(233,237,247,.6);
+      font-size: 12px;
+      font-weight: 950;
+    }
     .pill{
       display:inline-flex; align-items:center; gap:8px;
       padding: 6px 10px;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.06);
-      font-weight: 900;
+      font-weight: 950;
       font-size: 12px;
       color: rgba(233,237,247,.9);
     }
-    .dot{ width:8px; height:8px; border-radius:999px; background: rgba(233,237,247,.45); }
-    .dot.ok{ background: rgba(0,255,154,.75); box-shadow: 0 0 0 6px rgba(0,255,154,.12); }
-    .dot.run{ background: rgba(0,215,255,.85); box-shadow: 0 0 0 6px rgba(0,215,255,.12); }
-
+    .dot{
+      width:8px; height:8px;
+      border-radius:999px;
+      background: rgba(0,255,154,.75);
+      box-shadow: 0 0 0 6px rgba(0,255,154,.12);
+    }
     footer{
-      padding: 18px 0 28px;
+      margin-top: 28px;
       color: rgba(233,237,247,.55);
       font-size: 12px;
+      line-height: 1.6;
     }
   </style>
 </head>
-
 <body>
-  <header>
-    <div class="container">
-      <div class="nav">
-        <a class="brand" href="index.html" title="Volver al inicio">
-          <span class="logo" aria-hidden="true"></span>
-          <span>War<span class="grad">Master</span></span>
-        </a>
-
-        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-          <a class="btn" href="index.html">Landing</a>
-          <a class="btn primary" href="master.html">Nuevo master</a>
-        </div>
+<header>
+  <div class="wrap">
+    <div class="nav">
+      <a class="brand" href="index.html" aria-label="Home">
+        <span class="dotlogo" aria-hidden="true"></span>
+        <span>War<span class="grad">Master</span></span>
+      </a>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a class="btn" href="master.html">Nuevo master</a>
+        <a class="btn" href="index.html">Salir</a>
       </div>
     </div>
-  </header>
+  </div>
+</header>
 
-  <main>
-    <div class="container">
-      <div class="top">
-        <div>
-          <h1>Dashboard</h1>
-          <p class="sub">UI demo (beta1.1). Luego conectamos historial real.</p>
-        </div>
+<main>
+  <div class="wrap">
+    <div class="row">
+      <div>
+        <h1>Dashboard</h1>
+        <p class="sub">Vista demo (beta1.2). Próximamente historial real y usuarios.</p>
+      </div>
+      <span class="pill"><span class="dot"></span> Online</span>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="k">Plan</div>
+        <div class="v">Beta Free</div>
+        <p class="sub">Acceso abierto mientras pruebas el producto.</p>
       </div>
 
-      <section class="card">
-        <div class="card-h">
-          <h2>Últimos renders (demo)</h2>
-          <button class="btn" type="button" id="btnRefresh">Actualizar</button>
-        </div>
-        <div class="card-b" style="padding-top:6px;">
-          <table>
-            <thead>
-              <tr>
-                <th>Track</th>
-                <th>Estilo</th>
-                <th>LUFS</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="jobsTbody"></tbody>
-          </table>
-        </div>
-      </section>
+      <div class="card">
+        <div class="k">Estado del sistema</div>
+        <div class="v">Operativo</div>
+        <p class="sub">Backend en Render + FFmpeg.</p>
+      </div>
 
-      <footer>
-        © <span id="year"></span> WarMaster. Dashboard (demo UI) — beta1.1
-      </footer>
+      <div class="card" style="grid-column:1/-1;">
+        <div class="k">Historial (demo)</div>
+        <table class="table" aria-label="Historial demo">
+          <thead>
+            <tr><th>Fecha</th><th>Preset</th><th>Archivo</th><th>Estado</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>—</td><td>—</td><td>—</td><td>Próximamente</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-  </main>
 
-  <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
+    <footer>
+      © <span id="year"></span> WarMaster — beta1.2
+    </footer>
+  </div>
+</main>
 
-    const jobs = [
-      { track: "Demo_01.wav", style: "Clean", lufs: "-10.2", status: "Listo", s: "ok" },
-      { track: "Club_Banger.mp3", style: "Club", lufs: "-8.5", status: "Procesando", s: "run" },
-      { track: "Rock_Mix.wav", style: "Heavy", lufs: "-9.1", status: "Listo", s: "ok" },
-    ];
-
-    const tbody = document.getElementById('jobsTbody');
-    function dotClass(s){ return s === "ok" ? "ok" : "run"; }
-
-    function renderJobs(){
-      tbody.innerHTML = jobs.map((j, idx) => `
-        <tr>
-          <td>${j.track}</td>
-          <td>${j.style}</td>
-          <td>${j.lufs}</td>
-          <td><span class="pill"><span class="dot ${dotClass(j.s)}"></span> ${j.status}</span></td>
-          <td style="display:flex; gap:8px; flex-wrap:wrap; padding-top:8px; padding-bottom:8px;">
-            <button class="btn" type="button" onclick="downloadJob(${idx})" ${j.s!=="ok" ? "disabled" : ""}>Descargar</button>
-            <button class="btn" type="button" onclick="duplicateJob(${idx})">Duplicar</button>
-          </td>
-        </tr>
-      `).join("");
-    }
-    renderJobs();
-
-    window.downloadJob = () => alert("Descarga demo. Luego conectamos /api/download.");
-    window.duplicateJob = () => alert("Duplicar demo. Luego conectamos POST /api/master.");
-
-    document.getElementById('btnRefresh').addEventListener('click', () => {
-      alert("Actualizar (demo). Luego conectamos GET /api/jobs");
-      renderJobs();
-    });
-  </script>
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+</script>
 </body>
 </html>
