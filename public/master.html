@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>WarMaster — Masterizado</title>
 
   <style>
@@ -15,6 +15,7 @@
       --b:#00d7ff;
       --c:#00ff9a;
       --radius: 22px;
+      --shadow: 0 24px 70px rgba(0,0,0,.55);
     }
     *{ box-sizing:border-box; }
     body{
@@ -91,10 +92,9 @@
       border:none;
       background: linear-gradient(90deg, rgba(138,92,255,.95), rgba(0,215,255,.95));
       color:#061018;
+      box-shadow: 0 18px 60px rgba(0,0,0,.35);
     }
-    .btn.primary:hover{ transform: translateY(-1px); }
-    .ghost{ background: transparent; }
-    .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
+    .btn.ghost{ background: transparent; }
 
     main{ padding: 26px 0 70px; }
     .top{
@@ -112,7 +112,7 @@
       border-radius: var(--radius);
       border: 1px solid rgba(255,255,255,.12);
       background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
-      box-shadow: 0 24px 70px rgba(0,0,0,.55);
+      box-shadow: var(--shadow);
       overflow:hidden;
       position:relative;
     }
@@ -168,7 +168,6 @@
       justify-content:space-between;
       gap: 10px;
       align-items:center;
-      flex-wrap:wrap;
     }
     .card-h h2{ margin:0; font-size:14px; letter-spacing:.2px; }
     .card-b{ padding: 14px; }
@@ -215,27 +214,34 @@
       transition: width .25s ease;
     }
     .ptext{
-      min-width: 120px;
+      min-width: 150px;
       text-align:right;
       font-size: 12px;
       color: rgba(233,237,247,.8);
       font-weight: 900;
     }
 
-    /* Error UI bonito */
-    .uiError{
-      display:none;
+    /* Mensaje UI (sin alert) */
+    .msg{
       margin-top:12px;
       border-radius:16px;
-      border:1px solid rgba(255,120,120,.35);
-      background: rgba(255,120,120,.08);
-      padding:10px 12px;
-      color: rgba(233,237,247,.92);
-      font-size:12px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.16);
+      padding: 12px;
+      display:none;
       line-height:1.5;
-      white-space:pre-wrap;
+      font-size: 13px;
+      color: rgba(233,237,247,.9);
     }
-    .uiError.show{ display:block; }
+    .msg.show{ display:block; }
+    .msg.error{
+      border-color: rgba(255,120,120,.35);
+      background: rgba(255,120,120,.08);
+    }
+    .msg.ok{
+      border-color: rgba(0,255,154,.28);
+      background: rgba(0,255,154,.08);
+    }
 
     /* A/B */
     .hidden{ display:none; }
@@ -284,14 +290,13 @@
       flex-wrap:wrap;
     }
     .abPlay{
-      width:46px;
-      height:38px;
+      width:56px;
+      height:40px;
       border-radius: 14px;
       display:flex;
       align-items:center;
       justify-content:center;
       font-weight: 900;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     }
     .abTimeline{ flex:1; min-width: 180px; }
     .abTime{
@@ -301,9 +306,15 @@
       text-align:left;
     }
     #abSeek{ width:100%; accent-color: var(--b); }
-
     .disabled{ opacity:.6; pointer-events:none; }
-    audio{ width:100%; margin-top:10px; }
+    audio{ width:100%; margin-top:8px; }
+
+    .limits{
+      margin-top:10px;
+      color: rgba(233,237,247,.62);
+      font-size: 12px;
+      line-height: 1.5;
+    }
   </style>
 </head>
 
@@ -329,6 +340,7 @@
       <div>
         <h1>Masterizado</h1>
         <p class="sub">Sube tu audio, elige un preset y ajusta la intensidad.</p>
+        <div class="limits">Límites: máximo <b>100MB</b> y <b>6 minutos</b>.</div>
       </div>
     </div>
 
@@ -342,12 +354,9 @@
         <div class="split">
           <div class="field">
             <label for="file">Archivo</label>
-            <input type="text" id="file" placeholder="Elige un archivo" readonly />
+            <input type="text" id="file" placeholder="Arrastra aquí o elige un archivo" readonly />
             <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
               <button class="btn" type="button" id="btnPick">Seleccionar</button>
-            </div>
-            <div style="margin-top:10px; color:rgba(233,237,247,.65); font-size:12px; line-height:1.5;">
-              Límite recomendado: <b>100 MB</b> y <b>6 min</b>.
             </div>
           </div>
 
@@ -375,16 +384,13 @@
           <button class="btn primary" type="button" id="btnStartJob" disabled>Renderizar</button>
         </div>
 
-        <!-- Progreso -->
         <div class="progressWrap" id="progressWrap" aria-live="polite">
           <div class="bar"><div class="fill" id="progressFill"></div></div>
           <div class="ptext" id="progressText">Listo</div>
         </div>
 
-        <!-- Error bonito en UI -->
-        <div id="uiError" class="uiError"></div>
+        <div class="msg" id="msgBox"></div>
 
-        <!-- A/B -->
         <div id="abWrapper" class="hidden">
           <div class="abCard">
             <div class="abHead">
@@ -398,14 +404,14 @@
             </div>
 
             <div class="abTransport">
-              <button class="btn primary abPlay" type="button" id="btnABPlay" aria-label="Play/Pause">PLAY</button>
+              <button class="btn primary abPlay" type="button" id="btnABPlay">PLAY</button>
 
               <div class="abTimeline">
                 <div class="abTime" id="abTime">0:00 / 0:00</div>
                 <input id="abSeek" type="range" min="0" max="1000" value="0" />
               </div>
 
-              <button class="btn abBtn" type="button" id="btnABStop" aria-label="Stop">STOP</button>
+              <button class="btn abBtn" type="button" id="btnABStop">STOP</button>
             </div>
 
             <audio id="audioOriginal" preload="metadata"></audio>
@@ -422,16 +428,14 @@
 </main>
 
 <script>
-  // ===== API_BASE: querystring ?api=... o mismo dominio =====
   function getApiBase(){
     const qs = new URLSearchParams(location.search);
     const fromQs = (qs.get("api") || "").trim();
     if (fromQs) return fromQs.replace(/\/+$/,"");
-    return location.origin; // mismo dominio por defecto
+    return location.origin;
   }
   const API_BASE = getApiBase();
 
-  // ===== DOM =====
   const fileInput   = document.getElementById("fileInput");
   const fileField   = document.getElementById("file");
   const btnPick     = document.getElementById("btnPick");
@@ -443,7 +447,7 @@
   const progressFill = document.getElementById("progressFill");
   const progressText = document.getElementById("progressText");
 
-  const uiErrorBox = document.getElementById("uiError");
+  const msgBox = document.getElementById("msgBox");
 
   const abWrapper   = document.getElementById("abWrapper");
   const btnABOriginal = document.getElementById("btnABOriginal");
@@ -459,19 +463,6 @@
   const audioPreview  = document.getElementById("audioPreview");
   const audioMaster   = document.getElementById("audioMaster");
 
-  // ===== UI Error helpers =====
-  function showUiError(msg){
-    if (!uiErrorBox) return;
-    uiErrorBox.classList.add("show");
-    uiErrorBox.textContent = msg || "";
-  }
-  function clearUiError(){
-    if (!uiErrorBox) return;
-    uiErrorBox.classList.remove("show");
-    uiErrorBox.textContent = "";
-  }
-
-  // ===== State =====
   let currentFile = null;
   let activeAudio = audioPreview;
 
@@ -479,7 +470,7 @@
   let previewObjectUrl = null;
   let masterObjectUrl = null;
 
-  // ===== Preview engine =====
+  // WebAudio preview (EQ + gain)
   let audioCtx = null;
   let sourceNode = null;
   let gainNode = null;
@@ -525,7 +516,6 @@
     gainNode.gain.value = 1 + v * 0.8;
   }
 
-  // ===== A/B UI =====
   function fmtTime(s){
     s = Math.max(0, Math.floor(s || 0));
     const m = Math.floor(s/60);
@@ -589,11 +579,8 @@
   });
 
   btnABPlay?.addEventListener("click", async ()=>{
-    try{
-      if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume();
-    } catch(e){}
+    try{ if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume(); } catch(e){}
     if (!activeAudio) return;
-
     if (activeAudio.paused){
       await activeAudio.play();
       btnABPlay.textContent = "PAUSE";
@@ -620,22 +607,24 @@
     a.addEventListener("ended", ()=> { if(btnABPlay) btnABPlay.textContent="PLAY"; });
   });
 
-  // ===== Upload =====
   function pick(){ fileInput?.click(); }
   btnPick?.addEventListener("click", pick);
 
-  function revokeUrlSafe(u){
-    try{ if(u) URL.revokeObjectURL(u); }catch(e){}
-  }
+  function revokeUrlSafe(u){ try{ if(u) URL.revokeObjectURL(u); }catch(e){} }
 
-  function progressSet(pct, text){
-    progressWrap?.classList.add("show");
-    if (progressFill) progressFill.style.width = `${Math.max(0, Math.min(100, pct))}%`;
-    if (progressText) progressText.textContent = text || "";
+  function setMsg(type, text){
+    if (!msgBox) return;
+    msgBox.className = "msg show " + (type || "");
+    msgBox.textContent = text || "";
+  }
+  function clearMsg(){
+    if (!msgBox) return;
+    msgBox.className = "msg";
+    msgBox.textContent = "";
   }
 
   fileInput?.addEventListener("change", (e) => {
-    clearUiError();
+    clearMsg();
 
     currentFile = e.target.files?.[0] || null;
 
@@ -646,39 +635,31 @@
 
     abWrapper?.classList.remove("hidden");
 
-    // revoke prev urls
     revokeUrlSafe(originalObjectUrl);
     revokeUrlSafe(previewObjectUrl);
     revokeUrlSafe(masterObjectUrl);
     originalObjectUrl = previewObjectUrl = masterObjectUrl = null;
 
-    // original/preview
     originalObjectUrl = URL.createObjectURL(currentFile);
     previewObjectUrl  = URL.createObjectURL(currentFile);
 
-    audioOriginal.src = originalObjectUrl;
-    audioOriginal.load();
-
-    audioPreview.src = previewObjectUrl;
-    audioPreview.load();
+    audioOriginal.src = originalObjectUrl; audioOriginal.load();
+    audioPreview.src  = previewObjectUrl;  audioPreview.load();
 
     initPreviewEngine();
     applyPreset();
     applyIntensity();
 
-    // reset master
     audioMaster.removeAttribute("src");
     audioMaster.load();
     if (btnABMaster) btnABMaster.disabled = true;
 
-    // reset download
     if (btnDownloadMaster) {
       btnDownloadMaster.href = "#";
       btnDownloadMaster.classList.add("disabled");
       btnDownloadMaster.setAttribute("aria-disabled","true");
     }
 
-    // reset progress
     progressWrap?.classList.remove("show");
     if (progressFill) progressFill.style.width = "0%";
     if (progressText) progressText.textContent = "Listo";
@@ -689,33 +670,29 @@
   intensity?.addEventListener("input", applyIntensity);
   preset?.addEventListener("change", applyPreset);
 
-  // ===== Fetch with timeout =====
   async function fetchWithTimeout(url, options, timeoutMs){
     const controller = new AbortController();
     const t = setTimeout(()=> controller.abort("timeout"), timeoutMs);
     try{
-      const res = await fetch(url, { ...options, signal: controller.signal });
-      return res;
-    } finally {
-      clearTimeout(t);
-    }
+      return await fetch(url, { ...options, signal: controller.signal });
+    } finally { clearTimeout(t); }
   }
 
-  // ===== Render real (POST correcto) =====
-  btnStartJob?.addEventListener("click", async () => {
-    clearUiError();
+  function progressSet(pct, text){
+    progressWrap?.classList.add("show");
+    if (progressFill) progressFill.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+    if (progressText) progressText.textContent = text || "";
+  }
 
-    if (!currentFile) {
-      showUiError("Selecciona un archivo primero.");
-      return;
-    }
+  btnStartJob?.addEventListener("click", async () => {
+    clearMsg();
+    if (!currentFile) return;
 
     const old = btnStartJob.textContent;
     btnStartJob.textContent = "Procesando…";
     btnStartJob.disabled = true;
 
     try{
-      // gesto -> resume (para audio ctx)
       try{ if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume(); } catch(e){}
 
       const fd = new FormData();
@@ -726,38 +703,34 @@
       progressSet(10, "Subiendo…");
 
       const url = `${API_BASE}/api/master`;
-
-      let res;
-      try{
-        res = await fetchWithTimeout(url, { method: "POST", body: fd }, 180000);
-      } catch (err) {
-        const isTimeout = (err && (err.name === "AbortError" || err === "timeout"));
-        progressSet(0, "Error");
-        showUiError(
-          isTimeout
-            ? `Timeout. El servidor tardó demasiado.\nURL: ${url}`
-            : `Error de red/JS: ${err?.message || String(err)}\nURL: ${url}\nTip: revisa que estés en HTTPS y mismo dominio.`
-        );
-        return;
-      }
+      const res = await fetchWithTimeout(url, { method: "POST", body: fd }, 180000);
 
       progressSet(55, "Procesando…");
 
+      const ct = (res.headers.get("content-type") || "").toLowerCase();
+
       if (!res.ok) {
         const txt = await res.text().catch(()=> "");
+        const msg = (txt && txt.length) ? txt : ("Error HTTP " + res.status);
+        setMsg("error", msg.slice(0, 800));
         progressSet(0, "Error");
-        showUiError(`Render falló (${res.status}).\nURL: ${url}\n${txt.slice(0,600)}`);
+        return;
+      }
+
+      if (ct.includes("application/json")) {
+        const txt = await res.text().catch(()=> "");
+        setMsg("error", ("El backend devolvió JSON (no audio). " + txt).slice(0, 800));
+        progressSet(0, "Error");
         return;
       }
 
       const blob = await res.blob();
       if (!blob || blob.size < 1024) {
+        setMsg("error", "El master llegó vacío o muy pequeño.");
         progressSet(0, "Error");
-        showUiError(`El master llegó vacío o muy pequeño.\nURL: ${url}\nBytes: ${(blob && blob.size) || 0}`);
         return;
       }
 
-      // set master url
       revokeUrlSafe(masterObjectUrl);
       masterObjectUrl = URL.createObjectURL(blob);
 
@@ -773,15 +746,20 @@
         btnDownloadMaster.setAttribute("aria-disabled","false");
       }
 
+      setMsg("ok", "Master listo ✅ Puedes escucharlo en 'Master' o descargarlo.");
       progressSet(100, "Listo ✅");
-      clearUiError();
 
+    } catch (err) {
+      const msg = (err && (err.name === "AbortError" || err === "timeout"))
+        ? "Tiempo de espera agotado. El backend está demorando."
+        : ("Error de red/JS: " + (err?.message || String(err)));
+      setMsg("error", msg);
+      progressSet(0, "Error");
     } finally {
       btnStartJob.textContent = old;
       btnStartJob.disabled = !currentFile;
     }
   });
 </script>
-
 </body>
 </html>
