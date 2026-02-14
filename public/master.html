@@ -15,11 +15,12 @@
       --b:#00d7ff;
       --c:#00ff9a;
       --radius: 22px;
+      --shadow: 0 24px 70px rgba(0,0,0,.55);
     }
     *{ box-sizing:border-box; }
     body{
       margin:0;
-      font-family: Arial, sans-serif;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       color:var(--text);
       background:
         radial-gradient(900px 500px at 10% 10%, rgba(138,92,255,.22), transparent 55%),
@@ -48,7 +49,7 @@
     }
     .brand{
       font-size:22px;
-      font-weight:800;
+      font-weight:900;
       letter-spacing:.2px;
       display:flex;
       align-items:center;
@@ -70,6 +71,7 @@
       -webkit-background-clip:text;
       color:transparent;
     }
+
     .btn{
       padding:10px 16px;
       border-radius:14px;
@@ -77,20 +79,23 @@
       background: rgba(255,255,255,.06);
       color: var(--text);
       cursor:pointer;
-      font-weight:800;
+      font-weight:900;
       text-decoration:none;
       display:inline-flex;
       align-items:center;
       justify-content:center;
       user-select:none;
       gap:10px;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
     }
-    .btn:hover{ background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.22); }
+    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.22); }
     .btn.primary{
       border:none;
       background: linear-gradient(90deg, rgba(138,92,255,.95), rgba(0,215,255,.95));
       color:#061018;
+      box-shadow: var(--shadow);
     }
+    .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
     .ghost{ background: transparent; }
 
     main{ padding: 26px 0 70px; }
@@ -109,7 +114,7 @@
       border-radius: var(--radius);
       border: 1px solid rgba(255,255,255,.12);
       background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
-      box-shadow: 0 24px 70px rgba(0,0,0,.55);
+      box-shadow: var(--shadow);
       overflow:hidden;
       position:relative;
     }
@@ -165,7 +170,6 @@
       justify-content:space-between;
       gap: 10px;
       align-items:center;
-      flex-wrap:wrap;
     }
     .card-h h2{ margin:0; font-size:14px; letter-spacing:.2px; }
     .card-b{ padding: 14px; }
@@ -209,15 +213,55 @@
       height:100%;
       width:0%;
       background: linear-gradient(90deg, rgba(138,92,255,.95), rgba(0,215,255,.95));
-      transition: width .25s ease;
+      transition: width .22s ease;
     }
     .ptext{
-      min-width: 120px;
+      min-width: 170px;
       text-align:right;
       font-size: 12px;
-      color: rgba(233,237,247,.8);
-      font-weight: 900;
+      color: rgba(233,237,247,.86);
+      font-weight: 950;
+      letter-spacing:.2px;
     }
+
+    /* Mensajes dentro de UI */
+    .msg{
+      margin-top:12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      padding: 10px 12px;
+      display:none;
+      gap: 10px;
+      align-items:flex-start;
+      line-height:1.45;
+      font-size: 13px;
+      color: rgba(233,237,247,.90);
+    }
+    .msg.show{ display:flex; }
+    .msg .ico{
+      width: 28px; height: 28px;
+      border-radius: 12px;
+      display:flex; align-items:center; justify-content:center;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      flex: 0 0 auto;
+      margin-top: 1px;
+    }
+    .msg.info{
+      border-color: rgba(0,215,255,.24);
+      background: rgba(0,215,255,.06);
+    }
+    .msg.err{
+      border-color: rgba(255,120,120,.28);
+      background: rgba(255,120,120,.08);
+    }
+    .msg.ok{
+      border-color: rgba(0,255,154,.22);
+      background: rgba(0,255,154,.06);
+    }
+    .msg strong{ display:block; margin-bottom: 2px; }
+    .msg small{ color: rgba(233,237,247,.70); display:block; margin-top: 4px; }
 
     /* A/B */
     .hidden{ display:none; }
@@ -237,7 +281,7 @@
       margin-bottom:10px;
     }
     .abTitle{
-      font-weight:900;
+      font-weight:950;
       font-size:12px;
       letter-spacing:.2px;
       color: rgba(233,237,247,.85);
@@ -252,7 +296,7 @@
       padding:8px 12px;
       border-radius: 999px;
       font-size: 12px;
-      font-weight: 900;
+      font-weight: 950;
     }
     .abBtn[aria-pressed="true"]{
       border:none;
@@ -263,17 +307,30 @@
       display:flex;
       gap:10px;
       align-items:center;
-      flex-wrap:wrap;
     }
-    .abPlay{
+
+    .iconBtn{
       width:46px;
       height:38px;
       border-radius: 14px;
-      display:flex;
+      display:inline-flex;
       align-items:center;
       justify-content:center;
-      font-weight: 900;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
     }
+    .iconBtn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.22); }
+    .iconBtn.primary{
+      border:none;
+      background: linear-gradient(90deg, rgba(138,92,255,.95), rgba(0,215,255,.95));
+      color:#061018;
+    }
+    .iconBtn svg{ width:18px; height:18px; display:block; }
+    .iconBtn.primary svg{ fill:#061018; }
+    .iconBtn svg{ fill:#e9edf7; }
+
     .abTimeline{ flex:1; min-width: 180px; }
     .abTime{
       font-size: 11px;
@@ -284,29 +341,6 @@
     #abSeek{ width:100%; accent-color: var(--b); }
 
     .disabled{ opacity:.6; pointer-events:none; }
-
-    /* Info / warning */
-    .hint{
-      margin-top:10px;
-      color: rgba(233,237,247,.70);
-      font-size: 12px;
-      line-height: 1.5;
-    }
-    .hint b{ color: rgba(233,237,247,.92); }
-
-    /* Error UI (sin alert feo) */
-    .errorBox{
-      display:none;
-      margin-top:12px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,120,120,.35);
-      background: rgba(255,120,120,.08);
-      padding: 10px 12px;
-      color: rgba(233,237,247,.92);
-      font-size: 12px;
-      line-height: 1.5;
-    }
-    .errorBox.show{ display:block; }
   </style>
 </head>
 
@@ -331,28 +365,26 @@
     <div class="top">
       <div>
         <h1>Masterizado</h1>
-        <p class="sub">Sube tu audio, elige un preset, ajusta intensidad y selecciona el inicio del demo (20s).</p>
+        <p class="sub">Sube tu audio, elige un preset y ajusta la intensidad.</p>
       </div>
     </div>
 
     <section class="card">
       <div class="card-h">
         <h2>Nuevo master</h2>
-        <span style="font-size:12px;color:rgba(233,237,247,.7);font-weight:900;">beta estable</span>
+        <span style="font-size:12px;color:rgba(233,237,247,.7);font-weight:950;">beta1.3</span>
       </div>
 
       <div class="card-b">
         <div class="split">
           <div class="field">
             <label for="file">Archivo</label>
-            <input type="text" id="file" placeholder="Arrastra aquí o elige un archivo" readonly />
+            <input type="text" id="file" placeholder="Elige un archivo" readonly />
             <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
               <button class="btn" type="button" id="btnPick">Seleccionar</button>
             </div>
-
-            <div class="hint" id="fileMeta">Peso: — • Duración: —</div>
-            <div class="hint">
-              <b>Demo FREE:</b> se procesa solo un fragmento fijo de <b>20 segundos</b> (tú eliges el inicio).
+            <div style="margin-top:10px; font-size:12px; color:rgba(233,237,247,.65); line-height:1.45;">
+              Límite: <b>100MB</b> y <b>6 min</b> (validado por backend).
             </div>
           </div>
 
@@ -373,12 +405,6 @@
             <div style="display:flex; justify-content:space-between; font-size:12px; color:rgba(233,237,247,.65); margin-top:6px;">
               <span>Suave</span><span>Agresiva</span>
             </div>
-
-            <div style="height:12px"></div>
-
-            <label for="clipStart">Inicio del demo (20s)</label>
-            <input type="range" id="clipStart" min="0" max="0" value="0" disabled />
-            <div class="hint" id="clipLabel">Fragmento: 00:00 → 00:20 (20s)</div>
           </div>
         </div>
 
@@ -386,12 +412,25 @@
           <button class="btn primary" type="button" id="btnStartJob" disabled>Renderizar</button>
         </div>
 
-        <div id="errorBox" class="errorBox" role="alert"></div>
-
-        <!-- Progreso UI -->
+        <!-- Progreso -->
         <div class="progressWrap" id="progressWrap" aria-live="polite">
           <div class="bar"><div class="fill" id="progressFill"></div></div>
-          <div class="ptext" id="progressText">Listo</div>
+          <div class="ptext" id="progressText">0% • Listo</div>
+        </div>
+
+        <!-- Mensaje bonito (sin alerts) -->
+        <div class="msg" id="uiMsg" role="status" aria-live="polite">
+          <div class="ico" id="uiMsgIco">
+            <!-- info icon -->
+            <svg viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px;fill:#e9edf7">
+              <path d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2Zm0 4.9a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4Zm1.4 12H10.8v-1.8h.9v-5h-.9v-1.8h3.6v6.8h1v1.8Z"/>
+            </svg>
+          </div>
+          <div>
+            <strong id="uiMsgTitle">Listo</strong>
+            <div id="uiMsgText">Selecciona un archivo para comenzar.</div>
+            <small id="uiMsgSmall" style="display:none;"></small>
+          </div>
         </div>
 
         <div id="abWrapper" class="hidden">
@@ -407,14 +446,21 @@
             </div>
 
             <div class="abTransport">
-              <button class="btn primary abPlay" type="button" id="btnABPlay">▶</button>
+              <button class="iconBtn primary" type="button" id="btnABPlay" aria-label="Reproducir / Pausar">
+                <!-- play -->
+                <svg id="icoPlay" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l12-7-12-7Z"/></svg>
+                <!-- pause (hidden) -->
+                <svg id="icoPause" viewBox="0 0 24 24" aria-hidden="true" style="display:none"><path d="M6 5h4v14H6V5Zm8 0h4v14h-4V5Z"/></svg>
+              </button>
 
               <div class="abTimeline">
                 <div class="abTime" id="abTime">0:00 / 0:00</div>
                 <input id="abSeek" type="range" min="0" max="1000" value="0" />
               </div>
 
-              <button class="btn abBtn" type="button" id="btnABStop">■</button>
+              <button class="iconBtn" type="button" id="btnABStop" aria-label="Detener">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10H7V7Z"/></svg>
+              </button>
             </div>
 
             <audio id="audioOriginal" preload="metadata"></audio>
@@ -431,8 +477,6 @@
 </main>
 
 <script>
-  const FREE_CLIP_SECONDS = 20;
-
   // ===== API_BASE: querystring ?api=... o mismo dominio =====
   function getApiBase(){
     const qs = new URLSearchParams(location.search);
@@ -454,6 +498,11 @@
   const progressFill = document.getElementById("progressFill");
   const progressText = document.getElementById("progressText");
 
+  const uiMsg = document.getElementById("uiMsg");
+  const uiMsgTitle = document.getElementById("uiMsgTitle");
+  const uiMsgText = document.getElementById("uiMsgText");
+  const uiMsgSmall = document.getElementById("uiMsgSmall");
+
   const abWrapper   = document.getElementById("abWrapper");
   const btnABOriginal = document.getElementById("btnABOriginal");
   const btnABPreview  = document.getElementById("btnABPreview");
@@ -464,14 +513,12 @@
   const abTime        = document.getElementById("abTime");
   const btnDownloadMaster = document.getElementById("btnDownloadMaster");
 
+  const icoPlay = document.getElementById("icoPlay");
+  const icoPause = document.getElementById("icoPause");
+
   const audioOriginal = document.getElementById("audioOriginal");
   const audioPreview  = document.getElementById("audioPreview");
   const audioMaster   = document.getElementById("audioMaster");
-
-  const clipStart = document.getElementById("clipStart");
-  const clipLabel = document.getElementById("clipLabel");
-  const fileMeta  = document.getElementById("fileMeta");
-  const errorBox  = document.getElementById("errorBox");
 
   // ===== State =====
   let currentFile = null;
@@ -481,43 +528,23 @@
   let previewObjectUrl = null;
   let masterObjectUrl = null;
 
-  let audioDuration = 0;
-
-  // ===== Helpers =====
-  function revokeUrlSafe(u){
-    try{ if(u) URL.revokeObjectURL(u); }catch(e){}
-  }
-
-  function fmtTime(s){
-    s = Math.max(0, Math.floor(s || 0));
-    const m = Math.floor(s/60);
-    const r = s%60;
-    return `${m}:${String(r).padStart(2,'0')}`;
-  }
-
-  function fmtMMSS(s){
-    s = Math.max(0, Math.floor(s || 0));
-    const m = Math.floor(s/60);
-    const r = s%60;
-    return `${String(m).padStart(2,'0')}:${String(r).padStart(2,'0')}`;
-  }
-
-  function bytesToMB(b){
-    return (b / (1024*1024)).toFixed(2);
-  }
-
-  function showError(msg){
-    if (!errorBox) return;
-    if (!msg){
-      errorBox.classList.remove("show");
-      errorBox.textContent = "";
-      return;
+  // ===== UI message helpers =====
+  function showMsg(kind, title, text, small){
+    uiMsg.className = "msg show " + (kind || "info");
+    uiMsgTitle.textContent = title || "";
+    uiMsgText.textContent = text || "";
+    if (small){
+      uiMsgSmall.style.display = "block";
+      uiMsgSmall.textContent = small;
+    } else {
+      uiMsgSmall.style.display = "none";
+      uiMsgSmall.textContent = "";
     }
-    errorBox.textContent = msg;
-    errorBox.classList.add("show");
   }
+  // default
+  showMsg("info", "Listo", "Selecciona un archivo para comenzar.");
 
-  // ===== Preview engine (simple) =====
+  // ===== Preview engine (EQ + gain en cliente para “preview”) =====
   let audioCtx = null;
   let sourceNode = null;
   let gainNode = null;
@@ -564,6 +591,13 @@
   }
 
   // ===== A/B UI =====
+  function fmtTime(s){
+    s = Math.max(0, Math.floor(s || 0));
+    const m = Math.floor(s/60);
+    const r = s%60;
+    return `${m}:${String(r).padStart(2,'0')}`;
+  }
+
   function syncUI(){
     if (!activeAudio) return;
     const dur = activeAudio.duration || 0;
@@ -578,7 +612,10 @@
       a.pause();
       a.currentTime = 0;
     });
-    if (btnABPlay) btnABPlay.textContent = "▶";
+    if (icoPlay && icoPause){
+      icoPlay.style.display = "block";
+      icoPause.style.display = "none";
+    }
   }
 
   function setPressed(which){
@@ -627,10 +664,10 @@
 
     if (activeAudio.paused){
       await activeAudio.play();
-      btnABPlay.textContent = "⏸";
+      if (icoPlay && icoPause){ icoPlay.style.display="none"; icoPause.style.display="block"; }
     } else {
       activeAudio.pause();
-      btnABPlay.textContent = "▶";
+      if (icoPlay && icoPause){ icoPlay.style.display="block"; icoPause.style.display="none"; }
     }
   });
 
@@ -648,45 +685,31 @@
     if(!a) return;
     a.addEventListener("timeupdate", syncUI);
     a.addEventListener("loadedmetadata", syncUI);
-    a.addEventListener("ended", ()=> { if(btnABPlay) btnABPlay.textContent="▶"; });
+    a.addEventListener("ended", ()=> {
+      if (icoPlay && icoPause){ icoPlay.style.display="block"; icoPause.style.display="none"; }
+    });
   });
-
-  // ===== Clip selector (20s fijo) =====
-  function updateClipUI(){
-    const start = Number(clipStart.value || 0);
-    const end = start + FREE_CLIP_SECONDS;
-    clipLabel.textContent = `Fragmento: ${fmtMMSS(start)} → ${fmtMMSS(end)} (20s)`;
-  }
-
-  function setClipMaxFromDuration(){
-    const maxStart = Math.max(0, Math.floor(audioDuration - FREE_CLIP_SECONDS));
-    clipStart.max = String(maxStart);
-    if (Number(clipStart.value) > maxStart) clipStart.value = String(maxStart);
-    clipStart.disabled = false;
-    updateClipUI();
-  }
-
-  clipStart?.addEventListener("input", updateClipUI);
 
   // ===== Upload =====
   function pick(){ fileInput?.click(); }
   btnPick?.addEventListener("click", pick);
 
-  fileInput?.addEventListener("change", async (e) => {
-    showError("");
+  function revokeUrlSafe(u){
+    try{ if(u) URL.revokeObjectURL(u); }catch(e){}
+  }
+
+  fileInput?.addEventListener("change", (e) => {
     currentFile = e.target.files?.[0] || null;
 
     if (fileField) fileField.value = currentFile ? currentFile.name : "";
     if (btnStartJob) btnStartJob.disabled = !currentFile;
 
-    if (!currentFile){
-      fileMeta.textContent = "Peso: — • Duración: —";
-      clipStart.value = "0";
-      clipStart.max = "0";
-      clipStart.disabled = true;
-      updateClipUI();
+    if (!currentFile) {
+      showMsg("info", "Listo", "Selecciona un archivo para comenzar.");
       return;
     }
+
+    showMsg("ok", "Archivo cargado", "Configura preset/intensidad y presiona Renderizar.");
 
     abWrapper?.classList.remove("hidden");
 
@@ -725,38 +748,10 @@
     // reset progress
     progressWrap?.classList.remove("show");
     if (progressFill) progressFill.style.width = "0%";
-    if (progressText) progressText.textContent = "Listo";
-
-    // disable clip slider until duration is known
-    clipStart.disabled = true;
-    clipStart.value = "0";
-    clipStart.max = "0";
-    updateClipUI();
-
-    // read duration from metadata
-    await new Promise((resolve) => {
-      const onMeta = () => resolve();
-      audioOriginal.addEventListener("loadedmetadata", onMeta, { once:true });
-      // fallback if already loaded
-      if (Number.isFinite(audioOriginal.duration) && audioOriginal.duration > 0) resolve();
-    });
-
-    audioDuration = Number(audioOriginal.duration || 0);
-
-    const mb = bytesToMB(currentFile.size);
-    const dur = audioDuration > 0 ? fmtMMSS(audioDuration) : "—";
-    fileMeta.textContent = `Peso: ${mb} MB • Duración: ${dur}`;
-
-    if (audioDuration > 0){
-      if (audioDuration < FREE_CLIP_SECONDS){
-        showError(`Tu audio dura ${fmtMMSS(audioDuration)}. Para el modo demo necesitas mínimo ${FREE_CLIP_SECONDS}s.`);
-        clipStart.disabled = true;
-      } else {
-        setClipMaxFromDuration();
-      }
-    }
+    if (progressText) progressText.textContent = "0% • Listo";
 
     setActive(audioPreview, "preview");
+    stopAll();
   });
 
   intensity?.addEventListener("input", applyIntensity);
@@ -774,20 +769,51 @@
     }
   }
 
-  function progressSet(pct, text){
-    progressWrap.classList.add("show");
-    progressFill.style.width = `${Math.max(0, Math.min(100, pct))}%`;
-    progressText.textContent = text || "";
+  function progressSet(pct, label){
+    progressWrap?.classList.add("show");
+    const p = Math.max(0, Math.min(100, pct));
+    if (progressFill) progressFill.style.width = p + "%";
+    if (progressText) progressText.textContent = `${p}% • ${label || ""}`;
+  }
+
+  // ===== Progreso “pro” (con 75% Masterizando) =====
+  function stagedProgress(){
+    // Devuelve una función cancel() para detener timers
+    let alive = true;
+    const timers = [];
+
+    function later(ms, fn){
+      const id = setTimeout(()=> { if(alive) fn(); }, ms);
+      timers.push(id);
+    }
+
+    // orden
+    progressSet(5,  "Preparando archivo…");
+    later(220,  ()=> progressSet(20, "Subiendo…"));
+    later(520,  ()=> progressSet(45, "Analizando audio…"));
+    later(950,  ()=> progressSet(75, "🎛 Masterizando…"));
+    // 95% lo dejamos “cerca del final” para que no se quede pegado en 100 antes de tiempo
+    later(2200, ()=> progressSet(95, "Finalizando archivo…"));
+
+    return {
+      cancel(){
+        alive = false;
+        timers.forEach(clearTimeout);
+      }
+    };
   }
 
   // ===== Render real (POST correcto) =====
   btnStartJob?.addEventListener("click", async () => {
-    showError("");
     if (!currentFile) return;
 
     const old = btnStartJob.textContent;
     btnStartJob.textContent = "Procesando…";
     btnStartJob.disabled = true;
+
+    // Inicia progreso simulado (bonito)
+    const prog = stagedProgress();
+    showMsg("info", "Procesando", "Estamos trabajando tu master. No cierres esta pestaña.");
 
     try{
       // gesto -> resume
@@ -798,33 +824,48 @@
       fd.append("preset", preset?.value || "clean");
       fd.append("intensity", String(intensity?.value || 55));
 
-      // 20s fijo: usuario elige inicio
-      fd.append("start_sec", String(Number(clipStart?.value || 0)));
-
-      progressSet(10, "Subiendo…");
-
       const url = `${API_BASE}/api/master`;
       const res = await fetchWithTimeout(url, { method: "POST", body: fd }, 180000);
 
-      progressSet(55, "Procesando…");
+      const ct = (res.headers.get("content-type") || "").toLowerCase();
 
       if (!res.ok) {
-        const txt = await res.text().catch(()=> "");
-        let msg = `Render falló (${res.status}).`;
-        // intenta extraer detail si viene JSON
-        try{
-          const j = JSON.parse(txt);
-          if (j && j.detail) msg = j.detail;
-        }catch(e){}
-        showError(msg);
+        prog.cancel();
         progressSet(0, "Error");
+
+        // intenta leer json o texto
+        let detail = "";
+        try{
+          if (ct.includes("application/json")){
+            const j = await res.json();
+            detail = j?.detail ? String(j.detail) : JSON.stringify(j).slice(0,250);
+          } else {
+            detail = (await res.text()).slice(0,250);
+          }
+        } catch(e){}
+
+        showMsg(
+          "err",
+          "No se pudo renderizar",
+          detail || `Error HTTP ${res.status}.`,
+          "Tip: revisa que el archivo cumpla los límites (100MB / 6 min) y vuelve a intentar."
+        );
+        return;
+      }
+
+      if (ct.includes("application/json")) {
+        prog.cancel();
+        progressSet(0, "Error");
+        const txt = await res.text().catch(()=> "");
+        showMsg("err", "Respuesta inesperada", "El backend devolvió JSON (se esperaba audio).", txt.slice(0,200));
         return;
       }
 
       const blob = await res.blob();
       if (!blob || blob.size < 1024) {
-        showError("El master llegó vacío o muy pequeño.");
+        prog.cancel();
         progressSet(0, "Error");
+        showMsg("err", "Master vacío", "El archivo generado llegó vacío o demasiado pequeño.", `Bytes recibidos: ${blob ? blob.size : 0}`);
         return;
       }
 
@@ -844,18 +885,36 @@
         btnDownloadMaster.setAttribute("aria-disabled","false");
       }
 
+      prog.cancel();
       progressSet(100, "Listo ✅");
+      showMsg("ok", "Master listo", "Puedes escucharlo en A/B y descargarlo cuando quieras.");
 
     } catch (err) {
-      const msg = (err && (err.name === "AbortError" || err === "timeout"))
-        ? "Tiempo de espera agotado. El backend está demorando o colgado."
-        : ("Error de red/JS: " + (err?.message || String(err)));
-      showError(msg);
+      prog.cancel();
       progressSet(0, "Error");
+
+      const isTimeout = (err && (err.name === "AbortError" || err === "timeout"));
+      const msg = isTimeout
+        ? "Tiempo de espera agotado. El servidor está demorando o se cayó."
+        : ("Error de red/JS: " + (err?.message || String(err)));
+
+      showMsg(
+        "err",
+        "Error de conexión",
+        msg,
+        "Si estás en móvil, prueba con otra red o vuelve a cargar la página."
+      );
     } finally {
       btnStartJob.textContent = old;
       btnStartJob.disabled = !currentFile;
     }
+  });
+
+  // Limpieza al salir
+  window.addEventListener("beforeunload", ()=>{
+    revokeUrlSafe(originalObjectUrl);
+    revokeUrlSafe(previewObjectUrl);
+    revokeUrlSafe(masterObjectUrl);
   });
 </script>
 </body>
