@@ -13,10 +13,11 @@ from starlette.background import BackgroundTask
 # =========================
 # CONFIG
 # =========================
-
 MAX_FILE_SIZE_MB = 100
 MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
-MAX_DURATION_SECONDS = 6 * 60  # 6 minutos
+
+MAX_DURATION_SECONDS = 6 * 60  # 6 minutos (archivo completo)
+FREE_CLIP_SECONDS = 20         # 20 segundos fijos (demo/free)
 
 BASE_DIR = Path(__file__).parent
 TMP_DIR = BASE_DIR / "tmp"
@@ -31,7 +32,6 @@ app = FastAPI()
 # =========================
 # CORS
 # =========================
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -44,7 +44,6 @@ app.add_middleware(
 # =========================
 # UTILS
 # =========================
-
 def cleanup_files(*paths: Path) -> None:
     for p in paths:
         try:
@@ -75,7 +74,7 @@ def safe_filename(name: str) -> str:
 
 def get_audio_duration_seconds(path: Path) -> float:
     """
-    Usa ffprobe para obtener duración real del audio.
+    Usa ffprobe para obtener duración real del audio
     """
     cmd = [
         "ffprobe",
@@ -99,7 +98,7 @@ def get_audio_duration_seconds(path: Path) -> float:
 
     try:
         return float(proc.stdout.strip())
-    except Exception:
+    except:
         raise HTTPException(
             status_code=400,
             detail="Duración inválida."
@@ -136,7 +135,6 @@ def preset_chain(preset: str, intensity: int) -> str:
 # =========================
 # ENDPOINTS
 # =========================
-
 @app.get("/api/health")
 def health():
     return {"ok": True}
@@ -145,7 +143,7 @@ def health():
 @app.get("/api/master")
 def master_get_hint():
     return JSONResponse(
-        {"detail": "Method Not Allowed. Usa POST /api/master con form-data: file, preset, intensity."},
+        {"detail": "Method Not Allowed. Usa POST /api/master con form-data: file, preset, intensity, start_sec."},
         status_code=405
     )
 
@@ -155,6 +153,7 @@ async def master(
     file: UploadFile = File(...),
     preset: str = Form("clean"),
     intensity: int = Form(55),
+    start_sec: int = Form(0),  # <-- el usuario elige desde dónde empezar (20s fijos)
 ):
     if not file or not file.filename:
         raise HTTPException(status_code=400, detail="Archivo inválido.")
@@ -163,9 +162,12 @@ async def master(
     safe_name = safe_filename(file.filename)
 
     in_path = TMP_DIR / f"in_{job_id}_{safe_name}"
+    trim_path = TMP_DIR / f"trim_{job_id}.wav"
     out_path = TMP_DIR / f"master_{job_id}.wav"
 
-    # Guardar archivo
+    # =========================
+    # GUARDAR ARCHIVO
+    # =========================
     try:
         with in_path.open("wb") as f:
             shutil.copyfileobj(file.file, f)
@@ -175,7 +177,9 @@ async def master(
         except Exception:
             pass
 
-    # Validar tamaño
+    # =========================
+    # VALIDAR TAMAÑO REAL
+    # =========================
     size_bytes = in_path.stat().st_size
     if size_bytes > MAX_FILE_SIZE_BYTES:
         cleanup_files(in_path)
@@ -184,8 +188,11 @@ async def master(
             detail=f"El archivo supera el límite de {MAX_FILE_SIZE_MB}MB."
         )
 
-    # Validar duración
+    # =========================
+    # VALIDAR DURACIÓN REAL (archivo completo)
+    # =========================
     duration = get_audio_duration_seconds(in_path)
+
     if duration > MAX_DURATION_SECONDS:
         cleanup_files(in_path)
         raise HTTPException(
@@ -193,13 +200,60 @@ async def master(
             detail="El audio supera el límite de 6 minutos."
         )
 
-    # Procesar master
-    filters = preset_chain(preset, intensity)
+    if duration < FREE_CLIP_SECONDS:
+        cleanup_files(in_path)
+        raise HTTPException(
+            status_code=400,
+            detail=f"El audio debe durar al menos {FREE_CLIP_SECONDS} segundos para usar el modo demo."
+        )
 
-    cmd = [
+    # start_sec válido: 0..(duration-20)
+    try:
+        start_sec = int(start_sec)
+    except Exception:
+        start_sec = 0
+
+    if start_sec < 0:
+        start_sec = 0
+
+    max_start = int(duration) - FREE_CLIP_SECONDS
+    if start_sec > max_start:
+        cleanup_files(in_path)
+        raise HTTPException(
+            status_code=400,
+            detail=f"Elige un inicio más temprano. Máximo permitido: {max_start}s (para recortar {FREE_CLIP_SECONDS}s)."
+        )
+
+    # =========================
+    # RECORTAR 20s (DEMO/FREE)
+    # =========================
+    cmd_trim = [
         "ffmpeg", "-y",
         "-hide_banner",
+        "-ss", str(start_sec),
+        "-t", str(FREE_CLIP_SECONDS),
         "-i", str(in_path),
+        "-vn",
+        "-ac", "2",
+        "-ar", "44100",
+        "-af", "aresample=44100:async=1:first_pts=0",
+        str(trim_path)
+    ]
+    run_ffmpeg(cmd_trim)
+
+    if not trim_path.exists() or trim_path.stat().st_size < 1024:
+        cleanup_files(in_path, trim_path)
+        raise HTTPException(status_code=400, detail="No se pudo generar el recorte de 20 segundos.")
+
+    # =========================
+    # PROCESAR MASTER (sobre el recorte)
+    # =========================
+    filters = preset_chain(preset, intensity)
+
+    cmd_master = [
+        "ffmpeg", "-y",
+        "-hide_banner",
+        "-i", str(trim_path),
         "-vn",
         "-af", filters,
         "-ar", "44100",
@@ -207,11 +261,10 @@ async def master(
         "-sample_fmt", "s16",
         str(out_path)
     ]
-
-    run_ffmpeg(cmd)
+    run_ffmpeg(cmd_master)
 
     if not out_path.exists() or out_path.stat().st_size < 1024:
-        cleanup_files(in_path, out_path)
+        cleanup_files(in_path, trim_path, out_path)
         raise HTTPException(
             status_code=500,
             detail="Master no generado o vacío."
@@ -221,7 +274,7 @@ async def master(
         path=str(out_path),
         media_type="audio/wav",
         filename="warmaster_master.wav",
-        background=BackgroundTask(cleanup_files, in_path, out_path),
+        background=BackgroundTask(cleanup_files, in_path, trim_path, out_path),
     )
 
 
@@ -229,8 +282,8 @@ async def master(
 def root():
     return RedirectResponse(url="/index.html")
 
+
 # =========================
 # STATIC
 # =========================
-
 app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="public")
