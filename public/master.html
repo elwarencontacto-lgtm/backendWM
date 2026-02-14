@@ -84,16 +84,13 @@
       justify-content:center;
       user-select:none;
       gap:10px;
-      transition: transform .12s ease, background .12s ease, border-color .12s ease;
     }
-    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.22); }
+    .btn:hover{ background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.22); }
     .btn.primary{
       border:none;
       background: linear-gradient(90deg, rgba(138,92,255,.95), rgba(0,215,255,.95));
       color:#061018;
-      font-weight:900;
     }
-    .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
     .ghost{ background: transparent; }
 
     main{ padding: 26px 0 70px; }
@@ -168,6 +165,7 @@
       justify-content:space-between;
       gap: 10px;
       align-items:center;
+      flex-wrap:wrap;
     }
     .card-h h2{ margin:0; font-size:14px; letter-spacing:.2px; }
     .card-b{ padding: 14px; }
@@ -214,46 +212,11 @@
       transition: width .25s ease;
     }
     .ptext{
-      min-width: 160px;
+      min-width: 120px;
       text-align:right;
       font-size: 12px;
-      color: rgba(233,237,247,.85);
+      color: rgba(233,237,247,.8);
       font-weight: 900;
-      white-space: nowrap;
-    }
-
-    /* Status box (errores bonitos) */
-    .statusBox{
-      margin-top:12px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-      padding: 12px;
-      display:none;
-      gap: 10px;
-      align-items:flex-start;
-    }
-    .statusBox.show{ display:flex; }
-    .statusDot{
-      width:10px; height:10px; border-radius:999px;
-      background: rgba(233,237,247,.45);
-      margin-top:4px;
-      flex: 0 0 auto;
-    }
-    .statusDot.ok{ background: rgba(0,255,154,.75); box-shadow: 0 0 0 6px rgba(0,255,154,.12); }
-    .statusDot.warn{ background: rgba(255,196,90,.85); box-shadow: 0 0 0 6px rgba(255,196,90,.10); }
-    .statusDot.err{ background: rgba(255,120,120,.80); box-shadow: 0 0 0 6px rgba(255,120,120,.10); }
-    .statusText{
-      font-size: 12px;
-      color: rgba(233,237,247,.85);
-      line-height:1.45;
-      font-weight: 800;
-    }
-    .statusText small{
-      display:block;
-      margin-top:4px;
-      color: rgba(233,237,247,.62);
-      font-weight: 800;
     }
 
     /* A/B */
@@ -296,11 +259,11 @@
       background: linear-gradient(90deg, rgba(138,92,255,.95), rgba(0,215,255,.95));
       color:#061018;
     }
-
     .abTransport{
       display:flex;
       gap:10px;
       align-items:center;
+      flex-wrap:wrap;
     }
     .abPlay{
       width:46px;
@@ -310,8 +273,6 @@
       align-items:center;
       justify-content:center;
       font-weight: 900;
-      font-size: 16px;
-      line-height: 1;
     }
     .abTimeline{ flex:1; min-width: 180px; }
     .abTime{
@@ -319,12 +280,33 @@
       color: rgba(233,237,247,.65);
       margin-bottom:6px;
       text-align:left;
-      font-weight: 900;
     }
     #abSeek{ width:100%; accent-color: var(--b); }
 
     .disabled{ opacity:.6; pointer-events:none; }
-    audio{ width:100%; margin-top:8px; }
+
+    /* Info / warning */
+    .hint{
+      margin-top:10px;
+      color: rgba(233,237,247,.70);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .hint b{ color: rgba(233,237,247,.92); }
+
+    /* Error UI (sin alert feo) */
+    .errorBox{
+      display:none;
+      margin-top:12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,120,120,.35);
+      background: rgba(255,120,120,.08);
+      padding: 10px 12px;
+      color: rgba(233,237,247,.92);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .errorBox.show{ display:block; }
   </style>
 </head>
 
@@ -349,7 +331,7 @@
     <div class="top">
       <div>
         <h1>Masterizado</h1>
-        <p class="sub">Sube tu audio, elige un preset y ajusta la intensidad.</p>
+        <p class="sub">Sube tu audio, elige un preset, ajusta intensidad y selecciona el inicio del demo (20s).</p>
       </div>
     </div>
 
@@ -367,8 +349,10 @@
             <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
               <button class="btn" type="button" id="btnPick">Seleccionar</button>
             </div>
-            <div style="margin-top:10px; font-size:12px; color:rgba(233,237,247,.65); font-weight:800; line-height:1.5;">
-              Límite: <b>100MB</b> y <b>6 minutos</b>. (Valida el backend)
+
+            <div class="hint" id="fileMeta">Peso: — • Duración: —</div>
+            <div class="hint">
+              <b>Demo FREE:</b> se procesa solo un fragmento fijo de <b>20 segundos</b> (tú eliges el inicio).
             </div>
           </div>
 
@@ -386,9 +370,15 @@
 
             <label for="intensity2">Intensidad</label>
             <input type="range" id="intensity2" min="0" max="100" value="55" />
-            <div style="display:flex; justify-content:space-between; font-size:12px; color:rgba(233,237,247,.65); margin-top:6px; font-weight:800;">
+            <div style="display:flex; justify-content:space-between; font-size:12px; color:rgba(233,237,247,.65); margin-top:6px;">
               <span>Suave</span><span>Agresiva</span>
             </div>
+
+            <div style="height:12px"></div>
+
+            <label for="clipStart">Inicio del demo (20s)</label>
+            <input type="range" id="clipStart" min="0" max="0" value="0" disabled />
+            <div class="hint" id="clipLabel">Fragmento: 00:00 → 00:20 (20s)</div>
           </div>
         </div>
 
@@ -396,16 +386,12 @@
           <button class="btn primary" type="button" id="btnStartJob" disabled>Renderizar</button>
         </div>
 
+        <div id="errorBox" class="errorBox" role="alert"></div>
+
         <!-- Progreso UI -->
         <div class="progressWrap" id="progressWrap" aria-live="polite">
           <div class="bar"><div class="fill" id="progressFill"></div></div>
-          <div class="ptext" id="progressText">0% • Listo</div>
-        </div>
-
-        <!-- Status UI -->
-        <div class="statusBox" id="statusBox" aria-live="polite">
-          <span class="statusDot" id="statusDot"></span>
-          <div class="statusText" id="statusText">—</div>
+          <div class="ptext" id="progressText">Listo</div>
         </div>
 
         <div id="abWrapper" class="hidden">
@@ -421,14 +407,14 @@
             </div>
 
             <div class="abTransport">
-              <button class="btn primary abPlay" type="button" id="btnABPlay" aria-label="Play/Pause">▶</button>
+              <button class="btn primary abPlay" type="button" id="btnABPlay">▶</button>
 
               <div class="abTimeline">
                 <div class="abTime" id="abTime">0:00 / 0:00</div>
                 <input id="abSeek" type="range" min="0" max="1000" value="0" />
               </div>
 
-              <button class="btn abBtn" type="button" id="btnABStop" aria-label="Stop">■</button>
+              <button class="btn abBtn" type="button" id="btnABStop">■</button>
             </div>
 
             <audio id="audioOriginal" preload="metadata"></audio>
@@ -445,6 +431,8 @@
 </main>
 
 <script>
+  const FREE_CLIP_SECONDS = 20;
+
   // ===== API_BASE: querystring ?api=... o mismo dominio =====
   function getApiBase(){
     const qs = new URLSearchParams(location.search);
@@ -466,10 +454,6 @@
   const progressFill = document.getElementById("progressFill");
   const progressText = document.getElementById("progressText");
 
-  const statusBox = document.getElementById("statusBox");
-  const statusDot = document.getElementById("statusDot");
-  const statusText = document.getElementById("statusText");
-
   const abWrapper   = document.getElementById("abWrapper");
   const btnABOriginal = document.getElementById("btnABOriginal");
   const btnABPreview  = document.getElementById("btnABPreview");
@@ -484,6 +468,11 @@
   const audioPreview  = document.getElementById("audioPreview");
   const audioMaster   = document.getElementById("audioMaster");
 
+  const clipStart = document.getElementById("clipStart");
+  const clipLabel = document.getElementById("clipLabel");
+  const fileMeta  = document.getElementById("fileMeta");
+  const errorBox  = document.getElementById("errorBox");
+
   // ===== State =====
   let currentFile = null;
   let activeAudio = audioPreview;
@@ -492,7 +481,43 @@
   let previewObjectUrl = null;
   let masterObjectUrl = null;
 
-  // ===== Preview engine =====
+  let audioDuration = 0;
+
+  // ===== Helpers =====
+  function revokeUrlSafe(u){
+    try{ if(u) URL.revokeObjectURL(u); }catch(e){}
+  }
+
+  function fmtTime(s){
+    s = Math.max(0, Math.floor(s || 0));
+    const m = Math.floor(s/60);
+    const r = s%60;
+    return `${m}:${String(r).padStart(2,'0')}`;
+  }
+
+  function fmtMMSS(s){
+    s = Math.max(0, Math.floor(s || 0));
+    const m = Math.floor(s/60);
+    const r = s%60;
+    return `${String(m).padStart(2,'0')}:${String(r).padStart(2,'0')}`;
+  }
+
+  function bytesToMB(b){
+    return (b / (1024*1024)).toFixed(2);
+  }
+
+  function showError(msg){
+    if (!errorBox) return;
+    if (!msg){
+      errorBox.classList.remove("show");
+      errorBox.textContent = "";
+      return;
+    }
+    errorBox.textContent = msg;
+    errorBox.classList.add("show");
+  }
+
+  // ===== Preview engine (simple) =====
   let audioCtx = null;
   let sourceNode = null;
   let gainNode = null;
@@ -538,76 +563,7 @@
     gainNode.gain.value = 1 + v * 0.8;
   }
 
-  // ===== UI helpers =====
-  function setStatus(kind, title, detail){
-    if (!statusBox || !statusDot || !statusText) return;
-    statusBox.classList.add("show");
-    statusDot.classList.remove("ok","warn","err");
-    if (kind) statusDot.classList.add(kind);
-    statusText.innerHTML = `${title || ""}${detail ? `<small>${detail}</small>` : ""}`;
-  }
-
-  function clearStatus(){
-    statusBox?.classList.remove("show");
-    if (statusDot){
-      statusDot.classList.remove("ok","warn","err");
-    }
-    if (statusText) statusText.textContent = "—";
-  }
-
-  function progressSet(pct, text){
-    progressWrap?.classList.add("show");
-    if (progressFill) progressFill.style.width = `${Math.max(0, Math.min(100, pct))}%`;
-    if (progressText) progressText.textContent = `${Math.round(pct)}% • ${text || ""}`.trim();
-  }
-
-  function progressError(text){
-    progressWrap?.classList.add("show");
-    if (progressFill) progressFill.style.width = "0%";
-    if (progressText) progressText.textContent = `0% • ${text || "Error"}`;
-  }
-
-  // POST /api/master con % real de subida (XHR)
-  function postMasterWithProgress({ apiBase, file, preset, intensity, onProgress }){
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", `${apiBase}/api/master`, true);
-      xhr.responseType = "blob";
-      xhr.timeout = 180000; // 3 min
-
-      xhr.upload.onprogress = (e) => {
-        if (!e.lengthComputable) return;
-        const pct = (e.loaded / e.total) * 60; // 0..60% reservado para upload
-        onProgress?.(pct, "Subiendo…");
-      };
-
-      xhr.onload = () => {
-        resolve({
-          ok: xhr.status >= 200 && xhr.status < 300,
-          status: xhr.status,
-          contentType: xhr.getResponseHeader("content-type") || "",
-          blob: xhr.response
-        });
-      };
-
-      xhr.ontimeout = () => reject(new Error("timeout"));
-      xhr.onerror = () => reject(new Error("network"));
-
-      const fd = new FormData();
-      fd.append("file", file);
-      fd.append("preset", preset || "clean");
-      fd.append("intensity", String(intensity ?? 55));
-      xhr.send(fd);
-    });
-  }
-
-  function fmtTime(s){
-    s = Math.max(0, Math.floor(s || 0));
-    const m = Math.floor(s/60);
-    const r = s%60;
-    return `${m}:${String(r).padStart(2,'0')}`;
-  }
-
+  // ===== A/B UI =====
   function syncUI(){
     if (!activeAudio) return;
     const dur = activeAudio.duration || 0;
@@ -671,7 +627,7 @@
 
     if (activeAudio.paused){
       await activeAudio.play();
-      btnABPlay.textContent = "❚❚";
+      btnABPlay.textContent = "⏸";
     } else {
       activeAudio.pause();
       btnABPlay.textContent = "▶";
@@ -695,22 +651,42 @@
     a.addEventListener("ended", ()=> { if(btnABPlay) btnABPlay.textContent="▶"; });
   });
 
-  function revokeUrlSafe(u){
-    try{ if(u) URL.revokeObjectURL(u); }catch(e){}
+  // ===== Clip selector (20s fijo) =====
+  function updateClipUI(){
+    const start = Number(clipStart.value || 0);
+    const end = start + FREE_CLIP_SECONDS;
+    clipLabel.textContent = `Fragmento: ${fmtMMSS(start)} → ${fmtMMSS(end)} (20s)`;
   }
 
+  function setClipMaxFromDuration(){
+    const maxStart = Math.max(0, Math.floor(audioDuration - FREE_CLIP_SECONDS));
+    clipStart.max = String(maxStart);
+    if (Number(clipStart.value) > maxStart) clipStart.value = String(maxStart);
+    clipStart.disabled = false;
+    updateClipUI();
+  }
+
+  clipStart?.addEventListener("input", updateClipUI);
+
+  // ===== Upload =====
   function pick(){ fileInput?.click(); }
   btnPick?.addEventListener("click", pick);
 
-  fileInput?.addEventListener("change", (e) => {
+  fileInput?.addEventListener("change", async (e) => {
+    showError("");
     currentFile = e.target.files?.[0] || null;
 
     if (fileField) fileField.value = currentFile ? currentFile.name : "";
     if (btnStartJob) btnStartJob.disabled = !currentFile;
 
-    clearStatus();
-
-    if (!currentFile) return;
+    if (!currentFile){
+      fileMeta.textContent = "Peso: — • Duración: —";
+      clipStart.value = "0";
+      clipStart.max = "0";
+      clipStart.disabled = true;
+      updateClipUI();
+      return;
+    }
 
     abWrapper?.classList.remove("hidden");
 
@@ -749,7 +725,36 @@
     // reset progress
     progressWrap?.classList.remove("show");
     if (progressFill) progressFill.style.width = "0%";
-    if (progressText) progressText.textContent = "0% • Listo";
+    if (progressText) progressText.textContent = "Listo";
+
+    // disable clip slider until duration is known
+    clipStart.disabled = true;
+    clipStart.value = "0";
+    clipStart.max = "0";
+    updateClipUI();
+
+    // read duration from metadata
+    await new Promise((resolve) => {
+      const onMeta = () => resolve();
+      audioOriginal.addEventListener("loadedmetadata", onMeta, { once:true });
+      // fallback if already loaded
+      if (Number.isFinite(audioOriginal.duration) && audioOriginal.duration > 0) resolve();
+    });
+
+    audioDuration = Number(audioOriginal.duration || 0);
+
+    const mb = bytesToMB(currentFile.size);
+    const dur = audioDuration > 0 ? fmtMMSS(audioDuration) : "—";
+    fileMeta.textContent = `Peso: ${mb} MB • Duración: ${dur}`;
+
+    if (audioDuration > 0){
+      if (audioDuration < FREE_CLIP_SECONDS){
+        showError(`Tu audio dura ${fmtMMSS(audioDuration)}. Para el modo demo necesitas mínimo ${FREE_CLIP_SECONDS}s.`);
+        clipStart.disabled = true;
+      } else {
+        setClipMaxFromDuration();
+      }
+    }
 
     setActive(audioPreview, "preview");
   });
@@ -757,58 +762,69 @@
   intensity?.addEventListener("input", applyIntensity);
   preset?.addEventListener("change", applyPreset);
 
-  // ===== Render con % (subida real + procesando simulado) =====
+  // ===== Fetch with timeout =====
+  async function fetchWithTimeout(url, options, timeoutMs){
+    const controller = new AbortController();
+    const t = setTimeout(()=> controller.abort("timeout"), timeoutMs);
+    try{
+      const res = await fetch(url, { ...options, signal: controller.signal });
+      return res;
+    } finally {
+      clearTimeout(t);
+    }
+  }
+
+  function progressSet(pct, text){
+    progressWrap.classList.add("show");
+    progressFill.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+    progressText.textContent = text || "";
+  }
+
+  // ===== Render real (POST correcto) =====
   btnStartJob?.addEventListener("click", async () => {
+    showError("");
     if (!currentFile) return;
 
     const old = btnStartJob.textContent;
     btnStartJob.textContent = "Procesando…";
     btnStartJob.disabled = true;
 
-    clearStatus();
-
-    // “procesando” fake: 70%→95% mientras esperamos respuesta
-    let procTimer = null;
-    let procPct = 70;
-
     try{
-      progressSet(2, "Preparando…");
-
       // gesto -> resume
       try{ if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume(); } catch(e){}
 
-      const res = await postMasterWithProgress({
-        apiBase: API_BASE,
-        file: currentFile,
-        preset: preset?.value || "clean",
-        intensity: intensity?.value || 55,
-        onProgress: (pct, txt) => progressSet(pct, txt),
-      });
+      const fd = new FormData();
+      fd.append("file", currentFile);
+      fd.append("preset", preset?.value || "clean");
+      fd.append("intensity", String(intensity?.value || 55));
 
-      // ya terminó la subida: pasamos a “procesando”
-      progressSet(70, "Procesando…");
-      procTimer = setInterval(() => {
-        procPct = Math.min(95, procPct + 1.2);
-        progressSet(procPct, "Procesando…");
-        if (procPct >= 95) clearInterval(procTimer);
-      }, 450);
+      // 20s fijo: usuario elige inicio
+      fd.append("start_sec", String(Number(clipStart?.value || 0)));
+
+      progressSet(10, "Subiendo…");
+
+      const url = `${API_BASE}/api/master`;
+      const res = await fetchWithTimeout(url, { method: "POST", body: fd }, 180000);
+
+      progressSet(55, "Procesando…");
 
       if (!res.ok) {
-        let txt = "";
+        const txt = await res.text().catch(()=> "");
+        let msg = `Render falló (${res.status}).`;
+        // intenta extraer detail si viene JSON
         try{
-          if (res.blob && res.blob.type && res.blob.type.includes("application/json")) {
-            txt = await res.blob.text();
-          }
+          const j = JSON.parse(txt);
+          if (j && j.detail) msg = j.detail;
         }catch(e){}
-        progressError(`Error ${res.status}`);
-        setStatus("err", `No se pudo renderizar (HTTP ${res.status}).`, txt ? txt.slice(0,280) : "Intenta con otro archivo o revisa el backend.");
+        showError(msg);
+        progressSet(0, "Error");
         return;
       }
 
-      const blob = res.blob;
+      const blob = await res.blob();
       if (!blob || blob.size < 1024) {
-        progressError("Master vacío");
-        setStatus("err", "El master llegó vacío o muy pequeño.", "Revisa el backend/FFmpeg o prueba con otro archivo.");
+        showError("El master llegó vacío o muy pequeño.");
+        progressSet(0, "Error");
         return;
       }
 
@@ -829,19 +845,14 @@
       }
 
       progressSet(100, "Listo ✅");
-      setStatus("ok", "Master generado correctamente.", "Puedes escucharlo en Master o descargarlo.");
 
     } catch (err) {
-      const msg =
-        (err?.message === "timeout") ? "Tiempo de espera agotado (timeout)."
-        : (err?.message === "network") ? "Error de red (Failed to fetch)."
-        : ("Error: " + (err?.message || String(err)));
-
-      progressError("Error");
-      setStatus("err", "Error al conectar con el servidor.", msg);
-
+      const msg = (err && (err.name === "AbortError" || err === "timeout"))
+        ? "Tiempo de espera agotado. El backend está demorando o colgado."
+        : ("Error de red/JS: " + (err?.message || String(err)));
+      showError(msg);
+      progressSet(0, "Error");
     } finally {
-      if (procTimer) clearInterval(procTimer);
       btnStartJob.textContent = old;
       btnStartJob.disabled = !currentFile;
     }
