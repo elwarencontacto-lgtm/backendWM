@@ -4,19 +4,28 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>WarMaster — Dashboard</title>
+  <meta name="description" content="Panel WarMaster: historial de renders, estado, descargas." />
+
   <style>
     :root{
       --bg0:#07080c;
       --bg1:#0b0e16;
       --text:#e9edf7;
       --muted: rgba(233,237,247,.72);
-      --a:#8a5cff;
-      --b:#00d7ff;
-      --c:#00ff9a;
-      --radius:22px;
-      --shadow: 0 24px 70px rgba(0,0,0,.55);
+
+      --a:#8a5cff;   /* violeta */
+      --b:#00d7ff;   /* cyan */
+      --c:#00ff9a;   /* verde */
+
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
+      --radius: 18px;
+      --radius2: 24px;
+      --max: 1160px;
     }
+
     *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
@@ -28,207 +37,509 @@
         linear-gradient(180deg, var(--bg0), var(--bg1) 55%, #06070b);
       overflow-x:hidden;
     }
+
     a{ color:inherit; text-decoration:none; }
+    .container{ width:min(var(--max), calc(100% - 40px)); margin:0 auto; }
+
+    .grid-bg{
+      position: fixed;
+      inset: 0;
+      pointer-events:none;
+      opacity:.35;
+      background:
+        linear-gradient(to right, rgba(255,255,255,.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,.03) 1px, transparent 1px);
+      background-size: 54px 54px;
+      mask-image: radial-gradient(600px 400px at 50% 10%, #000 60%, transparent 100%);
+    }
+
     header{
       position: sticky;
       top:0;
-      z-index:10;
+      z-index:50;
       backdrop-filter: blur(14px);
       background: rgba(7,8,12,.55);
-      border-bottom:1px solid rgba(255,255,255,.08);
+      border-bottom: 1px solid rgba(255,255,255,.08);
     }
-    .wrap{ width:min(1180px, calc(100% - 40px)); margin:0 auto; }
+
     .nav{
       display:flex;
-      justify-content:space-between;
       align-items:center;
-      gap:14px;
-      padding:16px 0;
+      justify-content:space-between;
+      padding: 14px 0;
+      gap: 18px;
       flex-wrap:wrap;
     }
+
     .brand{
-      font-size:22px;
-      font-weight:950;
-      letter-spacing:.2px;
-      display:flex;
-      align-items:center;
-      gap:10px;
+      display:flex; align-items:center; gap:10px;
+      font-weight: 920;
+      letter-spacing:.3px;
     }
-    .dotlogo{
-      width:34px;height:34px;border-radius:12px;
+
+    .logo{
+      width: 36px; height:36px; border-radius: 12px;
       background:
         radial-gradient(circle at 30% 30%, rgba(0,215,255,.95), transparent 55%),
         radial-gradient(circle at 70% 70%, rgba(138,92,255,.95), transparent 55%),
         linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.02));
-      border:1px solid rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.12);
       box-shadow: 0 12px 40px rgba(0,0,0,.45);
+      position: relative;
+      overflow:hidden;
     }
+    .logo::after{
+      content:"";
+      position:absolute; inset:-30px;
+      background: conic-gradient(from 120deg, rgba(0,255,154,.0), rgba(0,255,154,.35), rgba(0,215,255,.0));
+      animation: spin 6s linear infinite;
+      opacity:.9;
+    }
+    @keyframes spin{ to{ transform: rotate(360deg); } }
+
     .grad{
-      background:linear-gradient(90deg,var(--a),var(--b),var(--c));
+      background: linear-gradient(90deg, rgba(138,92,255,1), rgba(0,215,255,1), rgba(0,255,154,1));
       -webkit-background-clip:text;
       background-clip:text;
-      color:transparent;
+      color: transparent;
     }
+
     .btn{
-      padding:10px 16px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.14);
       background: rgba(255,255,255,.06);
       color: var(--text);
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-weight: 820;
+      font-size: 14px;
       cursor:pointer;
-      font-weight:950;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
       transition: transform .12s ease, background .12s ease, border-color .12s ease;
+      display:inline-flex; align-items:center; gap:10px;
+      user-select:none;
     }
     .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.22); }
     .btn.primary{
       border:none;
       background: linear-gradient(90deg, rgba(138,92,255,.95), rgba(0,215,255,.95));
-      color:#061018;
-      box-shadow: 0 18px 60px rgba(0,0,0,.35);
+      color:#071018;
+      box-shadow: var(--shadow);
+    }
+    .btn.ghost{ background: transparent; }
+    .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
+
+    main{ padding: 22px 0 40px; }
+
+    .top{
+      display:flex; align-items:flex-end; justify-content:space-between;
+      gap: 18px; flex-wrap: wrap;
+      margin: 10px 0 16px;
+    }
+    h1{
+      margin:0;
+      font-size: clamp(26px, 3.5vw, 34px);
+      letter-spacing:-.6px;
+    }
+    .sub{
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height:1.5;
+      max-width: 70ch;
     }
 
-    main{ padding: 26px 0 80px; }
-    h1{ margin: 12px 0 0; font-size: 34px; letter-spacing:-.8px; }
-    .sub{ margin:8px 0 0; color: var(--muted); font-size: 14px; line-height:1.6; max-width: 72ch; }
-
-    .grid{
-      margin-top: 18px;
+    .layout{
       display:grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 280px 1fr;
       gap: 16px;
+      align-items:start;
     }
-    @media (max-width: 980px){ .grid{ grid-template-columns: 1fr; } }
 
     .card{
-      border-radius: var(--radius);
+      border-radius: var(--radius2);
       border: 1px solid rgba(255,255,255,.12);
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
-      box-shadow: var(--shadow);
-      padding: 16px;
-      position:relative;
+      background: rgba(255,255,255,.05);
+      box-shadow: 0 14px 50px rgba(0,0,0,.35);
       overflow:hidden;
+      position:relative;
     }
     .card::before{
       content:"";
       position:absolute; inset:-1px;
-      background:
-        radial-gradient(420px 220px at 20% 20%, rgba(138,92,255,.14), transparent 60%),
-        radial-gradient(420px 220px at 85% 30%, rgba(0,215,255,.10), transparent 60%),
-        radial-gradient(520px 240px at 40% 95%, rgba(0,255,154,.08), transparent 60%);
+      background: radial-gradient(260px 160px at 20% 20%, rgba(138,92,255,.14), transparent 60%);
       pointer-events:none;
       opacity:.9;
     }
     .card > *{ position:relative; }
 
-    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
-    .k{ color: rgba(233,237,247,.65); font-weight:950; font-size:12px; letter-spacing:.2px; }
-    .v{ font-size: 22px; font-weight: 980; letter-spacing:-.4px; margin-top:6px; }
+    .card-h{
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      display:flex; justify-content:space-between; gap: 10px; align-items:center;
+      flex-wrap:wrap;
+    }
+    .card-h h2{
+      margin:0;
+      font-size: 14px;
+      letter-spacing:.2px;
+    }
+    .card-b{ padding: 14px; }
 
-    .table{
-      width:100%;
-      border-collapse: collapse;
-      margin-top: 10px;
+    /* Sidebar */
+    .menu{
+      display:flex; flex-direction:column; gap: 8px;
+    }
+    .menu a{
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      color: rgba(233,237,247,.84);
+      font-weight: 800;
       font-size: 13px;
     }
-    .table th, .table td{
-      border-bottom: 1px solid rgba(255,255,255,.10);
-      padding: 10px 8px;
-      text-align:left;
-      color: rgba(233,237,247,.85);
+    .menu a.active{
+      border-color: rgba(0,215,255,.35);
+      background: rgba(0,215,255,.08);
+      color: rgba(233,237,247,.95);
     }
-    .table th{
-      color: rgba(233,237,247,.6);
-      font-size: 12px;
-      font-weight: 950;
+    .menu small{
+      color: rgba(233,237,247,.55);
+      font-weight: 800;
+      margin-top: 6px;
     }
+
     .pill{
       display:inline-flex; align-items:center; gap:8px;
       padding: 6px 10px;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.06);
-      font-weight: 950;
+      font-weight: 900;
       font-size: 12px;
       color: rgba(233,237,247,.9);
     }
     .dot{
-      width:8px; height:8px;
-      border-radius:999px;
-      background: rgba(0,255,154,.75);
-      box-shadow: 0 0 0 6px rgba(0,255,154,.12);
+      width:8px; height:8px; border-radius:999px; display:inline-block;
+      background: rgba(233,237,247,.45);
     }
+    .dot.ok{ background: rgba(0,255,154,.75); box-shadow: 0 0 0 6px rgba(0,255,154,.12); }
+    .dot.run{ background: rgba(0,215,255,.85); box-shadow: 0 0 0 6px rgba(0,215,255,.12); }
+    .dot.fail{ background: rgba(255,120,120,.80); box-shadow: 0 0 0 6px rgba(255,120,120,.10); }
+
+    /* Table */
+    table{ width:100%; border-collapse: collapse; }
+    th, td{
+      padding: 10px 8px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      font-size: 13px;
+      text-align:left;
+      vertical-align: top;
+    }
+    th{ color: rgba(233,237,247,.70); font-weight: 900; font-size: 12px; letter-spacing:.2px; }
+    td{ color: rgba(233,237,247,.88); }
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+
+    .muted{ color: rgba(233,237,247,.65); font-size:12px; }
+    .rowBtns{ display:flex; gap:8px; flex-wrap:wrap; padding-top:6px; padding-bottom:6px; }
+
+    .empty{
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px dashed rgba(255,255,255,.16);
+      background: rgba(0,0,0,.14);
+      color: rgba(233,237,247,.72);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .toast{
+      display:none;
+      margin: 10px 0 0;
+      border-radius: 16px;
+      border: 1px solid rgba(255,120,120,.35);
+      background: rgba(255,120,120,.08);
+      padding: 10px 12px;
+      color: rgba(233,237,247,.9);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .toast.show{ display:block; }
+
     footer{
-      margin-top: 28px;
+      padding: 18px 0 28px;
       color: rgba(233,237,247,.55);
       font-size: 12px;
-      line-height: 1.6;
+    }
+
+    @media (max-width: 980px){
+      .layout{ grid-template-columns: 1fr; }
     }
   </style>
 </head>
+
 <body>
-<header>
-  <div class="wrap">
-    <div class="nav">
-      <a class="brand" href="index.html" aria-label="Home">
-        <span class="dotlogo" aria-hidden="true"></span>
-        <span>War<span class="grad">Master</span></span>
-      </a>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <a class="btn" href="master.html">Nuevo master</a>
-        <a class="btn" href="index.html">Salir</a>
+  <div class="grid-bg" aria-hidden="true"></div>
+
+  <header>
+    <div class="container">
+      <div class="nav">
+        <a class="brand" href="index.html" title="Volver al inicio">
+          <span class="logo" aria-hidden="true"></span>
+          <span>War<span class="grad">Master</span></span>
+        </a>
+
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <span class="pill" title="Estado del backend"><span class="dot run" id="dotHealth"></span> <span id="healthTxt">Conectando…</span></span>
+          <a class="btn ghost" href="master.html">Nuevo master</a>
+          <a class="btn" href="index.html">Landing</a>
+        </div>
       </div>
     </div>
-  </div>
-</header>
+  </header>
 
-<main>
-  <div class="wrap">
-    <div class="row">
-      <div>
-        <h1>Dashboard</h1>
-        <p class="sub">Vista demo (beta1.2). Próximamente historial real y usuarios.</p>
+  <main>
+    <div class="container">
+      <div class="top">
+        <div>
+          <h1>Dashboard</h1>
+          <p class="sub">Historial real (memoria) de renders: estado, preset, intensidad y descarga cuando esté listo.</p>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn" type="button" id="btnRefresh">Actualizar</button>
+          <button class="btn primary" type="button" id="btnNewMaster">Nuevo master</button>
+        </div>
       </div>
-      <span class="pill"><span class="dot"></span> Online</span>
+
+      <div class="layout">
+        <!-- Sidebar -->
+        <aside class="card">
+          <div class="card-h">
+            <h2>Menú</h2>
+          </div>
+          <div class="card-b">
+            <div class="menu">
+              <a class="active" href="#projects">Últimos renders</a>
+              <a href="#help">Ayuda</a>
+              <small>Acciones</small>
+              <a href="master.html">Crear master</a>
+              <a href="index.html">Volver a landing</a>
+            </div>
+
+            <div style="margin-top:14px; color:rgba(233,237,247,.62); font-size:12px; line-height:1.5;">
+              <b>Tip:</b> si abres dashboard desde otro dominio, agrega:
+              <div class="mono" style="margin-top:6px; padding:8px 10px; border-radius:12px; border:1px solid rgba(255,255,255,.10); background: rgba(0,0,0,.18);">
+                ?api=https://TU-BACKEND.onrender.com
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Main -->
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <!-- Jobs table -->
+          <section id="projects" class="card">
+            <div class="card-h">
+              <h2>Últimos renders</h2>
+              <span class="pill"><span class="dot" id="dotJobs"></span> <span id="jobsCount">—</span></span>
+            </div>
+            <div class="card-b" style="padding-top:10px;">
+              <div id="toast" class="toast"></div>
+
+              <div id="empty" class="empty" style="display:none;">
+                Aún no hay jobs guardados.<br>
+                Crea uno desde <b>Nuevo master</b> y vuelve aquí.
+              </div>
+
+              <div style="overflow:auto;">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Archivo</th>
+                      <th>Preset</th>
+                      <th>Intensidad</th>
+                      <th>Estado</th>
+                      <th>Fecha</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="jobsTbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <section id="help" class="card">
+            <div class="card-h">
+              <h2>Ayuda</h2>
+              <a class="btn" href="master.html">Ir a Master</a>
+            </div>
+            <div class="card-b" style="color:rgba(233,237,247,.78); font-size:13px; line-height:1.6;">
+              Este dashboard lee jobs desde <span class="mono">GET /api/jobs</span>.<br>
+              Como es <b>memoria</b>, si Render reinicia el servicio, el historial se reinicia (normal en beta).
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <footer>
+        © <span id="year"></span> WarMaster. Dashboard (jobs reales en memoria).
+      </footer>
     </div>
+  </main>
 
-    <div class="grid">
-      <div class="card">
-        <div class="k">Plan</div>
-        <div class="v">Beta Free</div>
-        <p class="sub">Acceso abierto mientras pruebas el producto.</p>
-      </div>
+  <script>
+    // ===== API_BASE: querystring ?api=... o mismo dominio =====
+    function getApiBase(){
+      const qs = new URLSearchParams(location.search);
+      const fromQs = (qs.get("api") || "").trim();
+      if (fromQs) return fromQs.replace(/\/+$/,"");
+      return location.origin;
+    }
+    const API_BASE = getApiBase();
 
-      <div class="card">
-        <div class="k">Estado del sistema</div>
-        <div class="v">Operativo</div>
-        <p class="sub">Backend en Render + FFmpeg.</p>
-      </div>
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
 
-      <div class="card" style="grid-column:1/-1;">
-        <div class="k">Historial (demo)</div>
-        <table class="table" aria-label="Historial demo">
-          <thead>
-            <tr><th>Fecha</th><th>Preset</th><th>Archivo</th><th>Estado</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>—</td><td>—</td><td>—</td><td>Próximamente</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+    // DOM
+    const tbody = document.getElementById('jobsTbody');
+    const empty = document.getElementById('empty');
+    const toast = document.getElementById('toast');
+    const jobsCount = document.getElementById('jobsCount');
+    const dotJobs = document.getElementById('dotJobs');
+    const dotHealth = document.getElementById('dotHealth');
+    const healthTxt = document.getElementById('healthTxt');
 
-    <footer>
-      © <span id="year"></span> WarMaster — beta1.2
-    </footer>
-  </div>
-</main>
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(()=> toast.classList.remove("show"), 4200);
+    }
 
-<script>
-  document.getElementById("year").textContent = new Date().getFullYear();
-</script>
+    function dotClass(status){
+      if (status === "done") return "ok";
+      if (status === "processing") return "run";
+      return "fail";
+    }
+
+    function fmtDate(iso){
+      try{
+        const d = new Date(iso);
+        if (isNaN(d.getTime())) return "—";
+        return d.toLocaleString();
+      } catch(e){
+        return "—";
+      }
+    }
+
+    async function checkHealth(){
+      try{
+        const res = await fetch(`${API_BASE}/api/health`);
+        if (!res.ok) throw new Error("bad");
+        dotHealth.className = "dot ok";
+        healthTxt.textContent = "Backend OK";
+      } catch(e){
+        dotHealth.className = "dot fail";
+        healthTxt.textContent = "Backend OFF";
+      }
+    }
+
+    async function loadJobs(){
+      dotJobs.className = "dot run";
+      jobsCount.textContent = "Cargando…";
+
+      try{
+        const res = await fetch(`${API_BASE}/api/jobs`, { cache: "no-store" });
+        if (!res.ok){
+          const txt = await res.text().catch(()=> "");
+          throw new Error(`HTTP ${res.status} ${txt.slice(0,200)}`);
+        }
+        const data = await res.json();
+        const obj = data?.jobs || {};
+        const entries = Object.entries(obj);
+
+        // ordenar por fecha desc
+        entries.sort((a,b)=>{
+          const da = new Date(a[1]?.created_at || 0).getTime();
+          const db = new Date(b[1]?.created_at || 0).getTime();
+          return (db||0) - (da||0);
+        });
+
+        tbody.innerHTML = entries.map(([id, j])=>{
+          const st = j?.status || "unknown";
+          const preset = j?.preset || "—";
+          const intensity = (j?.intensity ?? "—");
+          const filename = j?.filename || "—";
+          const created = fmtDate(j?.created_at);
+
+          const pill = `<span class="pill"><span class="dot ${dotClass(st)}"></span> ${st}</span>`;
+
+          const dl = (st === "done")
+            ? `<a class="btn" href="${API_BASE}${j?.download || ("/download/"+id)}" target="_blank" rel="noopener">Descargar</a>`
+            : `<button class="btn" disabled>Descargar</button>`;
+
+          const copy = `<button class="btn" type="button" onclick="copyId('${id}')">Copiar ID</button>`;
+
+          return `
+            <tr>
+              <td class="mono">${id}</td>
+              <td>
+                ${filename}<div class="muted mono">${(j?.download || "")}</div>
+              </td>
+              <td>${preset}</td>
+              <td>${intensity}</td>
+              <td>${pill}</td>
+              <td>${created}</td>
+              <td>
+                <div class="rowBtns">
+                  ${dl}
+                  ${copy}
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join("");
+
+        const n = entries.length;
+        jobsCount.textContent = `${n} job${n===1?"":"s"}`;
+        dotJobs.className = n ? "dot ok" : "dot";
+
+        empty.style.display = n ? "none" : "block";
+
+      } catch (e){
+        dotJobs.className = "dot fail";
+        jobsCount.textContent = "Error";
+        showToast("No pude cargar jobs. Revisa API_BASE o el backend.");
+        console.error(e);
+      }
+    }
+
+    window.copyId = async (id) => {
+      try{
+        await navigator.clipboard.writeText(id);
+        showToast("ID copiado ✅");
+      } catch(e){
+        showToast("No se pudo copiar (tu navegador lo bloqueó).");
+      }
+    };
+
+    document.getElementById('btnRefresh').addEventListener('click', async ()=>{
+      await checkHealth();
+      await loadJobs();
+    });
+
+    document.getElementById('btnNewMaster').addEventListener('click', ()=>{
+      window.location.href = "master.html";
+    });
+
+    // init
+    (async ()=>{
+      await checkHealth();
+      await loadJobs();
+      // auto refresh suave
+      setInterval(loadJobs, 12000);
+      setInterval(checkHealth, 20000);
+    })();
+  </script>
 </body>
-</html>
+                                                                                    </html>
