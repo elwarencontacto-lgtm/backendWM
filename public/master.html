@@ -15,12 +15,11 @@
       --b:#00d7ff;
       --c:#00ff9a;
       --radius: 22px;
-      --shadow: 0 24px 70px rgba(0,0,0,.55);
     }
     *{ box-sizing:border-box; }
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      font-family: Arial, sans-serif;
       color:var(--text);
       background:
         radial-gradient(900px 500px at 10% 10%, rgba(138,92,255,.22), transparent 55%),
@@ -49,7 +48,7 @@
     }
     .brand{
       font-size:22px;
-      font-weight:900;
+      font-weight:800;
       letter-spacing:.2px;
       display:flex;
       align-items:center;
@@ -71,7 +70,6 @@
       -webkit-background-clip:text;
       color:transparent;
     }
-
     .btn{
       padding:10px 16px;
       border-radius:14px;
@@ -79,24 +77,22 @@
       background: rgba(255,255,255,.06);
       color: var(--text);
       cursor:pointer;
-      font-weight:900;
+      font-weight:800;
       text-decoration:none;
       display:inline-flex;
       align-items:center;
       justify-content:center;
       user-select:none;
       gap:10px;
-      transition: transform .12s ease, background .12s ease, border-color .12s ease;
     }
-    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.22); }
+    .btn:hover{ background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.22); }
     .btn.primary{
       border:none;
       background: linear-gradient(90deg, rgba(138,92,255,.95), rgba(0,215,255,.95));
       color:#061018;
-      box-shadow: var(--shadow);
     }
-    .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
     .ghost{ background: transparent; }
+    .btn:disabled{ opacity:.55; cursor:not-allowed; }
 
     main{ padding: 26px 0 70px; }
     .top{
@@ -114,7 +110,7 @@
       border-radius: var(--radius);
       border: 1px solid rgba(255,255,255,.12);
       background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
-      box-shadow: var(--shadow);
+      box-shadow: 0 24px 70px rgba(0,0,0,.55);
       overflow:hidden;
       position:relative;
     }
@@ -213,55 +209,30 @@
       height:100%;
       width:0%;
       background: linear-gradient(90deg, rgba(138,92,255,.95), rgba(0,215,255,.95));
-      transition: width .22s ease;
+      transition: width .25s ease;
     }
     .ptext{
       min-width: 170px;
       text-align:right;
       font-size: 12px;
-      color: rgba(233,237,247,.86);
-      font-weight: 950;
-      letter-spacing:.2px;
+      color: rgba(233,237,247,.8);
+      font-weight: 900;
     }
 
-    /* Mensajes dentro de UI */
-    .msg{
+    /* Error UI */
+    .errorBox{
       margin-top:12px;
       border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-      padding: 10px 12px;
-      display:none;
-      gap: 10px;
-      align-items:flex-start;
-      line-height:1.45;
-      font-size: 13px;
-      color: rgba(233,237,247,.90);
-    }
-    .msg.show{ display:flex; }
-    .msg .ico{
-      width: 28px; height: 28px;
-      border-radius: 12px;
-      display:flex; align-items:center; justify-content:center;
-      background: rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-      flex: 0 0 auto;
-      margin-top: 1px;
-    }
-    .msg.info{
-      border-color: rgba(0,215,255,.24);
-      background: rgba(0,215,255,.06);
-    }
-    .msg.err{
-      border-color: rgba(255,120,120,.28);
+      border: 1px solid rgba(255,120,120,.35);
       background: rgba(255,120,120,.08);
+      padding: 10px 12px;
+      color: rgba(233,237,247,.92);
+      font-size: 12px;
+      line-height: 1.5;
+      display:none;
+      white-space:pre-wrap;
     }
-    .msg.ok{
-      border-color: rgba(0,255,154,.22);
-      background: rgba(0,255,154,.06);
-    }
-    .msg strong{ display:block; margin-bottom: 2px; }
-    .msg small{ color: rgba(233,237,247,.70); display:block; margin-top: 4px; }
+    .errorBox.show{ display:block; }
 
     /* A/B */
     .hidden{ display:none; }
@@ -275,17 +246,43 @@
     .abHead{
       display:flex;
       justify-content:space-between;
-      align-items:center;
+      align-items:flex-start;
       gap:10px;
       flex-wrap:wrap;
       margin-bottom:10px;
     }
     .abTitle{
-      font-weight:950;
+      font-weight:900;
       font-size:12px;
       letter-spacing:.2px;
       color: rgba(233,237,247,.85);
+      margin-bottom:6px;
     }
+    .abMetrics{
+      font-size:12px;
+      color: rgba(233,237,247,.70);
+      font-weight: 900;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .metricPill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+    }
+    .metricDot{
+      width:8px;height:8px;border-radius:999px;
+      background: rgba(0,255,154,.75);
+      box-shadow: 0 0 0 6px rgba(0,255,154,.12);
+      display:inline-block;
+    }
+
     .abChips{
       display:flex;
       gap:8px;
@@ -296,7 +293,7 @@
       padding:8px 12px;
       border-radius: 999px;
       font-size: 12px;
-      font-weight: 950;
+      font-weight: 900;
     }
     .abBtn[aria-pressed="true"]{
       border:none;
@@ -308,29 +305,15 @@
       gap:10px;
       align-items:center;
     }
-
-    .iconBtn{
+    .abPlay{
       width:46px;
       height:38px;
       border-radius: 14px;
-      display:inline-flex;
+      display:flex;
       align-items:center;
       justify-content:center;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      cursor:pointer;
-      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+      font-weight: 900;
     }
-    .iconBtn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.22); }
-    .iconBtn.primary{
-      border:none;
-      background: linear-gradient(90deg, rgba(138,92,255,.95), rgba(0,215,255,.95));
-      color:#061018;
-    }
-    .iconBtn svg{ width:18px; height:18px; display:block; }
-    .iconBtn.primary svg{ fill:#061018; }
-    .iconBtn svg{ fill:#e9edf7; }
-
     .abTimeline{ flex:1; min-width: 180px; }
     .abTime{
       font-size: 11px;
@@ -365,14 +348,14 @@
     <div class="top">
       <div>
         <h1>Masterizado</h1>
-        <p class="sub">Sube tu audio, elige un preset y ajusta la intensidad.</p>
+        <p class="sub">Multibanda + saturación + LUFS real + target loudness (gratis).</p>
       </div>
     </div>
 
     <section class="card">
       <div class="card-h">
         <h2>Nuevo master</h2>
-        <span style="font-size:12px;color:rgba(233,237,247,.7);font-weight:950;">beta1.3</span>
+        <span style="font-size:12px;color:rgba(233,237,247,.7);font-weight:900;">beta1.3 PRO</span>
       </div>
 
       <div class="card-b">
@@ -383,8 +366,8 @@
             <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
               <button class="btn" type="button" id="btnPick">Seleccionar</button>
             </div>
-            <div style="margin-top:10px; font-size:12px; color:rgba(233,237,247,.65); line-height:1.45;">
-              Límite: <b>100MB</b> y <b>6 min</b> (validado por backend).
+            <div style="margin-top:10px; color:rgba(233,237,247,.65); font-size:12px; line-height:1.5;">
+              Límite: <b>100MB</b> • Duración máxima: <b>6 minutos</b>
             </div>
           </div>
 
@@ -396,6 +379,17 @@
               <option value="warm">Warm / Analog</option>
               <option value="bright">Bright / Pop</option>
               <option value="heavy">Heavy / Rock</option>
+            </select>
+
+            <div style="height:10px"></div>
+
+            <label for="target">Target Loudness</label>
+            <select id="target">
+              <option value="spotify">Spotify / YouTube (≈ -14 LUFS)</option>
+              <option value="apple">Apple Music (≈ -16 LUFS)</option>
+              <option value="streaming_safe">Streaming Safe (más control)</option>
+              <option value="club">Club (más fuerte, ≈ -9 LUFS)</option>
+              <option value="radio">Radio (≈ -10 LUFS)</option>
             </select>
 
             <div style="height:10px"></div>
@@ -412,31 +406,34 @@
           <button class="btn primary" type="button" id="btnStartJob" disabled>Renderizar</button>
         </div>
 
-        <!-- Progreso -->
         <div class="progressWrap" id="progressWrap" aria-live="polite">
           <div class="bar"><div class="fill" id="progressFill"></div></div>
-          <div class="ptext" id="progressText">0% • Listo</div>
+          <div class="ptext" id="progressText">Listo</div>
         </div>
 
-        <!-- Mensaje bonito (sin alerts) -->
-        <div class="msg" id="uiMsg" role="status" aria-live="polite">
-          <div class="ico" id="uiMsgIco">
-            <!-- info icon -->
-            <svg viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px;fill:#e9edf7">
-              <path d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2Zm0 4.9a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4Zm1.4 12H10.8v-1.8h.9v-5h-.9v-1.8h3.6v6.8h1v1.8Z"/>
-            </svg>
-          </div>
-          <div>
-            <strong id="uiMsgTitle">Listo</strong>
-            <div id="uiMsgText">Selecciona un archivo para comenzar.</div>
-            <small id="uiMsgSmall" style="display:none;"></small>
-          </div>
-        </div>
+        <div class="errorBox" id="errorBox"></div>
 
         <div id="abWrapper" class="hidden">
           <div class="abCard">
             <div class="abHead">
-              <div class="abTitle">Escucha A/B</div>
+              <div>
+                <div class="abTitle">Escucha A/B</div>
+                <div class="abMetrics">
+                  <span class="metricPill">
+                    <span class="metricDot"></span>
+                    <span id="lufsText">Orig: — LUFS • Master: — LUFS</span>
+                  </span>
+                  <span class="metricPill">
+                    <span class="metricDot" style="background:rgba(0,215,255,.85); box-shadow:0 0 0 6px rgba(0,215,255,.12);"></span>
+                    <span id="targetText">Target: —</span>
+                  </span>
+                  <span class="metricPill">
+                    <span class="metricDot" style="background:rgba(138,92,255,.85); box-shadow:0 0 0 6px rgba(138,92,255,.12);"></span>
+                    <span id="passText">Modo: —</span>
+                  </span>
+                </div>
+              </div>
+
               <div class="abChips">
                 <button class="btn abBtn" type="button" id="btnABOriginal" aria-pressed="false">Original</button>
                 <button class="btn abBtn" type="button" id="btnABPreview" aria-pressed="true">Preview</button>
@@ -446,21 +443,14 @@
             </div>
 
             <div class="abTransport">
-              <button class="iconBtn primary" type="button" id="btnABPlay" aria-label="Reproducir / Pausar">
-                <!-- play -->
-                <svg id="icoPlay" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l12-7-12-7Z"/></svg>
-                <!-- pause (hidden) -->
-                <svg id="icoPause" viewBox="0 0 24 24" aria-hidden="true" style="display:none"><path d="M6 5h4v14H6V5Zm8 0h4v14h-4V5Z"/></svg>
-              </button>
+              <button class="btn primary abPlay" type="button" id="btnABPlay">▶</button>
 
               <div class="abTimeline">
                 <div class="abTime" id="abTime">0:00 / 0:00</div>
                 <input id="abSeek" type="range" min="0" max="1000" value="0" />
               </div>
 
-              <button class="iconBtn" type="button" id="btnABStop" aria-label="Detener">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10H7V7Z"/></svg>
-              </button>
+              <button class="btn abBtn" type="button" id="btnABStop">■</button>
             </div>
 
             <audio id="audioOriginal" preload="metadata"></audio>
@@ -477,31 +467,29 @@
 </main>
 
 <script>
-  // ===== API_BASE: querystring ?api=... o mismo dominio =====
+  // API_BASE: querystring ?api=... o mismo dominio
   function getApiBase(){
     const qs = new URLSearchParams(location.search);
     const fromQs = (qs.get("api") || "").trim();
     if (fromQs) return fromQs.replace(/\/+$/,"");
-    return location.origin; // mismo dominio por defecto
+    return location.origin;
   }
   const API_BASE = getApiBase();
 
-  // ===== DOM =====
+  // DOM
   const fileInput   = document.getElementById("fileInput");
   const fileField   = document.getElementById("file");
   const btnPick     = document.getElementById("btnPick");
   const btnStartJob = document.getElementById("btnStartJob");
   const preset      = document.getElementById("preset");
+  const target      = document.getElementById("target");
   const intensity   = document.getElementById("intensity2");
 
   const progressWrap = document.getElementById("progressWrap");
   const progressFill = document.getElementById("progressFill");
   const progressText = document.getElementById("progressText");
 
-  const uiMsg = document.getElementById("uiMsg");
-  const uiMsgTitle = document.getElementById("uiMsgTitle");
-  const uiMsgText = document.getElementById("uiMsgText");
-  const uiMsgSmall = document.getElementById("uiMsgSmall");
+  const errorBox = document.getElementById("errorBox");
 
   const abWrapper   = document.getElementById("abWrapper");
   const btnABOriginal = document.getElementById("btnABOriginal");
@@ -513,14 +501,15 @@
   const abTime        = document.getElementById("abTime");
   const btnDownloadMaster = document.getElementById("btnDownloadMaster");
 
-  const icoPlay = document.getElementById("icoPlay");
-  const icoPause = document.getElementById("icoPause");
+  const lufsText = document.getElementById("lufsText");
+  const targetText = document.getElementById("targetText");
+  const passText = document.getElementById("passText");
 
   const audioOriginal = document.getElementById("audioOriginal");
   const audioPreview  = document.getElementById("audioPreview");
   const audioMaster   = document.getElementById("audioMaster");
 
-  // ===== State =====
+  // State
   let currentFile = null;
   let activeAudio = audioPreview;
 
@@ -528,23 +517,7 @@
   let previewObjectUrl = null;
   let masterObjectUrl = null;
 
-  // ===== UI message helpers =====
-  function showMsg(kind, title, text, small){
-    uiMsg.className = "msg show " + (kind || "info");
-    uiMsgTitle.textContent = title || "";
-    uiMsgText.textContent = text || "";
-    if (small){
-      uiMsgSmall.style.display = "block";
-      uiMsgSmall.textContent = small;
-    } else {
-      uiMsgSmall.style.display = "none";
-      uiMsgSmall.textContent = "";
-    }
-  }
-  // default
-  showMsg("info", "Listo", "Selecciona un archivo para comenzar.");
-
-  // ===== Preview engine (EQ + gain en cliente para “preview”) =====
+  // Preview engine (solo preview)
   let audioCtx = null;
   let sourceNode = null;
   let gainNode = null;
@@ -590,7 +563,23 @@
     gainNode.gain.value = 1 + v * 0.8;
   }
 
-  // ===== A/B UI =====
+  function showError(msg){
+    if(!errorBox) return;
+    errorBox.textContent = msg || "";
+    errorBox.classList.toggle("show", !!msg);
+  }
+
+  function progressSet(pct, text){
+    progressWrap?.classList.add("show");
+    if (progressFill) progressFill.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+    if (progressText) progressText.textContent = text || "";
+  }
+
+  function revokeUrlSafe(u){
+    try{ if(u) URL.revokeObjectURL(u); }catch(e){}
+  }
+
+  // A/B helpers
   function fmtTime(s){
     s = Math.max(0, Math.floor(s || 0));
     const m = Math.floor(s/60);
@@ -612,10 +601,7 @@
       a.pause();
       a.currentTime = 0;
     });
-    if (icoPlay && icoPause){
-      icoPlay.style.display = "block";
-      icoPause.style.display = "none";
-    }
+    if (btnABPlay) btnABPlay.textContent = "▶";
   }
 
   function setPressed(which){
@@ -664,10 +650,10 @@
 
     if (activeAudio.paused){
       await activeAudio.play();
-      if (icoPlay && icoPause){ icoPlay.style.display="none"; icoPause.style.display="block"; }
+      btnABPlay.textContent = "❚❚";
     } else {
       activeAudio.pause();
-      if (icoPlay && icoPause){ icoPlay.style.display="block"; icoPause.style.display="none"; }
+      btnABPlay.textContent = "▶";
     }
   });
 
@@ -685,41 +671,29 @@
     if(!a) return;
     a.addEventListener("timeupdate", syncUI);
     a.addEventListener("loadedmetadata", syncUI);
-    a.addEventListener("ended", ()=> {
-      if (icoPlay && icoPause){ icoPlay.style.display="block"; icoPause.style.display="none"; }
-    });
+    a.addEventListener("ended", ()=> { if(btnABPlay) btnABPlay.textContent="▶"; });
   });
 
-  // ===== Upload =====
+  // Upload
   function pick(){ fileInput?.click(); }
   btnPick?.addEventListener("click", pick);
 
-  function revokeUrlSafe(u){
-    try{ if(u) URL.revokeObjectURL(u); }catch(e){}
-  }
-
   fileInput?.addEventListener("change", (e) => {
+    showError("");
     currentFile = e.target.files?.[0] || null;
 
     if (fileField) fileField.value = currentFile ? currentFile.name : "";
     if (btnStartJob) btnStartJob.disabled = !currentFile;
 
-    if (!currentFile) {
-      showMsg("info", "Listo", "Selecciona un archivo para comenzar.");
-      return;
-    }
-
-    showMsg("ok", "Archivo cargado", "Configura preset/intensidad y presiona Renderizar.");
+    if (!currentFile) return;
 
     abWrapper?.classList.remove("hidden");
 
-    // revoke prev urls
     revokeUrlSafe(originalObjectUrl);
     revokeUrlSafe(previewObjectUrl);
     revokeUrlSafe(masterObjectUrl);
     originalObjectUrl = previewObjectUrl = masterObjectUrl = null;
 
-    // original/preview
     originalObjectUrl = URL.createObjectURL(currentFile);
     previewObjectUrl  = URL.createObjectURL(currentFile);
 
@@ -733,31 +707,31 @@
     applyPreset();
     applyIntensity();
 
-    // reset master
     audioMaster.removeAttribute("src");
     audioMaster.load();
     if (btnABMaster) btnABMaster.disabled = true;
 
-    // reset download
     if (btnDownloadMaster) {
       btnDownloadMaster.href = "#";
       btnDownloadMaster.classList.add("disabled");
       btnDownloadMaster.setAttribute("aria-disabled","true");
     }
 
-    // reset progress
+    if (lufsText) lufsText.textContent = "Orig: — LUFS • Master: — LUFS";
+    if (targetText) targetText.textContent = "Target: —";
+    if (passText) passText.textContent = "Modo: —";
+
     progressWrap?.classList.remove("show");
     if (progressFill) progressFill.style.width = "0%";
-    if (progressText) progressText.textContent = "0% • Listo";
+    if (progressText) progressText.textContent = "Listo";
 
     setActive(audioPreview, "preview");
-    stopAll();
   });
 
   intensity?.addEventListener("input", applyIntensity);
   preset?.addEventListener("change", applyPreset);
 
-  // ===== Fetch with timeout =====
+  // fetch with timeout
   async function fetchWithTimeout(url, options, timeoutMs){
     const controller = new AbortController();
     const t = setTimeout(()=> controller.abort("timeout"), timeoutMs);
@@ -769,107 +743,58 @@
     }
   }
 
-  function progressSet(pct, label){
-    progressWrap?.classList.add("show");
-    const p = Math.max(0, Math.min(100, pct));
-    if (progressFill) progressFill.style.width = p + "%";
-    if (progressText) progressText.textContent = `${p}% • ${label || ""}`;
-  }
-
-  // ===== Progreso “pro” (con 75% Masterizando) =====
-  function stagedProgress(){
-    // Devuelve una función cancel() para detener timers
-    let alive = true;
-    const timers = [];
-
-    function later(ms, fn){
-      const id = setTimeout(()=> { if(alive) fn(); }, ms);
-      timers.push(id);
-    }
-
-    // orden
-    progressSet(5,  "Preparando archivo…");
-    later(220,  ()=> progressSet(20, "Subiendo…"));
-    later(520,  ()=> progressSet(45, "Analizando audio…"));
-    later(950,  ()=> progressSet(75, "🎛 Masterizando…"));
-    // 95% lo dejamos “cerca del final” para que no se quede pegado en 100 antes de tiempo
-    later(2200, ()=> progressSet(95, "Finalizando archivo…"));
-
-    return {
-      cancel(){
-        alive = false;
-        timers.forEach(clearTimeout);
-      }
-    };
-  }
-
-  // ===== Render real (POST correcto) =====
+  // Render
   btnStartJob?.addEventListener("click", async () => {
     if (!currentFile) return;
 
+    showError("");
     const old = btnStartJob.textContent;
     btnStartJob.textContent = "Procesando…";
     btnStartJob.disabled = true;
 
-    // Inicia progreso simulado (bonito)
-    const prog = stagedProgress();
-    showMsg("info", "Procesando", "Estamos trabajando tu master. No cierres esta pestaña.");
-
     try{
-      // gesto -> resume
       try{ if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume(); } catch(e){}
 
       const fd = new FormData();
       fd.append("file", currentFile);
       fd.append("preset", preset?.value || "clean");
       fd.append("intensity", String(intensity?.value || 55));
+      fd.append("target", target?.value || "spotify");
 
+      progressSet(12, "Subiendo…");
       const url = `${API_BASE}/api/master`;
       const res = await fetchWithTimeout(url, { method: "POST", body: fd }, 180000);
 
-      const ct = (res.headers.get("content-type") || "").toLowerCase();
+      progressSet(55, "Masterizando…");
 
       if (!res.ok) {
-        prog.cancel();
-        progressSet(0, "Error");
-
-        // intenta leer json o texto
-        let detail = "";
-        try{
-          if (ct.includes("application/json")){
-            const j = await res.json();
-            detail = j?.detail ? String(j.detail) : JSON.stringify(j).slice(0,250);
-          } else {
-            detail = (await res.text()).slice(0,250);
-          }
-        } catch(e){}
-
-        showMsg(
-          "err",
-          "No se pudo renderizar",
-          detail || `Error HTTP ${res.status}.`,
-          "Tip: revisa que el archivo cumpla los límites (100MB / 6 min) y vuelve a intentar."
-        );
-        return;
-      }
-
-      if (ct.includes("application/json")) {
-        prog.cancel();
-        progressSet(0, "Error");
         const txt = await res.text().catch(()=> "");
-        showMsg("err", "Respuesta inesperada", "El backend devolvió JSON (se esperaba audio).", txt.slice(0,200));
+        showError(`Render falló (${res.status}).\n${txt.slice(0,700)}`);
+        progressSet(0, "Error");
         return;
       }
+
+      // headers pro
+      const lufsO = res.headers.get("x-lufs-original");
+      const lufsM = res.headers.get("x-lufs-master");
+      const tsel  = res.headers.get("x-target") || (target?.value || "spotify");
+      const twoP  = res.headers.get("x-two-pass") === "1";
+
+      if (lufsText) {
+        const o = (lufsO && !isNaN(Number(lufsO))) ? `${Number(lufsO).toFixed(1)}` : "—";
+        const m = (lufsM && !isNaN(Number(lufsM))) ? `${Number(lufsM).toFixed(1)}` : "—";
+        lufsText.textContent = `Orig: ${o} LUFS • Master: ${m} LUFS`;
+      }
+      if (targetText) targetText.textContent = `Target: ${tsel}`;
+      if (passText) passText.textContent = `Modo: ${twoP ? "2-pass pro" : "1-pass (fallback)"}`;
 
       const blob = await res.blob();
       if (!blob || blob.size < 1024) {
-        prog.cancel();
+        showError("El master llegó vacío o muy pequeño.");
         progressSet(0, "Error");
-        showMsg("err", "Master vacío", "El archivo generado llegó vacío o demasiado pequeño.", `Bytes recibidos: ${blob ? blob.size : 0}`);
         return;
       }
 
-      // set master url
       revokeUrlSafe(masterObjectUrl);
       masterObjectUrl = URL.createObjectURL(blob);
 
@@ -885,37 +810,19 @@
         btnDownloadMaster.setAttribute("aria-disabled","false");
       }
 
-      prog.cancel();
       progressSet(100, "Listo ✅");
-      showMsg("ok", "Master listo", "Puedes escucharlo en A/B y descargarlo cuando quieras.");
 
     } catch (err) {
-      prog.cancel();
-      progressSet(0, "Error");
-
-      const isTimeout = (err && (err.name === "AbortError" || err === "timeout"));
-      const msg = isTimeout
-        ? "Tiempo de espera agotado. El servidor está demorando o se cayó."
+      const msg = (err && (err.name === "AbortError" || err === "timeout"))
+        ? "Tiempo de espera agotado. El backend está demorando."
         : ("Error de red/JS: " + (err?.message || String(err)));
-
-      showMsg(
-        "err",
-        "Error de conexión",
-        msg,
-        "Si estás en móvil, prueba con otra red o vuelve a cargar la página."
-      );
+      showError(msg);
+      progressSet(0, "Error");
     } finally {
       btnStartJob.textContent = old;
       btnStartJob.disabled = !currentFile;
     }
   });
-
-  // Limpieza al salir
-  window.addEventListener("beforeunload", ()=>{
-    revokeUrlSafe(originalObjectUrl);
-    revokeUrlSafe(previewObjectUrl);
-    revokeUrlSafe(masterObjectUrl);
-  });
 </script>
 </body>
-</html>
+              </html>
