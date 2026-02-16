@@ -142,16 +142,6 @@
 
     .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
 
-    .input{
-      width:100%;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.03);
-      border-radius: 12px;
-      padding:10px 12px;
-      color:var(--text);
-      outline:none;
-    }
-
     .grid{
       display:grid;
       grid-template-columns: 1fr 1fr;
@@ -368,17 +358,18 @@
       background: rgba(0,0,0,.18);
     }
 
+    /* 8 knobs */
     .eqBottom{
       padding:14px;
       display:grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(8, 1fr);
       gap:12px;
       background: rgba(255,255,255,.02);
     }
-    @media (max-width: 900px){
-      .eqBottom{grid-template-columns: repeat(3, 1fr);}
+    @media (max-width: 1100px){
+      .eqBottom{grid-template-columns: repeat(4, 1fr);}
     }
-    @media (max-width: 520px){
+    @media (max-width: 620px){
       .eqBottom{grid-template-columns: repeat(2, 1fr);}
     }
 
@@ -522,7 +513,7 @@
               <audio id="audioMaster"></audio>
             </div>
 
-            <!-- ===== EQ LIVE PANEL (reemplaza waveform) ===== -->
+            <!-- ===== PLUGIN PANEL ===== -->
             <div class="eqPanel" id="eqPanel">
               <div class="eqTop">
                 <div class="eqTitle">EQ Live</div>
@@ -556,13 +547,31 @@
                 </div>
 
                 <div class="knobCol">
+                  <div class="knob" data-knob="glue"></div>
+                  <div class="kLabel">GLUE</div>
+                  <div class="kVal" id="vGlue">0%</div>
+                </div>
+
+                <div class="knobCol">
+                  <div class="knob" data-knob="width"></div>
+                  <div class="kLabel">WIDTH</div>
+                  <div class="kVal" id="vWidth">100%</div>
+                </div>
+
+                <div class="knobCol">
+                  <div class="knob" data-knob="sat"></div>
+                  <div class="kLabel">SAT</div>
+                  <div class="kVal" id="vSat">0%</div>
+                </div>
+
+                <div class="knobCol">
                   <div class="knob" data-knob="out"></div>
                   <div class="kLabel">OUTPUT</div>
                   <div class="kVal" id="vOut">0.0 dB</div>
                 </div>
               </div>
             </div>
-            <!-- ===== /EQ LIVE PANEL ===== -->
+            <!-- ===== /PLUGIN PANEL ===== -->
 
             <div class="note" id="unlockHint"></div>
 
@@ -768,7 +777,6 @@
       document.getElementById("btnDownloadFull").style.display = "none";
       document.getElementById("btnUpgradeToPro").style.display = "none";
 
-      // Reset players
       const ao = document.getElementById("audioOriginal");
       const am = document.getElementById("audioMaster");
       ao.removeAttribute("src"); am.removeAttribute("src");
@@ -777,7 +785,6 @@
       revoke(originalUrl); revoke(masterUrl); revoke(previewUrl);
       originalUrl=null; masterUrl=null; previewUrl=null;
 
-      // Reset UI
       document.querySelectorAll(".pTime[data-k='cur']").forEach(el => el.textContent="0:00");
       document.querySelectorAll(".pTime[data-k='dur']").forEach(el => el.textContent="0:00");
       document.querySelectorAll(".pSeek").forEach(el => el.value="0");
@@ -870,7 +877,7 @@
         closeModal();
         afterUnlockUI();
       }catch(e){
-        payMsg.textContent = "Falta backend /api/unlock (lo agregamos en el siguiente paso).";
+        payMsg.textContent = "Falta backend /api/unlock (lo agregamos en backend).";
       }
     }
 
@@ -916,7 +923,7 @@
         const blob = await res.blob();
         revoke(previewUrl);
         previewUrl = URL.createObjectURL(blob);
-        downloadBlobUrl(previewUrl, "warmaster_preview_20s.mp3");
+        downloadBlobUrl(previewUrl, "warmaster_preview_20s.wav");
         setStatus("Listo.", 100);
       }catch(e){
         alert("Preview 20s requiere /api/master/preview (lo agregamos en backend).");
@@ -998,10 +1005,7 @@
         if(audio.duration) audio.currentTime = p * audio.duration;
       });
 
-      vol.addEventListener("input", () => {
-        audio.volume = Number(vol.value);
-      });
-
+      vol.addEventListener("input", () => { audio.volume = Number(vol.value); });
       audio.volume = Number(vol.value);
       syncBtn();
     }
@@ -1026,6 +1030,19 @@
       form.append("file", file);
       form.append("preset", selectedTarget);
       form.append("intensity", String(selectedIntensity));
+
+      // ===== enviar knobs al backend (para que el archivo final descargado sea igual a lo escuchado) =====
+      const K = window.WM_KNOBS || { low:0, mid:0, pres:0, air:0, glue:0, width:100, sat:0, out:0 };
+      form.append("k_low",   String(K.low));
+      form.append("k_mid",   String(K.mid));
+      form.append("k_pres",  String(K.pres));
+      form.append("k_air",   String(K.air));
+      form.append("k_glue",  String(K.glue));
+      form.append("k_width", String(K.width));
+      form.append("k_sat",   String(K.sat));
+      form.append("k_out",   String(K.out));
+
+      // (compat)
       form.append("requested_quality", currentPlan);
       form.append("target", selectedTarget);
 
@@ -1090,16 +1107,53 @@
       const eqPanel = document.getElementById("eqPanel");
       if (!masterAudio || !eqPanel) return;
 
-      const state = { low:0, mid:0, pres:0, air:0, out:0 };
+      // dB knobs + macros (%)
+      const state = {
+        low:0, mid:0, pres:0, air:0,
+        glue:0,      // 0..100 %
+        width:100,   // 50..150 %
+        sat:0,       // 0..100 %
+        out:0
+      };
+
+      // Exponer para el submit (backend)
+      window.WM_KNOBS = state;
 
       let ctx=null, src=null, analyser=null, rafId=0;
-      let lowShelf=null, midPeak=null, presPeak=null, highShelf=null, outGain=null, limiter=null;
+
+      // core nodes
+      let lowShelf=null, midPeak=null, presPeak=null, highShelf=null;
+      let glueComp=null;
+
+      // saturation nodes (dry/wet)
+      let satShaper=null, satDry=null, satWet=null, satMix=null;
+
+      // width (mid/side)
+      let widthSplitter=null, widthMerger=null;
+      let midSum=null, sideSum=null, sideScale=null;
+      let leftOut=null, rightOut=null;
+
+      // output / limiter
+      let outGain=null, limiter=null;
 
       const canvas = document.getElementById("eqViz");
       const g = canvas ? canvas.getContext("2d") : null;
       const buf = new Uint8Array(1024);
 
       function dbToGain(db){ return Math.pow(10, db/20); }
+      function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
+
+      function makeWaveshaperCurve(drive){
+        // drive: 0..1
+        const n = 2048;
+        const curve = new Float32Array(n);
+        const k = 1 + drive * 40; // 1..41
+        for(let i=0;i<n;i++){
+          const x = (i * 2 / (n-1)) - 1;
+          curve[i] = Math.tanh(k * x) / Math.tanh(k);
+        }
+        return curve;
+      }
 
       function ensureAudioGraph(){
         if (ctx) return;
@@ -1109,6 +1163,7 @@
 
         src = ctx.createMediaElementSource(masterAudio);
 
+        // EQ
         lowShelf = ctx.createBiquadFilter();
         lowShelf.type = "lowshelf";
         lowShelf.frequency.value = 120;
@@ -1127,8 +1182,43 @@
         highShelf.type = "highshelf";
         highShelf.frequency.value = 8500;
 
-        outGain = ctx.createGain();
+        // Glue compressor
+        glueComp = ctx.createDynamicsCompressor();
+        glueComp.knee.value = 18;
+        glueComp.attack.value = 0.01;
+        glueComp.release.value = 0.18;
 
+        // Saturation (dry/wet)
+        satDry = ctx.createGain();
+        satWet = ctx.createGain();
+        satMix = ctx.createGain(); // sum point
+
+        satShaper = ctx.createWaveShaper();
+        satShaper.oversample = "4x";
+
+        // Width M/S
+        widthSplitter = ctx.createChannelSplitter(2);
+        widthMerger = ctx.createChannelMerger(2);
+
+        // mid/side sums
+        const lToMid = ctx.createGain(); lToMid.gain.value = 0.5;
+        const rToMid = ctx.createGain(); rToMid.gain.value = 0.5;
+
+        const lToSide = ctx.createGain(); lToSide.gain.value = 0.5;
+        const rToSide = ctx.createGain(); rToSide.gain.value = -0.5;
+
+        midSum = ctx.createGain();   // receives L+R
+        sideSum = ctx.createGain();  // receives L-R
+
+        sideScale = ctx.createGain(); // width control
+
+        leftOut = ctx.createGain();  // mid + side
+        rightOut = ctx.createGain(); // mid - side
+
+        const invSide = ctx.createGain(); invSide.gain.value = -1; // for right channel
+
+        // Output chain
+        outGain = ctx.createGain();
         limiter = ctx.createDynamicsCompressor();
         limiter.threshold.value = -1.0;
         limiter.knee.value = 0.0;
@@ -1140,12 +1230,56 @@
         analyser.fftSize = 2048;
         analyser.smoothingTimeConstant = 0.85;
 
-        // chain
+        // Wiring:
         src
           .connect(lowShelf)
           .connect(midPeak)
           .connect(presPeak)
           .connect(highShelf)
+          .connect(glueComp);
+
+        // saturation split
+        glueComp.connect(satDry);
+        glueComp.connect(satShaper);
+        satShaper.connect(satWet);
+
+        // mix sum
+        satDry.connect(satMix);
+        satWet.connect(satMix);
+
+        // width
+        satMix.connect(widthSplitter);
+
+        // build mid
+        widthSplitter.connect(lToMid, 0);
+        widthSplitter.connect(rToMid, 1);
+        lToMid.connect(midSum);
+        rToMid.connect(midSum);
+
+        // build side
+        widthSplitter.connect(lToSide, 0);
+        widthSplitter.connect(rToSide, 1);
+        lToSide.connect(sideSum);
+        rToSide.connect(sideSum);
+
+        // width scaling
+        sideSum.connect(sideScale);
+
+        // L = mid + side
+        midSum.connect(leftOut);
+        sideScale.connect(leftOut);
+
+        // R = mid - side
+        midSum.connect(rightOut);
+        sideScale.connect(invSide);
+        invSide.connect(rightOut);
+
+        // to stereo
+        leftOut.connect(widthMerger, 0, 0);
+        rightOut.connect(widthMerger, 0, 1);
+
+        // to output
+        widthMerger
           .connect(outGain)
           .connect(limiter)
           .connect(analyser)
@@ -1160,33 +1294,63 @@
         const t = ctx.currentTime;
         const k = instant ? 0.001 : 0.06;
 
+        // EQ dB
         lowShelf.gain.setTargetAtTime(state.low, t, k);
         midPeak.gain.setTargetAtTime(state.mid, t, k);
         presPeak.gain.setTargetAtTime(state.pres, t, k);
         highShelf.gain.setTargetAtTime(state.air, t, k);
 
+        // GLUE 0..100 -> threshold/ratio/makeup (soft)
+        const gP = clamp(state.glue / 100, 0, 1);
+        const thr = -10 - gP * 18;      // -10 .. -28 dB
+        const rat = 1.5 + gP * 4.5;     // 1.5 .. 6.0
+        const atk = 0.012 - gP * 0.007; // 12ms .. 5ms
+        const rel = 0.20 + gP * 0.10;   // 200ms .. 300ms
+
+        glueComp.threshold.setTargetAtTime(thr, t, k);
+        glueComp.ratio.setTargetAtTime(rat, t, k);
+        glueComp.attack.setTargetAtTime(atk, t, k);
+        glueComp.release.setTargetAtTime(rel, t, k);
+
+        // SAT 0..100 -> dry/wet + drive curve
+        const sP = clamp(state.sat / 100, 0, 1);
+        satShaper.curve = makeWaveshaperCurve(sP);
+        satDry.gain.setTargetAtTime(1 - (sP * 0.55), t, k);
+        satWet.gain.setTargetAtTime(sP * 0.85, t, k);
+
+        // WIDTH 50..150 -> side gain 0.5..1.5
+        const wP = clamp(state.width, 50, 150);
+        const side = wP / 100; // 0.5..1.5
+        sideScale.gain.setTargetAtTime(side, t, k);
+
+        // OUTPUT dB
         outGain.gain.setTargetAtTime(dbToGain(state.out), t, k);
       }
 
-      // ===== Knobs =====
+      // ======= Knobs =======
       const knobEls = [...document.querySelectorAll(".knob")];
       const valEls = {
         low: document.getElementById("vLow"),
         mid: document.getElementById("vMid"),
         pres: document.getElementById("vPres"),
         air: document.getElementById("vAir"),
-        out: document.getElementById("vOut")
+        glue: document.getElementById("vGlue"),
+        width: document.getElementById("vWidth"),
+        sat: document.getElementById("vSat"),
+        out: document.getElementById("vOut"),
       };
 
       const ranges = {
-        low:  {min:-12, max: 12},
-        mid:  {min:-12, max: 12},
-        pres: {min:-12, max: 12},
-        air:  {min:-12, max: 12},
-        out:  {min:-12, max: 6}
+        low:   {min:-12, max: 12, step:0.2, fmt:"db"},
+        mid:   {min:-12, max: 12, step:0.2, fmt:"db"},
+        pres:  {min:-12, max: 12, step:0.2, fmt:"db"},
+        air:   {min:-12, max: 12, step:0.2, fmt:"db"},
+        glue:  {min:  0, max:100, step:1,   fmt:"pct"},
+        width: {min: 50, max:150, step:1,   fmt:"pct"},
+        sat:   {min:  0, max:100, step:1,   fmt:"pct"},
+        out:   {min:-12, max:  6, step:0.2, fmt:"db"},
       };
 
-      function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
       function valueToAngle(v, key){
         const r = ranges[key];
         const p = (v - r.min) / (r.max - r.min);
@@ -1202,7 +1366,15 @@
         const el = knobEls.find(x => x.dataset.knob === key);
         if (!el) return;
         el.style.setProperty("--ang", valueToAngle(state[key], key) + "deg");
-        if (valEls[key]) valEls[key].textContent = (state[key] >= 0 ? "+" : "") + state[key].toFixed(1) + " dB";
+
+        const r = ranges[key];
+        if (!valEls[key]) return;
+
+        if (r.fmt === "db"){
+          valEls[key].textContent = (state[key] >= 0 ? "+" : "") + state[key].toFixed(1) + " dB";
+        } else {
+          valEls[key].textContent = String(Math.round(state[key])) + "%";
+        }
       }
 
       function initKnobs(){
@@ -1235,13 +1407,16 @@
             ang = clamp(ang, -120, 120);
 
             let v = angleToValue(ang, key);
-            v = clamp(v, ranges[key].min, ranges[key].max);
-
-            const step = 0.2;
-            v = Math.round(v/step)*step;
+            const r = ranges[key];
+            v = clamp(v, r.min, r.max);
+            v = Math.round(v / r.step) * r.step;
 
             state[key] = v;
             setKnobUI(key);
+
+            // asegurar que el submit tenga los últimos valores
+            window.WM_KNOBS = state;
+
             applyParams(false);
           };
 
@@ -1254,7 +1429,7 @@
         });
       }
 
-      // ===== Visual =====
+      // ======= Visual =======
       function drawGrid(){
         if (!g) return;
         const w = canvas.width, h = canvas.height;
@@ -1361,7 +1536,6 @@
         tick();
       }
 
-      // iOS/Android: activar al play o al gesto (perilla ya lo hace)
       masterAudio.addEventListener("play", () => {
         ensureAudioGraph();
         if (ctx && ctx.state === "suspended") ctx.resume().catch(()=>{});
