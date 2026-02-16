@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>WarMaster — Masterizar</title>
+  <title>WarMaster | Master</title>
+
   <style>
     :root{
       --bg:#0b0c10;
@@ -12,14 +13,24 @@
       --line:#232736;
       --text:#e9ecf3;
       --muted:#a8b0c3;
+
+      /* Brand base */
       --brand:#6d5efc;
       --brand2:#2dd4bf;
+
+      /* Plan colors (official) */
+      --free:#ffffff;   /* FREE blanco */
+      --plus:#f5c542;   /* PLUS amarillo premium */
+      --pro:#4ea8ff;    /* PRO azul premium */
+
       --warn:#f59e0b;
       --bad:#ef4444;
       --ok:#22c55e;
+
       --shadow: 0 10px 30px rgba(0,0,0,.45);
       --radius: 16px;
     }
+
     *{box-sizing:border-box}
     body{
       margin:0;
@@ -32,8 +43,10 @@
       min-height:100vh;
       padding:18px;
     }
-    a{color:inherit}
+
     .wrap{width:min(1120px,100%); margin:0 auto}
+    a{color:inherit}
+
     .top{
       display:flex; align-items:center; justify-content:space-between;
       gap:12px; margin-bottom:14px;
@@ -47,9 +60,8 @@
       background: linear-gradient(135deg, var(--brand), var(--brand2));
       box-shadow: 0 0 0 6px rgba(109,94,252,.12);
     }
-    .nav{
-      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
-    }
+    .nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+
     .pill{
       font-size:12px;
       padding:8px 10px;
@@ -59,31 +71,19 @@
       color:var(--muted);
       white-space:nowrap;
     }
-    .btn{
-      border:1px solid var(--line);
+
+    /* Plan pill */
+    .planPill{
+      border-color: rgba(255,255,255,.18);
       background: rgba(255,255,255,.03);
-      color:var(--text);
-      padding:10px 12px;
-      border-radius: 12px;
-      cursor:pointer;
-      font-weight:800;
-      transition: transform .06s ease, background .15s ease, border-color .15s ease;
-      display:inline-flex; align-items:center; gap:8px;
-      user-select:none;
+      color: var(--free);
+      font-weight:900;
     }
-    .btn:hover{background: rgba(255,255,255,.06)}
-    .btn:active{transform: translateY(1px)}
-    .btn.primary{
-      background: linear-gradient(135deg, rgba(109,94,252,.95), rgba(45,212,191,.55));
-      border-color: transparent;
-    }
-    .btn.primary:hover{filter:brightness(1.06)}
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:14px;
-    }
-    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
+    .planPill.plus{ color: var(--plus); border-color: rgba(245,197,66,.35); background: rgba(245,197,66,.08); }
+    .planPill.pro{  color: var(--pro);  border-color: rgba(78,168,255,.35); background: rgba(78,168,255,.08); }
+    .planPill.free{ color: var(--free); border-color: rgba(255,255,255,.20); background: rgba(255,255,255,.03); }
+
+    /* Card + optional plan glow */
     .card{
       background: rgba(18,20,27,.92);
       border:1px solid var(--line);
@@ -91,6 +91,9 @@
       box-shadow: var(--shadow);
       overflow:hidden;
     }
+    .cardGlowPlus{ box-shadow: 0 10px 30px rgba(0,0,0,.45), 0 0 0 1px rgba(245,197,66,.18), 0 0 24px rgba(245,197,66,.10); }
+    .cardGlowPro{  box-shadow: 0 10px 30px rgba(0,0,0,.45), 0 0 0 1px rgba(78,168,255,.18), 0 0 24px rgba(78,168,255,.10); }
+
     .head{
       padding:16px 18px;
       border-bottom:1px solid var(--line);
@@ -98,9 +101,48 @@
       display:flex; align-items:center; justify-content:space-between; gap:12px;
     }
     .head h2{margin:0; font-size:16px}
+
     .body{padding:16px 18px}
     .muted{color:var(--muted)}
+    label{font-size:12px; color:var(--muted); display:block; margin-bottom:6px}
+
+    .btn{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-weight:900;
+      transition: transform .06s ease, background .15s ease, border-color .15s ease;
+      display:inline-flex; align-items:center; gap:8px;
+      user-select:none;
+    }
+    .btn:hover{background: rgba(255,255,255,.06)}
+    .btn:active{transform: translateY(1px)}
+    .btn:disabled{opacity:.5; cursor:not-allowed}
+
+    /* Plan buttons accents */
+    .btnPlus{
+      border-color: rgba(245,197,66,.45);
+      background: rgba(245,197,66,.10);
+      color: var(--plus);
+    }
+    .btnPro{
+      border-color: rgba(78,168,255,.45);
+      background: rgba(78,168,255,.10);
+      color: var(--pro);
+    }
+
+    .btnPrimary{
+      border-color: transparent;
+      background: linear-gradient(135deg, rgba(109,94,252,.95), rgba(45,212,191,.55));
+      color: #fff;
+    }
+    .btnPrimary:hover{filter:brightness(1.06)}
+
     .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+
     .input{
       width:100%;
       border:1px solid var(--line);
@@ -110,9 +152,17 @@
       color:var(--text);
       outline:none;
     }
-    label{font-size:12px; color:var(--muted); display:block; margin-bottom:6px}
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+    }
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
+
     .selectGrid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px}
     @media (max-width: 520px){ .selectGrid{grid-template-columns:1fr} }
+
     .opt{
       border:1px solid var(--line);
       background: rgba(255,255,255,.02);
@@ -131,14 +181,19 @@
       border-color: rgba(109,94,252,.65);
       background: rgba(109,94,252,.10);
     }
+
+    /* Lock badge (no emojis) */
     .lock{
       position:absolute; top:10px; right:10px;
-      font-size:12px; color: var(--warn);
-      border:1px solid rgba(245,158,11,.35);
+      font-size:12px;
+      border:1px solid rgba(245,197,66,.35);
       padding:4px 8px;
       border-radius:999px;
-      background: rgba(245,158,11,.08);
+      background: rgba(245,197,66,.08);
+      color: var(--plus);
+      font-weight:900;
     }
+
     .bar{
       width:100%;
       height:10px;
@@ -152,24 +207,33 @@
       width:0%;
       background: linear-gradient(90deg, var(--brand), var(--brand2));
     }
+
     .note{
       font-size:12px;
       color:var(--muted);
       margin-top:8px;
       line-height:1.5;
     }
+
     audio{width:100%}
     .divider{border:none;border-top:1px solid var(--line); margin:14px 0}
-    .badgeOk{
-      color: var(--ok);
-      font-weight:800;
+
+    .badge{
+      font-weight:900;
       font-size:12px;
+      display:inline-block;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.03);
+      color: var(--free);
+      margin-right:8px;
     }
-    .badgeWarn{
-      color: var(--warn);
-      font-weight:800;
-      font-size:12px;
-    }
+    .badge.plus{ color: var(--plus); border-color: rgba(245,197,66,.35); background: rgba(245,197,66,.08); }
+    .badge.pro{  color: var(--pro);  border-color: rgba(78,168,255,.35); background: rgba(78,168,255,.08); }
+    .badge.free{ color: var(--free); border-color: rgba(255,255,255,.18); background: rgba(255,255,255,.03); }
+
+    /* Modal */
     .modalBack{
       position:fixed; inset:0;
       background: rgba(0,0,0,.6);
@@ -186,63 +250,53 @@
       overflow:hidden;
     }
     .modal .body{padding:16px 18px}
-    .priceBtn{
-      width:100%;
-      justify-content:center;
-    }
-    .danger{
-      color: var(--bad);
-      font-weight:800;
-      font-size:12px;
-    }
+    .priceBtn{ width:100%; justify-content:center; }
   </style>
 </head>
+
 <body>
   <div class="wrap">
     <div class="top">
       <div class="brand"><span class="dot"></span> WarMaster</div>
       <div class="nav">
         <span class="pill" id="apiPill">API: auto</span>
-        <button class="btn" id="goHome">🏠 Inicio</button>
-        <button class="btn" id="goDash">📁 Dashboard</button>
+        <span class="pill planPill free" id="planPill">■ FREE</span>
+        <button class="btn" id="goHome">Inicio</button>
+        <button class="btn" id="goDash">Dashboard</button>
       </div>
     </div>
 
     <div class="grid">
-      <!-- LEFT: Upload + settings -->
-      <div class="card">
+      <!-- LEFT -->
+      <div class="card" id="cardLeft">
         <div class="head">
           <h2>Nuevo Master</h2>
-          <span class="pill" id="planPill">Plan: FREE</span>
+          <span class="pill" id="statusPill">Listo</span>
         </div>
         <div class="body">
-          <label>Archivo de audio (mp3/wav)</label>
+          <label>Archivo (mp3/wav)</label>
           <input class="input" type="file" id="file" accept="audio/*"/>
 
           <div style="height:12px"></div>
 
-          <label>Destino / Target</label>
-          <div class="selectGrid" id="targets">
-            <!-- injected -->
-          </div>
+          <label>Destino / Preset</label>
+          <div class="selectGrid" id="targets"></div>
 
           <div style="height:12px"></div>
 
-          <label>Intensidad (PLUS/PRO)</label>
-          <div class="selectGrid" id="intensity">
-            <!-- injected -->
-          </div>
+          <label>Intensidad</label>
+          <div class="selectGrid" id="intensity"></div>
 
-          <div class="note">
-            FREE: puedes <b>escuchar</b> el master completo, pero solo <b>descargas 20s</b>.<br/>
-            PLUS/PRO: descarga completa. Si haces un master nuevo (nuevo render), se vuelve a cobrar.
+          <div class="note" id="planNote">
+            <span class="badge free">■ FREE</span>
+            Escucha el master completo. Descarga: 20s.
           </div>
 
           <hr class="divider"/>
 
           <div class="row">
-            <button class="btn primary" id="btnMaster">⚡ Masterizar</button>
-            <button class="btn" id="btnReset">🧹 Limpiar</button>
+            <button class="btn btnPrimary" id="btnMaster">Procesar</button>
+            <button class="btn" id="btnReset">Limpiar</button>
           </div>
 
           <div style="height:12px"></div>
@@ -251,14 +305,14 @@
         </div>
       </div>
 
-      <!-- RIGHT: Result -->
-      <div class="card">
+      <!-- RIGHT -->
+      <div class="card" id="cardRight">
         <div class="head">
           <h2>Resultado</h2>
           <span class="pill" id="resultPill">—</span>
         </div>
         <div class="body">
-          <div id="resultEmpty" class="muted">Sube un archivo y presiona “Masterizar”.</div>
+          <div id="resultEmpty" class="muted">Sube un archivo y presiona “Procesar”.</div>
 
           <div id="resultBox" style="display:none">
             <label>Original</label>
@@ -272,13 +326,13 @@
             <div class="note" id="unlockHint"></div>
 
             <div class="row" style="margin-top:12px">
-              <button class="btn" id="btnDownloadPreview">⬇️ Descargar 20s (FREE)</button>
-              <button class="btn primary" id="btnUnlock">🔓 Desbloquear descarga completa</button>
+              <button class="btn" id="btnDownloadPreview">Descargar 20s</button>
+              <button class="btn btnPlus" id="btnUnlock">◇ Desbloquear</button>
+              <button class="btn btnPro" id="btnUpgradeToPro" style="display:none">◆ Upgrade PRO</button>
             </div>
 
             <div class="row" style="margin-top:10px">
-              <button class="btn" id="btnDownloadFull" style="display:none">⬇️ Descargar completo</button>
-              <button class="btn" id="btnUpgradeToPro" style="display:none">⬆️ Upgrade a PRO (pagar diferencia)</button>
+              <button class="btn btnPrimary" id="btnDownloadFull" style="display:none">Descargar completo</button>
             </div>
 
             <div class="note" id="backendNote"></div>
@@ -293,29 +347,24 @@
     <div class="modal">
       <div class="head">
         <h2>Desbloquear descarga</h2>
-        <button class="btn" id="closeModal">✖</button>
+        <button class="btn" id="closeModal">×</button>
       </div>
       <div class="body">
-        <div class="note" style="margin-top:0">
-          Estás escuchando el master completo. Para descargarlo, elige una opción:
+        <div class="note" style="margin-top:0" id="modalTopNote">
+          Estás escuchando el master completo. Para descargar, elige:
         </div>
 
         <div style="height:12px"></div>
 
-        <button class="btn priceBtn" id="buyPlus">🔓 Unlock PLUS (por canción)</button>
-        <div class="note muted">Desbloquea este master (re-descarga desde dashboard).</div>
+        <button class="btn btnPlus priceBtn" id="buyPlus">◇ Unlock PLUS (por canción)</button>
+        <div class="note muted">Desbloquea este master y queda en tu dashboard.</div>
 
         <div style="height:10px"></div>
 
-        <button class="btn primary priceBtn" id="buyPro">💎 Unlock PRO (por canción)</button>
-        <div class="note muted">Mejor motor/controles (según backend).</div>
+        <button class="btn btnPro priceBtn" id="buyPro">◆ Unlock PRO (por canción)</button>
+        <div class="note muted">Versión PRO del master (según motor backend).</div>
 
         <hr class="divider"/>
-
-        <div class="row">
-          <button class="btn" id="subPlus">🟡 Suscripción PLUS</button>
-          <button class="btn" id="subPro">💎 Suscripción PRO</button>
-        </div>
 
         <div class="note" id="payMsg"></div>
       </div>
@@ -323,7 +372,7 @@
   </div>
 
   <script>
-    // ========= API / helpers =========
+    // ========= API BASE =========
     function getApiBase() {
       const qs = new URLSearchParams(location.search);
       const fromQS = qs.get("api");
@@ -335,56 +384,102 @@
     const API_BASE = getApiBase();
     document.getElementById("apiPill").textContent = "API: " + (API_BASE || "mismo dominio");
 
-    async function fetchWithTimeout(url, options={}, timeoutMs=180000) {
-      const ctrl = new AbortController();
-      const id = setTimeout(() => ctrl.abort(), timeoutMs);
-      try {
-        return await fetch(url, { ...options, signal: ctrl.signal });
-      } finally {
-        clearTimeout(id);
-      }
-    }
-    function authHeaders(){
-      const t = localStorage.getItem("WM_TOKEN") || "";
-      return t ? {"Authorization":"Bearer "+t} : {};
-    }
     function qsCarry(path){
       const qs = new URLSearchParams(location.search);
       const api = qs.get("api");
       return api ? (path + "?api=" + encodeURIComponent(api)) : path;
     }
-
     document.getElementById("goHome").onclick = () => location.href = qsCarry("/index.html");
     document.getElementById("goDash").onclick = () => location.href = qsCarry("/dashboard.html");
 
-    // ========= UI data =========
+    async function fetchWithTimeout(url, options={}, timeoutMs=180000) {
+      const ctrl = new AbortController();
+      const id = setTimeout(() => ctrl.abort(), timeoutMs);
+      try { return await fetch(url, { ...options, signal: ctrl.signal }); }
+      finally { clearTimeout(id); }
+    }
+
+    // ========= PLAN STATE (dynamic) =========
+    let currentPlan = "FREE"; // FREE / PLUS / PRO
+    function applyPlanUI(){
+      const pill = document.getElementById("planPill");
+      pill.classList.remove("free","plus","pro");
+      const left = document.getElementById("cardLeft");
+      const right = document.getElementById("cardRight");
+      left.classList.remove("cardGlowPlus","cardGlowPro");
+      right.classList.remove("cardGlowPlus","cardGlowPro");
+
+      if(currentPlan === "PLUS"){
+        pill.textContent = "◇ PLUS";
+        pill.classList.add("plus");
+        left.classList.add("cardGlowPlus");
+        right.classList.add("cardGlowPlus");
+        document.getElementById("planNote").innerHTML =
+          `<span class="badge plus">◇ PLUS</span> Descarga completa habilitada (plan).`;
+      } else if(currentPlan === "PRO"){
+        pill.textContent = "◆ PRO";
+        pill.classList.add("pro");
+        left.classList.add("cardGlowPro");
+        right.classList.add("cardGlowPro");
+        document.getElementById("planNote").innerHTML =
+          `<span class="badge pro">◆ PRO</span> Descarga completa habilitada (plan).`;
+      } else {
+        pill.textContent = "■ FREE";
+        pill.classList.add("free");
+        document.getElementById("planNote").innerHTML =
+          `<span class="badge free">■ FREE</span> Escucha completo. Descarga: 20s.`;
+      }
+
+      renderOptions(); // re-eval locks
+    }
+
+    async function loadPlan(){
+      // En tu backend actual no existe /api/me: por eso, ahora quedará FREE.
+      // En el siguiente paso (backend) lo añadimos para que funcione real.
+      try{
+        const res = await fetchWithTimeout((API_BASE||"") + "/api/me", {}, 12000);
+        if(!res.ok) throw new Error("no /api/me");
+        const data = await res.json();
+        currentPlan = (data.plan || "FREE").toUpperCase();
+        if(!["FREE","PLUS","PRO"].includes(currentPlan)) currentPlan="FREE";
+      }catch(e){
+        currentPlan = "FREE";
+      }
+      applyPlanUI();
+    }
+
+    // ========= OPTIONS =========
+    // OJO: Tu backend hoy usa preset: clean/warm/bright/heavy/club.
+    // Por eso aquí usamos esos mismos ids para que sea compatible.
     const TARGETS = [
-      {id:"spotify", name:"Spotify / YouTube", desc:"Target -14 LUFS", lock:false},
-      {id:"apple", name:"Apple Music", desc:"Sound Check ≈ -16 LUFS", lock:false},
-      {id:"club", name:"Club", desc:"Impacto alto (-8 a -9 LUFS)", lock:true},
-      {id:"radio", name:"Radio", desc:"Más presencia / densidad", lock:true},
-    ];
-    const INTENSITIES = [
-      {id:"soft", name:"Suave", desc:"más dinámico", lock:true},
-      {id:"balanced", name:"Balanceado", desc:"default", lock:true},
-      {id:"aggressive", name:"Agresivo", desc:"más loud", lock:true},
+      {id:"clean",  name:"Streaming", desc:"Balance general", lock:false},
+      {id:"warm",   name:"Warm",      desc:"Cuerpo / suavidad", lock:false},
+      {id:"bright", name:"Bright",    desc:"Brillo / presencia", lock:false},
+      {id:"heavy",  name:"Heavy",     desc:"Grueso / denso", lock:false},
+      {id:"club",   name:"Club",      desc:"Impacto alto", lock:true}, // lock en FREE (como negocio)
     ];
 
-    let selectedTarget = "spotify";
-    let selectedIntensity = "balanced";
+    const INTENSITIES = [
+      {id:35, name:"Suave",      desc:"Más dinámico", lock:true},
+      {id:55, name:"Balanceado", desc:"Default",      lock:false},
+      {id:80, name:"Agresivo",   desc:"Más loud",     lock:true},
+    ];
+
+    let selectedTarget = "clean";
+    let selectedIntensity = 55;
 
     function renderOptions(){
       const tBox = document.getElementById("targets");
       tBox.innerHTML = "";
       TARGETS.forEach(o=>{
         const div = document.createElement("div");
+        const locked = o.lock && currentPlan === "FREE";
         div.className = "opt" + (o.id===selectedTarget ? " active" : "");
-        div.innerHTML = `<b>${o.name}</b><small>${o.desc}</small>` + (o.lock ? `<span class="lock">PLUS/PRO</span>` : "");
+        div.innerHTML =
+          `<b>${o.name}</b><small>${o.desc}</small>` +
+          (locked ? `<span class="lock">◇ PLUS / ◆ PRO</span>` : "");
         div.onclick = () => {
-          if (o.lock && currentPlan === "FREE") {
-            openModal("Este preset está disponible en PLUS/PRO.");
-            return;
-          }
+          if (locked) { openModal("Este preset está disponible en PLUS/PRO o unlock por canción."); return; }
           selectedTarget = o.id;
           renderOptions();
         };
@@ -394,14 +489,14 @@
       const iBox = document.getElementById("intensity");
       iBox.innerHTML = "";
       INTENSITIES.forEach(o=>{
+        const locked = o.lock && currentPlan === "FREE";
         const div = document.createElement("div");
         div.className = "opt" + (o.id===selectedIntensity ? " active" : "");
-        div.innerHTML = `<b>${o.name}</b><small>${o.desc}</small>` + (o.lock ? `<span class="lock">PLUS/PRO</span>` : "");
+        div.innerHTML =
+          `<b>${o.name}</b><small>${o.desc}</small>` +
+          (locked ? `<span class="lock">◇ PLUS / ◆ PRO</span>` : "");
         div.onclick = () => {
-          if (o.lock && currentPlan === "FREE") {
-            openModal("La intensidad está disponible en PLUS/PRO.");
-            return;
-          }
+          if (locked) { openModal("Esta intensidad está disponible en PLUS/PRO."); return; }
           selectedIntensity = o.id;
           renderOptions();
         };
@@ -409,20 +504,27 @@
       });
     }
 
-    // ========= State =========
-    let currentPlan = "FREE";      // FREE / PLUS / PRO (from /api/me if exists)
-    let lastMasterId = null;       // returned by backend (ideal)
-    let masterUrl = null;          // objectURL to play master
-    let originalUrl = null;        // objectURL to play original
-    let previewUrl = null;         // objectURL for 20s preview (if backend returns)
-    let paidQuality = null;        // null / "PLUS" / "PRO" for this master
+    // ========= RESULT STATE =========
+    let lastMasterId = null;
+    let masterUrl = null;
+    let originalUrl = null;
+    let previewUrl = null;
 
-    function revoke(url){
-      try { if(url) URL.revokeObjectURL(url); } catch(e){}
+    let paidQuality = null; // null / PLUS / PRO (unlock)
+
+    function revoke(url){ try{ if(url) URL.revokeObjectURL(url); }catch(e){} }
+
+    function setStatus(msg, pct){
+      document.getElementById("status").textContent = msg;
+      document.getElementById("statusPill").textContent = msg.length > 18 ? "Procesando" : msg;
+      const p = Math.max(0, Math.min(100, pct ?? 0));
+      document.getElementById("barFill").style.width = p + "%";
     }
+
     function resetResult(){
       lastMasterId = null;
       paidQuality = null;
+
       document.getElementById("resultEmpty").style.display = "";
       document.getElementById("resultBox").style.display = "none";
       document.getElementById("resultPill").textContent = "—";
@@ -433,23 +535,23 @@
 
       const ao = document.getElementById("audioOriginal");
       const am = document.getElementById("audioMaster");
-      ao.removeAttribute("src");
-      am.removeAttribute("src");
+      ao.removeAttribute("src"); am.removeAttribute("src");
       ao.load(); am.load();
 
       revoke(originalUrl); revoke(masterUrl); revoke(previewUrl);
-      originalUrl = null; masterUrl = null; previewUrl = null;
+      originalUrl=null; masterUrl=null; previewUrl=null;
     }
 
-    function setStatus(msg, pct){
-      document.getElementById("status").textContent = msg;
-      const p = Math.max(0, Math.min(100, pct ?? 0));
-      document.getElementById("barFill").style.width = p + "%";
-    }
+    document.getElementById("btnReset").onclick = () => {
+      document.getElementById("file").value = "";
+      resetResult();
+      setStatus("Listo.", 0);
+    };
 
-    // ========= Modal =========
+    // ========= MODAL =========
     const modalBack = document.getElementById("modalBack");
     const payMsg = document.getElementById("payMsg");
+
     function openModal(msg){
       payMsg.textContent = msg || "";
       modalBack.style.display = "flex";
@@ -463,39 +565,65 @@
 
     document.getElementById("btnUnlock").onclick = () => openModal("");
 
-    // ========= Unlock / subscribe hooks (backend needed) =========
     async function postJSON(path, body){
       const res = await fetchWithTimeout((API_BASE||"") + path, {
         method:"POST",
-        headers: {"Content-Type":"application/json", ...authHeaders()},
+        headers: {"Content-Type":"application/json"},
         body: JSON.stringify(body||{})
       }, 180000);
       return res;
     }
 
-    async function unlock(quality){ // PLUS or PRO
+    function afterUnlockUI(){
+      // Si plan es PLUS/PRO, ya hay descarga completa.
+      // Si fue unlock individual, también.
+      document.getElementById("btnDownloadFull").style.display = "";
+      if (paidQuality === "PLUS") {
+        document.getElementById("btnUpgradeToPro").style.display = "";
+        document.getElementById("unlockHint").innerHTML =
+          `<span class="badge plus">◇ PLUS</span> Master desbloqueado. Disponible en dashboard para re-descarga.`;
+      } else if (paidQuality === "PRO") {
+        document.getElementById("btnUpgradeToPro").style.display = "none";
+        document.getElementById("unlockHint").innerHTML =
+          `<span class="badge pro">◆ PRO</span> Master desbloqueado. Disponible en dashboard para re-descarga.`;
+      } else if (currentPlan === "PLUS") {
+        document.getElementById("btnUpgradeToPro").style.display = "";
+        document.getElementById("unlockHint").innerHTML =
+          `<span class="badge plus">◇ PLUS</span> Descarga completa habilitada por plan.`;
+      } else if (currentPlan === "PRO") {
+        document.getElementById("btnUpgradeToPro").style.display = "none";
+        document.getElementById("unlockHint").innerHTML =
+          `<span class="badge pro">◆ PRO</span> Descarga completa habilitada por plan.`;
+      } else {
+        document.getElementById("btnDownloadFull").style.display = "none";
+        document.getElementById("btnUpgradeToPro").style.display = "none";
+        document.getElementById("unlockHint").innerHTML =
+          `<span class="badge free">■ FREE</span> Escucha completo. Descarga: 20s.`;
+      }
+    }
+
+    async function unlock(quality){
       if(!lastMasterId){
-        openModal("Primero debes masterizar.");
+        openModal("Primero procesa un master.");
         return;
       }
-      payMsg.textContent = "Procesando pago / unlock...";
+      payMsg.textContent = "Procesando unlock...";
       try{
-        // Esperado: backend crea pago o marca unlock; responde {ok:true, quality, download_url?}
         const res = await postJSON("/api/unlock", { master_id:lastMasterId, quality });
         if(!res.ok) throw new Error("unlock fail");
         const data = await res.json();
-        paidQuality = quality;
+        paidQuality = (data.quality || quality).toUpperCase();
         closeModal();
-        afterUnlock(data);
+        afterUnlockUI();
       }catch(e){
-        // Fallback: si no existe backend de pagos
-        payMsg.innerHTML = "⚠️ Backend de pagos no disponible aún. Cuando lo activemos, este botón desbloqueará la descarga completa.";
+        payMsg.textContent =
+          "Backend aún no tiene /api/unlock. En el siguiente paso lo añadimos para que el botón desbloquee la descarga.";
       }
     }
 
     async function upgradeToPro(){
       if(!lastMasterId){
-        alert("Primero masteriza.");
+        alert("Primero procesa un master.");
         return;
       }
       try{
@@ -503,31 +631,17 @@
         if(!res.ok) throw new Error("upgrade fail");
         const data = await res.json();
         paidQuality = "PRO";
-        afterUnlock(data);
+        afterUnlockUI();
       }catch(e){
-        alert("Upgrade no disponible aún (falta endpoint /api/upgrade).");
-      }
-    }
-
-    function afterUnlock(data){
-      // Si el backend devuelve download_url, úsalo. Si no, habilitamos descarga full con el blob que ya tenemos.
-      document.getElementById("unlockHint").innerHTML = `<span class="badgeOk">Desbloqueado:</span> ${paidQuality} (este master quedará en tu dashboard).`;
-      document.getElementById("btnDownloadFull").style.display = "";
-      if (paidQuality === "PLUS") {
-        document.getElementById("btnUpgradeToPro").style.display = "";
-      } else {
-        document.getElementById("btnUpgradeToPro").style.display = "none";
+        alert("Upgrade requiere endpoint /api/upgrade (lo añadimos en backend).");
       }
     }
 
     document.getElementById("buyPlus").onclick = () => unlock("PLUS");
-    document.getElementById("buyPro").onclick = () => unlock("PRO");
-    document.getElementById("subPlus").onclick = () => payMsg.textContent = "Suscripción PLUS: lo conectamos cuando definamos pasarela (Webpay/MercadoPago).";
-    document.getElementById("subPro").onclick = () => payMsg.textContent = "Suscripción PRO: lo conectamos cuando definamos pasarela (Webpay/MercadoPago).";
-
+    document.getElementById("buyPro").onclick  = () => unlock("PRO");
     document.getElementById("btnUpgradeToPro").onclick = upgradeToPro;
 
-    // ========= Download buttons =========
+    // ========= DOWNLOAD =========
     function downloadBlobUrl(url, filename){
       const a = document.createElement("a");
       a.href = url;
@@ -537,82 +651,66 @@
       a.remove();
     }
 
-    document.getElementById("btnDownloadFull").onclick = () => {
-      if(!masterUrl){
-        alert("No hay master listo.");
-        return;
-      }
-      downloadBlobUrl(masterUrl, "warmaster_master_full.wav");
-    };
-
     document.getElementById("btnDownloadPreview").onclick = async () => {
-      // Ideal: backend entrega un preview de 20s (para cumplir tu lógica actual)
-      // Endpoint sugerido: GET /api/master/preview?master_id=...
       if(!lastMasterId){
-        alert("Primero masteriza.");
+        alert("Primero procesa un master.");
         return;
       }
       try{
-        setStatus("Generando preview 20s...", 70);
-        const res = await fetchWithTimeout((API_BASE||"") + `/api/master/preview?master_id=${encodeURIComponent(lastMasterId)}`, {
-          headers: {...authHeaders()}
-        }, 180000);
-        if(!res.ok) throw new Error("no preview");
+        setStatus("Generando preview...", 70);
+        const res = await fetchWithTimeout((API_BASE||"") + `/api/master/preview?master_id=${encodeURIComponent(lastMasterId)}`, {}, 180000);
+        if(!res.ok) throw new Error("preview fail");
         const blob = await res.blob();
         revoke(previewUrl);
         previewUrl = URL.createObjectURL(blob);
         downloadBlobUrl(previewUrl, "warmaster_preview_20s.mp3");
-        setStatus("Preview descargado.", 100);
+        setStatus("Listo.", 100);
       }catch(e){
-        alert("Preview 20s requiere endpoint /api/master/preview (lo agregamos en el backend).");
+        alert("Preview 20s requiere /api/master/preview (lo añadimos en backend).");
         setStatus("Listo.", 100);
       }
     };
 
-    // ========= Master flow =========
-    document.getElementById("btnReset").onclick = () => {
-      document.getElementById("file").value = "";
-      resetResult();
-      setStatus("Listo.", 0);
-    };
-
-    document.getElementById("btnMaster").onclick = async () => {
-      const file = document.getElementById("file").files?.[0];
-      if(!file){
-        alert("Selecciona un archivo.");
+    document.getElementById("btnDownloadFull").onclick = async () => {
+      if(!lastMasterId){
+        alert("Primero procesa un master.");
         return;
       }
+      // Preferimos descarga desde backend (para respetar reglas paid)
+      const url = (API_BASE||"") + `/api/masters/${encodeURIComponent(lastMasterId)}/download`;
+      // Abrimos directo; si backend devuelve 402, el navegador lo mostrará como error.
+      window.open(url, "_blank");
+    };
 
-      // FREE no permite seleccionar preset lock / intensidad lock (ya bloqueado en UI)
-      // Aquí solo enviamos lo seleccionado.
+    // ========= PROCESS =========
+    document.getElementById("btnMaster").onclick = async () => {
+      const file = document.getElementById("file").files?.[0];
+      if(!file){ alert("Selecciona un archivo."); return; }
 
       resetResult();
-      setStatus("Subiendo y procesando...", 10);
+      setStatus("Subiendo...", 10);
 
-      // Original audio preview (local)
       revoke(originalUrl);
       originalUrl = URL.createObjectURL(file);
       const ao = document.getElementById("audioOriginal");
-      ao.src = originalUrl;
-      ao.load();
+      ao.src = originalUrl; ao.load();
 
-      // Build form to /api/master (tu endpoint actual)
+      // Tu backend actual usa preset + intensity
       const form = new FormData();
       form.append("file", file);
+      form.append("preset", selectedTarget);
+      form.append("intensity", String(selectedIntensity));
 
-      // Campos sugeridos (el backend puede ignorarlos si aún no los implementas)
+      // Extras (no rompen nada si backend los ignora)
+      form.append("requested_quality", currentPlan);
       form.append("target", selectedTarget);
-      form.append("intensity", selectedIntensity);
-      form.append("requested_quality", currentPlan); // FREE / PLUS / PRO (según sesión)
-      // Tip: si tu backend hoy usa otro nombre de campo, lo adaptamos después.
 
       try{
-        setStatus("Procesando (FFmpeg)...", 35);
+        setStatus("Procesando...", 40);
 
         const res = await fetchWithTimeout((API_BASE||"") + "/api/master", {
           method:"POST",
-          body: form,
-          headers: { ...authHeaders() }
+          body: form
         }, 180000);
 
         if(!res.ok){
@@ -620,82 +718,52 @@
           throw new Error(txt);
         }
 
-        // Opcional: si el backend devuelve header X-Master-Id o JSON, pero hoy puede devolver blob directo.
-        // Vamos a intentar leer header primero:
+        // master_id desde header (lo añadimos en backend en el paso 2)
         const hdrId = res.headers.get("X-Master-Id") || res.headers.get("x-master-id");
-        if (hdrId) lastMasterId = hdrId;
+        if(hdrId) lastMasterId = hdrId;
 
-        // Si el backend devolvió JSON en vez de blob:
-        const contentType = (res.headers.get("Content-Type")||"").toLowerCase();
-        let blob;
-
-        if(contentType.includes("application/json")){
-          const data = await res.json();
-          // Esperado: { master_id, url } o { master_id, file_base64 } etc.
-          lastMasterId = data.master_id || lastMasterId;
-          if (data.url){
-            // si entrega URL directa
-            const r2 = await fetchWithTimeout(data.url, {}, 180000);
-            blob = await r2.blob();
-          } else {
-            throw new Error("JSON recibido pero falta url/blob. Ajustamos backend.");
-          }
-        } else {
-          blob = await res.blob();
-        }
+        const blob = await res.blob();
 
         setStatus("Finalizando...", 85);
 
         revoke(masterUrl);
         masterUrl = URL.createObjectURL(blob);
         const am = document.getElementById("audioMaster");
-        am.src = masterUrl;
-        am.load();
+        am.src = masterUrl; am.load();
 
         document.getElementById("resultEmpty").style.display = "none";
         document.getElementById("resultBox").style.display = "";
         document.getElementById("resultPill").textContent = "Master listo";
-        document.getElementById("unlockHint").innerHTML = `<span class="badgeWarn">FREE:</span> Puedes escuchar completo. Descarga completa se desbloquea con pago o plan.`;
+
+        // Si backend no dio id aún, avisamos (porque preview/download necesitan master_id real)
         document.getElementById("backendNote").textContent = lastMasterId
-          ? "ID Master: " + lastMasterId
-          : "Tip: para dashboard/pagos, el backend debería entregar master_id (header X-Master-Id o JSON).";
+          ? ("master_id: " + lastMasterId)
+          : "Falta header X-Master-Id en /api/master. En el siguiente paso lo añadimos al backend.";
 
-        setStatus("Listo ✅", 100);
-
-        // Si el usuario YA está en plan PLUS/PRO (por /api/me), habilitar full:
+        // Regla: si plan PLUS/PRO => descarga completa habilitada
+        // Si FREE => solo 20s (hasta que haga unlock)
         if(currentPlan === "PLUS" || currentPlan === "PRO"){
           paidQuality = currentPlan;
-          document.getElementById("btnDownloadFull").style.display = "";
-          document.getElementById("btnUpgradeToPro").style.display = (currentPlan === "PLUS") ? "" : "none";
-          document.getElementById("unlockHint").innerHTML = `<span class="badgeOk">Plan ${currentPlan}:</span> Descarga completa habilitada.`;
+        } else {
+          paidQuality = null;
         }
+        afterUnlockUI();
+
+        setStatus("Listo.", 100);
       }catch(err){
         console.error(err);
-        setStatus("Error: " + (err?.message || "fallo"), 0);
-        alert("Error al masterizar. Revisa consola/logs. " + (err?.message || ""));
+        setStatus("Error", 0);
+        alert("Error al masterizar. " + (err?.message || ""));
       }
     };
 
-    // ========= Load plan from backend if exists =========
-    (async () => {
-      try{
-        const res = await fetchWithTimeout((API_BASE||"") + "/api/me", {
-          headers: {...authHeaders()}
-        }, 12000);
-        if(!res.ok) throw new Error("no me");
-        const data = await res.json();
-        currentPlan = (data.plan || data.tier || "FREE").toUpperCase();
-      }catch(e){
-        currentPlan = "FREE";
-      }
-      document.getElementById("planPill").textContent = "Plan: " + currentPlan;
-      renderOptions();
-    })();
-
-    // Clean up on unload
+    // ========= Init =========
     window.addEventListener("beforeunload", () => {
       revoke(originalUrl); revoke(masterUrl); revoke(previewUrl);
     });
+
+    renderOptions();
+    loadPlan();
   </script>
 </body>
 </html>
