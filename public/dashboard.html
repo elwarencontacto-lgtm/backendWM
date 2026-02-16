@@ -1,328 +1,351 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>WarMaster — Dashboard</title>
-  <style>
-    :root{
-      --bg:#0b0c10;
-      --panel:#12141b;
-      --line:#232736;
-      --text:#e9ecf3;
-      --muted:#a8b0c3;
-      --brand:#6d5efc;
-      --brand2:#2dd4bf;
-      --warn:#f59e0b;
-      --bad:#ef4444;
-      --ok:#22c55e;
-      --shadow: 0 10px 30px rgba(0,0,0,.45);
-      --radius: 16px;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background:
-        radial-gradient(1200px 600px at 15% 0%, rgba(109,94,252,.22), transparent 55%),
-        radial-gradient(900px 600px at 90% 10%, rgba(45,212,191,.16), transparent 55%),
-        linear-gradient(180deg, var(--bg), #06070a 70%);
-      color:var(--text);
-      min-height:100vh;
-      padding:18px;
-    }
-    .wrap{width:min(1120px,100%); margin:0 auto}
-    .top{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:12px; margin-bottom:14px;
-    }
-    .brand{
-      display:flex; align-items:center; gap:10px;
-      font-weight:900; letter-spacing:.3px;
-    }
-    .dot{
-      width:12px;height:12px;border-radius:999px;
-      background: linear-gradient(135deg, var(--brand), var(--brand2));
-      box-shadow: 0 0 0 6px rgba(109,94,252,.12);
-    }
-    .nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
-    .pill{
-      font-size:12px;
-      padding:8px 10px;
-      border:1px solid var(--line);
-      border-radius:999px;
-      background: rgba(255,255,255,.03);
-      color:var(--muted);
-      white-space:nowrap;
-    }
-    .btn{
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.03);
-      color:var(--text);
-      padding:10px 12px;
-      border-radius: 12px;
-      cursor:pointer;
-      font-weight:800;
-      transition: transform .06s ease, background .15s ease;
-      display:inline-flex; align-items:center; gap:8px;
-      user-select:none;
-    }
-    .btn:hover{background: rgba(255,255,255,.06)}
-    .btn:active{transform: translateY(1px)}
-    .btn.primary{
-      background: linear-gradient(135deg, rgba(109,94,252,.95), rgba(45,212,191,.55));
-      border-color: transparent;
-    }
-    .btn.primary:hover{filter:brightness(1.06)}
-    .card{
-      background: rgba(18,20,27,.92);
-      border:1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-    .head{
-      padding:16px 18px;
-      border-bottom:1px solid var(--line);
-      background: rgba(255,255,255,.02);
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-    }
-    .head h2{margin:0; font-size:16px}
-    .body{padding:16px 18px}
-    .muted{color:var(--muted)}
-    .list{display:grid; gap:10px}
-    .item{
-      border:1px solid var(--line);
-      border-radius: 14px;
-      background: rgba(255,255,255,.02);
-      padding:12px;
-    }
-    .itemTop{
-      display:flex; align-items:flex-start; justify-content:space-between;
-      gap:12px;
-    }
-    .meta{color:var(--muted); font-size:12px; line-height:1.45}
-    .title{font-weight:900}
-    audio{width:100%; margin-top:10px}
-    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:10px}
-    .tag{
-      font-size:12px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      color:var(--muted);
-      background: rgba(255,255,255,.03);
-      white-space:nowrap;
-    }
-    .tag.ok{color: var(--ok); border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.08)}
-    .tag.warn{color: var(--warn); border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.08)}
-    .tag.bad{color: var(--bad); border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.08)}
-    .input{
-      width:100%;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.03);
-      border-radius: 12px;
-      padding:10px 12px;
-      color:var(--text);
-      outline:none;
-    }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <div class="top">
-      <div class="brand"><span class="dot"></span> WarMaster</div>
-      <div class="nav">
-        <span class="pill" id="apiPill">API: auto</span>
-        <span class="pill" id="planPill">Plan: —</span>
-        <button class="btn" id="goHome">🏠 Inicio</button>
-        <button class="btn primary" id="goMaster">🚀 Masterizar</button>
-      </div>
-    </div>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>WarMaster | Dashboard</title>
 
-    <div class="card">
-      <div class="head">
-        <h2>Mis Masters</h2>
-        <div class="row" style="margin:0">
-          <input class="input" id="search" placeholder="Buscar por nombre/preset..." style="width:min(320px, 70vw)"/>
-          <button class="btn" id="refresh">🔄 Actualizar</button>
-        </div>
-      </div>
-      <div class="body">
-        <div id="empty" class="muted">Cargando...</div>
-        <div class="list" id="list" style="display:none"></div>
-        <div class="muted" id="note" style="margin-top:12px"></div>
-      </div>
+<style>
+:root{
+  --bg:#0b0c10;
+  --line:#232736;
+  --text:#e9ecf3;
+  --muted:#a8b0c3;
+
+  --brand:#6d5efc;
+  --brand2:#2dd4bf;
+
+  --free:#ffffff;
+  --plus:#f5c542;
+  --pro:#4ea8ff;
+
+  --shadow: 0 10px 30px rgba(0,0,0,.45);
+  --radius: 16px;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  background:
+    radial-gradient(1200px 600px at 15% 0%, rgba(109,94,252,.25), transparent 55%),
+    radial-gradient(900px 600px at 90% 10%, rgba(45,212,191,.18), transparent 55%),
+    linear-gradient(180deg, var(--bg), #06070a 70%);
+  color:var(--text);
+  min-height:100vh;
+  padding:18px;
+}
+
+.wrap{width:min(1120px,100%); margin:0 auto}
+
+.top{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; margin-bottom:14px;
+}
+
+.brand{
+  display:flex; align-items:center; gap:10px;
+  font-weight:900; letter-spacing:.3px;
+}
+
+.dot{
+  width:12px;height:12px;border-radius:999px;
+  background: linear-gradient(135deg, var(--brand), var(--brand2));
+  box-shadow: 0 0 0 6px rgba(109,94,252,.12);
+}
+
+.nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+
+.pill{
+  font-size:12px;
+  padding:8px 10px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background: rgba(255,255,255,.03);
+  color:var(--muted);
+}
+
+.planPill{
+  font-weight:900;
+}
+
+.planPill.free{
+  color: var(--free);
+  border-color: rgba(255,255,255,.20);
+}
+
+.planPill.plus{
+  color: var(--plus);
+  border-color: rgba(245,197,66,.35);
+  background: rgba(245,197,66,.08);
+}
+
+.planPill.pro{
+  color: var(--pro);
+  border-color: rgba(78,168,255,.35);
+  background: rgba(78,168,255,.08);
+}
+
+.btn{
+  border:1px solid var(--line);
+  background: rgba(255,255,255,.03);
+  color:var(--text);
+  padding:10px 12px;
+  border-radius: 12px;
+  cursor:pointer;
+  font-weight:900;
+  transition: .15s ease;
+  display:inline-flex; align-items:center;
+}
+
+.btn:hover{background: rgba(255,255,255,.06)}
+
+.btnPrimary{
+  border-color: transparent;
+  background: linear-gradient(135deg, rgba(109,94,252,.95), rgba(45,212,191,.55));
+  color: #fff;
+}
+
+.card{
+  background: rgba(18,20,27,.92);
+  border:1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow:hidden;
+}
+
+.head{
+  padding:16px 18px;
+  border-bottom:1px solid var(--line);
+  background: rgba(255,255,255,.02);
+  display:flex; justify-content:space-between;
+}
+
+.head h2{margin:0; font-size:16px}
+
+.body{padding:16px 18px}
+
+.grid{
+  display:grid;
+  gap:12px;
+}
+
+.empty{
+  padding:18px;
+  border:1px dashed rgba(255,255,255,.15);
+  border-radius: 14px;
+  color: var(--muted);
+  background: rgba(255,255,255,.02);
+}
+
+.item{
+  border:1px solid rgba(255,255,255,.06);
+  border-radius: 14px;
+  background: rgba(255,255,255,.02);
+  padding:14px;
+}
+
+.title{
+  font-weight:900;
+}
+
+.meta{
+  color: var(--muted);
+  font-size:12px;
+  margin-top:6px;
+}
+
+.badge{
+  font-weight:900;
+  font-size:12px;
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.18);
+}
+
+.badge.plus{
+  color: var(--plus);
+  border-color: rgba(245,197,66,.35);
+  background: rgba(245,197,66,.08);
+}
+
+.badge.pro{
+  color: var(--pro);
+  border-color: rgba(78,168,255,.35);
+  background: rgba(78,168,255,.08);
+}
+
+/* Player */
+.player{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border:1px solid var(--line);
+  background: rgba(255,255,255,.03);
+  border-radius: 14px;
+  margin-top:10px;
+}
+
+.pBtn{
+  width:40px;height:40px;
+  border-radius: 12px;
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.15);
+  color: var(--text);
+  font-weight:900;
+  cursor:pointer;
+}
+
+.pMid{flex:1}
+
+.pTimeRow{
+  display:flex;
+  gap:8px;
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:6px;
+}
+
+.pSeek{
+  width:100%;
+  accent-color: var(--brand);
+}
+
+.player audio{display:none}
+
+.actions{
+  display:flex;
+  gap:10px;
+  margin-top:12px;
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+<div class="top">
+  <div class="brand"><span class="dot"></span> WarMaster</div>
+  <div class="nav">
+    <span class="pill" id="apiPill">API</span>
+    <span class="pill planPill free" id="planPill">FREE</span>
+    <button class="btn" onclick="location.href='index.html'">Inicio</button>
+    <button class="btn btnPrimary" onclick="location.href='master.html'">Nuevo Master</button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="head">
+    <h2>Masters Desbloqueados</h2>
+    <span class="pill" id="countPill">0</span>
+  </div>
+  <div class="body">
+    <div id="list" class="grid"></div>
+    <div id="empty" class="empty" style="display:none">
+      No tienes masters desbloqueados todavía.
     </div>
   </div>
+</div>
 
-  <script>
-    function getApiBase() {
-      const qs = new URLSearchParams(location.search);
-      const fromQS = qs.get("api");
-      if (fromQS) return fromQS.replace(/\/+$/,'');
-      const stored = localStorage.getItem("WM_API_BASE");
-      if (stored) return stored.replace(/\/+$/,'');
-      return ""; // same origin
-    }
-    const API_BASE = getApiBase();
-    document.getElementById("apiPill").textContent = "API: " + (API_BASE || "mismo dominio");
+</div>
 
-    async function fetchWithTimeout(url, options={}, timeoutMs=180000) {
-      const ctrl = new AbortController();
-      const id = setTimeout(() => ctrl.abort(), timeoutMs);
-      try {
-        return await fetch(url, { ...options, signal: ctrl.signal });
-      } finally {
-        clearTimeout(id);
-      }
-    }
-    function authHeaders(){
-      const t = localStorage.getItem("WM_TOKEN") || "";
-      return t ? {"Authorization":"Bearer "+t} : {};
-    }
-    function qsCarry(path){
-      const qs = new URLSearchParams(location.search);
-      const api = qs.get("api");
-      return api ? (path + "?api=" + encodeURIComponent(api)) : path;
-    }
+<script>
+const API_BASE = "";
+document.getElementById("apiPill").textContent = "API: mismo dominio";
 
-    document.getElementById("goHome").onclick = () => location.href = qsCarry("/index.html");
-    document.getElementById("goMaster").onclick = () => location.href = qsCarry("/master.html");
-    document.getElementById("refresh").onclick = () => load();
+async function loadPlan(){
+  try{
+    const r = await fetch("/api/me");
+    const d = await r.json();
+    const plan = (d.plan||"FREE").toUpperCase();
+    const pill = document.getElementById("planPill");
+    pill.classList.remove("free","plus","pro");
+    pill.classList.add(plan.toLowerCase());
+    pill.textContent = plan;
+  }catch{}
+}
 
-    const listEl = document.getElementById("list");
-    const emptyEl = document.getElementById("empty");
-    const noteEl = document.getElementById("note");
-    const searchEl = document.getElementById("search");
+function fmt(sec){
+  sec=Math.floor(sec||0);
+  const m=Math.floor(sec/60);
+  const s=sec%60;
+  return m+":"+String(s).padStart(2,"0");
+}
 
-    let items = [];
+function bindPlayer(box){
+  const audio=box.querySelector("audio");
+  const btn=box.querySelector(".pBtn");
+  const seek=box.querySelector(".pSeek");
+  const cur=box.querySelector(".cur");
+  const dur=box.querySelector(".dur");
 
-    function fmtDate(s){
-      try{
-        const d = new Date(s);
-        return d.toLocaleString();
-      }catch(e){ return s || ""; }
-    }
+  audio.addEventListener("loadedmetadata",()=>{
+    dur.textContent=fmt(audio.duration);
+  });
 
-    function render(){
-      const q = (searchEl.value || "").toLowerCase().trim();
-      const filtered = !q ? items : items.filter(it=>{
-        const t = (it.title||"").toLowerCase();
-        const p = (it.preset||"").toLowerCase();
-        const i = (it.intensity||"").toLowerCase();
-        return (t+p+i).includes(q);
-      });
+  audio.addEventListener("timeupdate",()=>{
+    cur.textContent=fmt(audio.currentTime);
+    seek.value=(audio.currentTime/audio.duration)*1000||0;
+  });
 
-      if(filtered.length === 0){
-        listEl.style.display = "none";
-        emptyEl.style.display = "";
-        emptyEl.textContent = items.length ? "Sin resultados." : "Aún no tienes masters desbloqueados.";
-        return;
-      }
+  btn.onclick=()=>{
+    document.querySelectorAll("audio").forEach(a=>{if(a!==audio)a.pause();});
+    audio.paused?audio.play():audio.pause();
+    btn.textContent=audio.paused?"Play":"Pause";
+  };
 
-      emptyEl.style.display = "none";
-      listEl.style.display = "";
-      listEl.innerHTML = "";
+  seek.oninput=()=>{
+    audio.currentTime=(seek.value/1000)*audio.duration;
+  };
+}
 
-      filtered.forEach(it=>{
-        const paid = !!it.paid;
-        const quality = (it.quality||"FREE").toUpperCase();
-        const tagPaid = paid ? `<span class="tag ok">Pagado</span>` : `<span class="tag warn">FREE</span>`;
-        const tagQ = `<span class="tag">${quality}</span>`;
-        const tagPreset = `<span class="tag">${(it.preset||"—")}</span>`;
+async function load(){
+  const r=await fetch("/api/masters");
+  if(!r.ok)return;
+  const items=await r.json();
+  const list=document.getElementById("list");
+  const empty=document.getElementById("empty");
+  document.getElementById("countPill").textContent=items.length;
+  if(!items.length){empty.style.display="";return;}
+  empty.style.display="none";
 
-        const div = document.createElement("div");
-        div.className = "item";
-        div.innerHTML = `
-          <div class="itemTop">
-            <div>
-              <div class="title">${it.title || "Master"}</div>
-              <div class="meta">
-                ${tagPaid} ${tagQ} ${tagPreset}
-                <div style="margin-top:6px">Creado: ${fmtDate(it.created_at)}</div>
-              </div>
-            </div>
-            <div class="row" style="margin-top:0">
-              <button class="btn" data-play>▶️ Play</button>
-              <button class="btn primary" data-download ${paid ? "" : "disabled"}>⬇️ Descargar</button>
-            </div>
+  items.forEach(it=>{
+    const div=document.createElement("div");
+    div.className="item";
+
+    div.innerHTML=`
+      <div class="title">${it.title||it.id}</div>
+      <div class="meta">Preset: ${it.preset} · Intensidad: ${it.intensity}</div>
+      <span class="badge ${it.quality.toLowerCase()}">${it.quality}</span>
+
+      <div class="player">
+        <button class="pBtn">Play</button>
+        <div class="pMid">
+          <div class="pTimeRow">
+            <span class="cur">0:00</span> /
+            <span class="dur">0:00</span>
           </div>
-          <audio controls style="display:none"></audio>
-          ${paid ? "" : `<div class="meta" style="margin-top:8px">🔒 Para descargar, desbloquea desde la pantalla de masterización (o suscríbete).</div>`}
-        `;
+          <input class="pSeek" type="range" min="0" max="1000" value="0">
+        </div>
+        <audio src="/api/masters/${it.id}/stream"></audio>
+      </div>
 
-        const audio = div.querySelector("audio");
-        const playBtn = div.querySelector("[data-play]");
-        const dlBtn = div.querySelector("[data-download]");
+      <div class="actions">
+        <button class="btn btnPrimary" onclick="window.open('/api/masters/${it.id}/download')">
+          Descargar
+        </button>
+      </div>
+    `;
+    list.appendChild(div);
+    bindPlayer(div);
+  });
+}
 
-        playBtn.onclick = async () => {
-          try{
-            // Sugerido: backend entrega un stream/url
-            // GET /api/masters/{id}/stream
-            const url = (API_BASE||"") + `/api/masters/${encodeURIComponent(it.id)}/stream`;
-            audio.src = url;
-            audio.style.display = "";
-            audio.play();
-          }catch(e){
-            alert("Play requiere endpoint /api/masters/{id}/stream");
-          }
-        };
+loadPlan();
+load();
+</script>
 
-        dlBtn.onclick = () => {
-          if(!paid) return;
-          // Sugerido: backend entrega descarga directa
-          const url = (API_BASE||"") + `/api/masters/${encodeURIComponent(it.id)}/download`;
-          window.open(url, "_blank");
-        };
-
-        listEl.appendChild(div);
-      });
-    }
-
-    searchEl.addEventListener("input", render);
-
-    async function load(){
-      noteEl.textContent = "";
-      emptyEl.style.display = "";
-      emptyEl.textContent = "Cargando...";
-      listEl.style.display = "none";
-
-      // Cargar plan (best-effort)
-      try{
-        const me = await fetchWithTimeout((API_BASE||"") + "/api/me", { headers: {...authHeaders()} }, 12000);
-        if(me.ok){
-          const data = await me.json();
-          const plan = (data.plan || data.tier || "FREE").toUpperCase();
-          document.getElementById("planPill").textContent = "Plan: " + plan;
-        } else {
-          document.getElementById("planPill").textContent = "Plan: FREE";
-        }
-      }catch(e){
-        document.getElementById("planPill").textContent = "Plan: FREE";
-      }
-
-      // Cargar masters del usuario
-      try{
-        // Sugerido: GET /api/masters -> [{id,title,preset,intensity,quality,paid,created_at}]
-        const res = await fetchWithTimeout((API_BASE||"") + "/api/masters", {
-          headers: {...authHeaders()}
-        }, 180000);
-
-        if(!res.ok) throw new Error("No existe /api/masters");
-        const data = await res.json();
-        items = Array.isArray(data) ? data : (data.items || []);
-        render();
-      }catch(e){
-        items = [];
-        render();
-        noteEl.textContent =
-          "⚠️ Aún no está implementado el endpoint /api/masters en el backend. " +
-          "Cuando lo agreguemos, aquí verás tus masters comprados para re-descargar.";
-      }
-    }
-
-    load();
-  </script>
 </body>
 </html>
