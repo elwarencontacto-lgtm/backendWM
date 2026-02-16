@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Dict, Optional
 
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -15,18 +15,29 @@ from fastapi.staticfiles import StaticFiles
 # CONFIG
 # =========================
 
-MAX_FILE_SIZE_MB = 100
-MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
-MAX_DURATION_SECONDS = 6 * 60  # 6 minutos
+# FREE limits (tu versión actual)
+FREE_MAX_FILE_SIZE_MB = 100
+FREE_MAX_FILE_SIZE_BYTES = FREE_MAX_FILE_SIZE_MB * 1024 * 1024
+FREE_MAX_DURATION_SECONDS = 6 * 60  # 6 min
+
+# (Opcional) límites futuros por plan (puedes ajustar)
+PLUS_MAX_FILE_SIZE_MB = 250
+PLUS_MAX_FILE_SIZE_BYTES = PLUS_MAX_FILE_SIZE_MB * 1024 * 1024
+PLUS_MAX_DURATION_SECONDS = 15 * 60
+
+PRO_MAX_FILE_SIZE_MB = 500
+PRO_MAX_FILE_SIZE_BYTES = PRO_MAX_FILE_SIZE_MB * 1024 * 1024
+PRO_MAX_DURATION_SECONDS = 30 * 60
 
 BASE_DIR = Path(__file__).parent
+
 TMP_DIR = BASE_DIR / "tmp"
 TMP_DIR.mkdir(exist_ok=True)
 
 PUBLIC_DIR = BASE_DIR / "public"
 PUBLIC_DIR.mkdir(exist_ok=True)
 
-# Persistencia (para dashboard + re-descarga)
+# Persistencia
 DATA_DIR = BASE_DIR / "data"
 MASTERS_DIR = DATA_DIR / "masters"
 DATA_DIR.mkdir(exist_ok=True)
@@ -35,19 +46,17 @@ MASTERS_DIR.mkdir(exist_ok=True)
 app = FastAPI()
 
 # =========================
-# JOB STORAGE (MEMORIA)
+# STORAGE (MEMORIA)
 # =========================
-# job_id == master_id (para el front)
+# jobs[master_id] -> info para debug/UI
 jobs: Dict[str, dict] = {}
 
-# Compras (memoria). Más adelante lo pasas a DB.
-# purchases[master_id] = {"paid": True, "quality": "PLUS"/"PRO", "paid_at": "..."}
+# purchases[master_id] -> {paid: True, quality: "PLUS"/"PRO", paid_at: "..."}
 purchases: Dict[str, dict] = {}
 
 # =========================
 # CORS
 # =========================
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -97,7 +106,10 @@ def get_audio_duration_seconds(path: Path) -> float:
     if proc.returncode != 0:
         raise HTTPException(status_code=400, detail="No se pudo analizar duración.")
 
-    return float(proc.stdout.strip() or 0.0)
+    try:
+        return float(proc.stdout.strip() or 0.0)
+    except Exception:
+        return 0.0
 
 
 def preset_chain(preset: str, intensity: int) -> str:
@@ -127,15 +139,15 @@ def preset_chain(preset: str, intensity: int) -> str:
     )
 
 
-def master_path_for(master_id: str) -> Path:
+def master_path(master_id: str) -> Path:
     return MASTERS_DIR / f"master_{master_id}.wav"
 
 
-def orig_path_for(master_id: str, safe_name: str) -> Path:
+def orig_path(master_id: str, safe_name: str) -> Path:
     return MASTERS_DIR / f"orig_{master_id}_{safe_name}"
 
 
-def preview_path_for(master_id: str) -> Path:
+def preview_path(master_id: str) -> Path:
     return MASTERS_DIR / f"preview_{master_id}_20s.mp3"
 
 
@@ -144,12 +156,44 @@ def is_paid(master_id: str) -> bool:
     return bool(p and p.get("paid") is True)
 
 
-def paid_quality(master_id: str) -> Optional[str]:
+def get_paid_quality(master_id: str) -> Optional[str]:
     p = purchases.get(master_id)
     if not p:
         return None
     q = (p.get("quality") or "").upper()
     return q if q in ("PLUS", "PRO") else None
+
+
+def resolve_plan(req: Request) -> str:
+    """
+    Plan actual: por ahora FREE por defecto.
+    (Más adelante lo conectamos a login/suscripción real)
+    Para test, puedes enviar header: X-WM-Plan: PLUS/PRO
+    """
+    hdr = (req.headers.get("X-WM-Plan") or "").upper().strip()
+    if hdr in ("FREE", "PLUS", "PRO"):
+        return hdr
+    return "FREE"
+
+
+def enforce_limits(plan_or_quality: str, file_size_bytes: int, duration_seconds: float) -> None:
+    q = (plan_or_quality or "FREE").upper()
+
+    if q == "PRO":
+        max_bytes = PRO_MAX_FILE_SIZE_BYTES
+        max_sec = PRO_MAX_DURATION_SECONDS
+    elif q == "PLUS":
+        max_bytes = PLUS_MAX_FILE_SIZE_BYTES
+        max_sec = PLUS_MAX_DURATION_SECONDS
+    else:
+        max_bytes = FREE_MAX_FILE_SIZE_BYTES
+        max_sec = FREE_MAX_DURATION_SECONDS
+
+    if file_size_bytes > max_bytes:
+        raise HTTPException(status_code=400, detail=f"Supera el máximo de {max_bytes // (1024*1024)}MB.")
+
+    if duration_seconds > max_sec:
+        raise HTTPException(status_code=400, detail=f"Supera el máximo de {max_sec // 60} minutos.")
 
 
 # =========================
@@ -159,6 +203,13 @@ def paid_quality(master_id: str) -> Optional[str]:
 @app.get("/api/health")
 def health():
     return {"ok": True}
+
+
+@app.get("/api/me")
+def me(request: Request):
+    # Para el master.html dinámico
+    plan = resolve_plan(request)
+    return {"plan": plan}
 
 
 @app.get("/api/jobs")
@@ -183,25 +234,23 @@ async def master(
     file: UploadFile = File(...),
     preset: str = Form("clean"),
     intensity: int = Form(55),
-    # Estos campos extra NO rompen tu front actual, y ayudan con el nuevo
-    target: str = Form(None),              # alias si tu nuevo front envía "target"
-    requested_quality: str = Form("FREE"), # FREE/PLUS/PRO (por ahora lo ignoramos si no hay pagos)
+    # compat con tu master.html nuevo
+    target: Optional[str] = Form(None),
+    requested_quality: str = Form("FREE"),
 ):
     if not file or not file.filename:
         raise HTTPException(status_code=400, detail="Archivo inválido.")
 
-    # Compatibilidad: si viene "target" lo usamos como preset
-    if target and not preset:
-        preset = target
-    elif target and preset == "clean":
-        # si tu UI nueva manda target, úsalo
+    # Compat: si viene "target", lo usamos como preset
+    if target:
         preset = target
 
     master_id = uuid.uuid4().hex[:10]
     safe_name = safe_filename(file.filename)
 
-    # Guardamos original temporal primero
-    tmp_in_path = TMP_DIR / f"in_{master_id}_{safe_name}"
+    tmp_in = TMP_DIR / f"in_{master_id}_{safe_name}"
+    out = master_path(master_id)
+    orig = orig_path(master_id, safe_name)
 
     jobs[master_id] = {
         "status": "processing",
@@ -209,11 +258,12 @@ async def master(
         "preset": preset,
         "intensity": int(intensity),
         "created_at": datetime.utcnow().isoformat(),
-        "master_id": master_id
+        "master_id": master_id,
     }
 
+    # Guardar upload temporal
     try:
-        with tmp_in_path.open("wb") as f:
+        with tmp_in.open("wb") as f:
             shutil.copyfileobj(file.file, f)
     finally:
         try:
@@ -221,67 +271,59 @@ async def master(
         except Exception:
             pass
 
-    # VALIDAR TAMAÑO
-    if tmp_in_path.stat().st_size > MAX_FILE_SIZE_BYTES:
-        tmp_in_path.unlink(missing_ok=True)
-        jobs[master_id]["status"] = "error"
-        raise HTTPException(status_code=400, detail="Supera 100MB.")
+    # Validaciones (por ahora: según plan o requested_quality)
+    plan = resolve_plan(request)
+    quality = (requested_quality or plan or "FREE").upper()
+    if quality not in ("FREE", "PLUS", "PRO"):
+        quality = plan
 
-    # VALIDAR DURACIÓN
-    duration = get_audio_duration_seconds(tmp_in_path)
-    if duration > MAX_DURATION_SECONDS:
-        tmp_in_path.unlink(missing_ok=True)
-        jobs[master_id]["status"] = "error"
-        raise HTTPException(status_code=400, detail="Supera 6 minutos.")
+    file_bytes = tmp_in.stat().st_size
+    duration = get_audio_duration_seconds(tmp_in)
 
-    # Persistimos original para poder re-render en unlock/upgrade (si quieres)
-    persisted_orig = orig_path_for(master_id, safe_name)
+    # Mantén tus límites FREE, pero dejamos preparado PLUS/PRO
+    enforce_limits(quality, file_bytes, duration)
+
+    # Persistimos original (para poder re-render/descargas)
     try:
-        shutil.move(str(tmp_in_path), str(persisted_orig))
+        shutil.move(str(tmp_in), str(orig))
     except Exception:
-        # fallback: si move falla, copiamos
-        shutil.copy2(str(tmp_in_path), str(persisted_orig))
-        tmp_in_path.unlink(missing_ok=True)
-
-    out_path = master_path_for(master_id)
+        shutil.copy2(str(tmp_in), str(orig))
+        tmp_in.unlink(missing_ok=True)
 
     filters = preset_chain(preset, intensity)
-
     cmd = [
         "ffmpeg", "-y",
         "-hide_banner",
-        "-i", str(persisted_orig),
+        "-i", str(orig),
         "-vn",
         "-af", filters,
         "-ar", "44100",
         "-ac", "2",
         "-sample_fmt", "s16",
-        str(out_path)
+        str(out)
     ]
 
     try:
         run_ffmpeg(cmd)
     except Exception:
         jobs[master_id]["status"] = "error"
-        # No borramos persisted_orig automáticamente para poder debug, pero si quieres lo borramos:
-        # persisted_orig.unlink(missing_ok=True)
-        out_path.unlink(missing_ok=True)
+        out.unlink(missing_ok=True)
         raise
 
-    if not out_path.exists() or out_path.stat().st_size < 1024:
+    if not out.exists() or out.stat().st_size < 1024:
         jobs[master_id]["status"] = "error"
-        out_path.unlink(missing_ok=True)
+        out.unlink(missing_ok=True)
         raise HTTPException(status_code=500, detail="Master vacío.")
 
     jobs[master_id]["status"] = "done"
     jobs[master_id]["duration_sec"] = duration
     jobs[master_id]["stream"] = f"/api/masters/{master_id}/stream"
     jobs[master_id]["preview_download"] = f"/api/master/preview?master_id={master_id}"
-    jobs[master_id]["full_download"] = f"/api/masters/{master_id}/download"  # requiere paid
+    jobs[master_id]["full_download"] = f"/api/masters/{master_id}/download"
 
-    # Respuesta: devolvemos el WAV para escuchar en la UI + header master_id
+    # Respuesta: WAV para escuchar + header master_id
     resp = FileResponse(
-        path=str(out_path),
+        path=str(out),
         media_type="audio/wav",
         filename="warmaster_master.wav",
     )
@@ -294,17 +336,16 @@ async def master(
 # -------------------------
 @app.get("/api/master/preview")
 def preview_20s(master_id: str):
-    out_path = master_path_for(master_id)
-    if not out_path.exists():
+    out = master_path(master_id)
+    if not out.exists():
         raise HTTPException(status_code=404, detail="Master no encontrado.")
 
-    prev = preview_path_for(master_id)
-    # Generar si no existe
-    if not prev.exists() or prev.stat().st_mtime < out_path.stat().st_mtime:
+    prev = preview_path(master_id)
+    if (not prev.exists()) or (prev.stat().st_mtime < out.stat().st_mtime):
         cmd = [
             "ffmpeg", "-y",
             "-hide_banner",
-            "-i", str(out_path),
+            "-i", str(out),
             "-t", "20",
             "-vn",
             "-codec:a", "libmp3lame",
@@ -322,7 +363,7 @@ def preview_20s(master_id: str):
 
 # -------------------------
 # UNLOCK por canción (PLUS/PRO)
-# (por ahora sin pasarela, solo marca paid para test)
+# (sin pasarela aún: marca pagado para test)
 # -------------------------
 @app.post("/api/unlock")
 async def unlock(req: Request):
@@ -335,8 +376,8 @@ async def unlock(req: Request):
     if quality not in ("PLUS", "PRO"):
         raise HTTPException(status_code=400, detail="quality debe ser PLUS o PRO.")
 
-    out_path = master_path_for(master_id)
-    if not out_path.exists():
+    out = master_path(master_id)
+    if not out.exists():
         raise HTTPException(status_code=404, detail="Master no encontrado.")
 
     purchases[master_id] = {
@@ -349,7 +390,7 @@ async def unlock(req: Request):
 
 
 # -------------------------
-# Upgrade PLUS -> PRO (paga diferencia más adelante)
+# Upgrade PLUS -> PRO (marca estado)
 # -------------------------
 @app.post("/api/upgrade")
 async def upgrade(req: Request):
@@ -373,82 +414,72 @@ async def upgrade(req: Request):
 
 # -------------------------
 # Dashboard list (masters pagados)
-# (luego lo hacemos por usuario con login real)
 # -------------------------
 @app.get("/api/masters")
 def list_masters():
-    # Por ahora: devolvemos todos los masters pagados en memoria
     items = []
     for mid, meta in jobs.items():
         if meta.get("status") != "done":
             continue
         if not is_paid(mid):
             continue
-
         items.append({
             "id": mid,
             "title": meta.get("filename") or "Master",
             "preset": meta.get("preset") or "clean",
             "intensity": meta.get("intensity") or 55,
-            "quality": paid_quality(mid) or "PLUS",
+            "quality": get_paid_quality(mid) or "PLUS",
             "paid": True,
             "created_at": meta.get("created_at"),
         })
-
-    # Orden por fecha (desc)
     items.sort(key=lambda x: x.get("created_at") or "", reverse=True)
     return items
 
 
 # -------------------------
-# Stream (escuchar completo siempre, incluso FREE)
+# Stream (escuchar completo siempre)
 # -------------------------
 @app.get("/api/masters/{master_id}/stream")
 def stream_master(master_id: str):
-    out_path = master_path_for(master_id)
-    if not out_path.exists():
+    out = master_path(master_id)
+    if not out.exists():
         raise HTTPException(status_code=404, detail="Master no encontrado.")
     return FileResponse(
-        path=str(out_path),
+        path=str(out),
         media_type="audio/wav",
         filename="warmaster_master.wav"
     )
 
 
 # -------------------------
-# Download FULL (solo si paid)
+# Download FULL (solo si pagado)
 # -------------------------
 @app.get("/api/masters/{master_id}/download")
 def download_master(master_id: str):
-    out_path = master_path_for(master_id)
-    if not out_path.exists():
+    out = master_path(master_id)
+    if not out.exists():
         raise HTTPException(status_code=404, detail="Master no encontrado.")
 
     if not is_paid(master_id):
-        # Modelo: FREE no descarga completo
+        # FREE: no descarga completo
         raise HTTPException(status_code=402, detail="Debes desbloquear (PLUS/PRO) para descargar completo.")
 
-    q = paid_quality(master_id) or "PLUS"
+    q = get_paid_quality(master_id) or "PLUS"
     return FileResponse(
-        path=str(out_path),
+        path=str(out),
         media_type="audio/wav",
         filename=f"warmaster_master_{q.lower()}.wav"
     )
 
 
 # -------------------------
-# Compatibilidad con tu ruta antigua /download/{job_id}
-# (ahora exige paid para descargar completo)
+# Compatibilidad con tu ruta antigua
 # -------------------------
 @app.get("/download/{job_id}")
 def download_job(job_id: str):
-    # Deja tu endpoint pero con reglas nuevas (FULL solo si paid)
     return download_master(job_id)
 
 
-# -------------------------
-# Root
-# -------------------------
 @app.get("/")
 def root():
     return RedirectResponse(url="/index.html")
