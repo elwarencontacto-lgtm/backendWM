@@ -339,6 +339,84 @@
     }
     .modal .body{padding:16px 18px}
     .priceBtn{ width:100%; justify-content:center; }
+
+    /* ===== EQ LIVE (Plugin panel) ===== */
+    .eqPanel{
+      margin-top:12px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(18,20,27,.65);
+      border-radius:18px;
+      overflow:hidden;
+    }
+    .eqTop{
+      padding:14px 14px 10px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      background:
+        radial-gradient(900px 260px at 10% 0%, rgba(109,94,252,.18), transparent 55%),
+        radial-gradient(900px 260px at 90% 0%, rgba(45,212,191,.12), transparent 55%),
+        rgba(255,255,255,.02);
+    }
+    .eqTitle{font-weight:900; letter-spacing:.3px}
+    .eqSub{color: rgba(255,255,255,.60); font-size:12px; margin-top:2px}
+    #eqViz{
+      width:100%;
+      height:220px;
+      display:block;
+      margin-top:10px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.06);
+      background: rgba(0,0,0,.18);
+    }
+
+    .eqBottom{
+      padding:14px;
+      display:grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap:12px;
+      background: rgba(255,255,255,.02);
+    }
+    @media (max-width: 900px){
+      .eqBottom{grid-template-columns: repeat(3, 1fr);}
+    }
+    @media (max-width: 520px){
+      .eqBottom{grid-template-columns: repeat(2, 1fr);}
+    }
+
+    .knobCol{
+      border:1px solid rgba(255,255,255,.06);
+      background: rgba(255,255,255,.02);
+      border-radius:16px;
+      padding:12px;
+      text-align:center;
+    }
+    .kLabel{margin-top:10px; font-weight:900; font-size:12px; letter-spacing:.2px}
+    .kVal{margin-top:4px; color: rgba(255,255,255,.65); font-size:12px}
+
+    .knob{
+      width:74px; height:74px;
+      margin:0 auto;
+      border-radius:999px;
+      position:relative;
+      border:1px solid rgba(255,255,255,.12);
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,.10), transparent 45%),
+        radial-gradient(circle at 70% 70%, rgba(0,0,0,.25), transparent 55%),
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.20));
+      box-shadow: 0 12px 22px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.06);
+      touch-action:none;
+      user-select:none;
+    }
+    .knob::after{
+      content:"";
+      position:absolute;
+      left:50%; top:50%;
+      width:4px; height:28px;
+      background: linear-gradient(180deg, rgba(109,94,252,.95), rgba(45,212,191,.55));
+      transform-origin: 50% calc(100% - 2px);
+      transform: translate(-50%,-100%) rotate(var(--ang, -120deg));
+      border-radius:999px;
+      box-shadow: 0 0 10px rgba(109,94,252,.25);
+    }
   </style>
 </head>
 
@@ -443,6 +521,48 @@
               <input class="pVol" type="range" min="0" max="1" step="0.01" value="1" data-act="vol" aria-label="vol"/>
               <audio id="audioMaster"></audio>
             </div>
+
+            <!-- ===== EQ LIVE PANEL (reemplaza waveform) ===== -->
+            <div class="eqPanel" id="eqPanel">
+              <div class="eqTop">
+                <div class="eqTitle">EQ Live</div>
+                <div class="eqSub">Ajuste en tiempo real (preview)</div>
+                <canvas id="eqViz" width="900" height="220"></canvas>
+              </div>
+
+              <div class="eqBottom">
+                <div class="knobCol">
+                  <div class="knob" data-knob="low"></div>
+                  <div class="kLabel">LOW</div>
+                  <div class="kVal" id="vLow">0.0 dB</div>
+                </div>
+
+                <div class="knobCol">
+                  <div class="knob" data-knob="mid"></div>
+                  <div class="kLabel">MID</div>
+                  <div class="kVal" id="vMid">0.0 dB</div>
+                </div>
+
+                <div class="knobCol">
+                  <div class="knob" data-knob="pres"></div>
+                  <div class="kLabel">PRESENCE</div>
+                  <div class="kVal" id="vPres">0.0 dB</div>
+                </div>
+
+                <div class="knobCol">
+                  <div class="knob" data-knob="air"></div>
+                  <div class="kLabel">AIR</div>
+                  <div class="kVal" id="vAir">0.0 dB</div>
+                </div>
+
+                <div class="knobCol">
+                  <div class="knob" data-knob="out"></div>
+                  <div class="kLabel">OUTPUT</div>
+                  <div class="kVal" id="vOut">0.0 dB</div>
+                </div>
+              </div>
+            </div>
+            <!-- ===== /EQ LIVE PANEL ===== -->
 
             <div class="note" id="unlockHint"></div>
 
@@ -554,7 +674,6 @@
     }
 
     async function loadPlan(){
-      // (Cuando actualicemos backend, /api/me devolverá el plan real)
       try{
         const res = await fetchWithTimeout((API_BASE||"") + "/api/me", {}, 12000);
         if(!res.ok) throw new Error("no /api/me");
@@ -699,7 +818,6 @@
     }
 
     function afterUnlockUI(){
-      // Plan = full download, unlock = full download
       const fullBtn = document.getElementById("btnDownloadFull");
       const upBtn = document.getElementById("btnUpgradeToPro");
 
@@ -732,7 +850,6 @@
         return;
       }
 
-      // FREE
       fullBtn.style.display = "none";
       upBtn.style.display = "none";
       document.getElementById("unlockHint").innerHTML =
@@ -849,7 +966,7 @@
       let dragging = false;
 
       function syncBtn(){
-        btn.textContent = audio.paused ? "▶" : "❚❚";
+        btn.textContent = audio.paused ? "▶" : "II";
       }
 
       audio.addEventListener("loadedmetadata", () => {
@@ -944,7 +1061,6 @@
           ? ("master_id: " + lastMasterId)
           : "Falta header X-Master-Id en /api/master (lo añadimos en backend).";
 
-        // Si plan PLUS/PRO => descarga completa
         if(currentPlan === "PLUS" || currentPlan === "PRO"){
           paidQuality = currentPlan;
         } else {
@@ -967,6 +1083,292 @@
 
     renderOptions();
     loadPlan();
+
+    // ========= EQ LIVE (WebAudio real-time preview) =========
+    (() => {
+      const masterAudio = document.getElementById("audioMaster");
+      const eqPanel = document.getElementById("eqPanel");
+      if (!masterAudio || !eqPanel) return;
+
+      const state = { low:0, mid:0, pres:0, air:0, out:0 };
+
+      let ctx=null, src=null, analyser=null, rafId=0;
+      let lowShelf=null, midPeak=null, presPeak=null, highShelf=null, outGain=null, limiter=null;
+
+      const canvas = document.getElementById("eqViz");
+      const g = canvas ? canvas.getContext("2d") : null;
+      const buf = new Uint8Array(1024);
+
+      function dbToGain(db){ return Math.pow(10, db/20); }
+
+      function ensureAudioGraph(){
+        if (ctx) return;
+
+        ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === "suspended") ctx.resume().catch(()=>{});
+
+        src = ctx.createMediaElementSource(masterAudio);
+
+        lowShelf = ctx.createBiquadFilter();
+        lowShelf.type = "lowshelf";
+        lowShelf.frequency.value = 120;
+
+        midPeak = ctx.createBiquadFilter();
+        midPeak.type = "peaking";
+        midPeak.frequency.value = 630;
+        midPeak.Q.value = 1.0;
+
+        presPeak = ctx.createBiquadFilter();
+        presPeak.type = "peaking";
+        presPeak.frequency.value = 1760;
+        presPeak.Q.value = 1.0;
+
+        highShelf = ctx.createBiquadFilter();
+        highShelf.type = "highshelf";
+        highShelf.frequency.value = 8500;
+
+        outGain = ctx.createGain();
+
+        limiter = ctx.createDynamicsCompressor();
+        limiter.threshold.value = -1.0;
+        limiter.knee.value = 0.0;
+        limiter.ratio.value = 20.0;
+        limiter.attack.value = 0.003;
+        limiter.release.value = 0.09;
+
+        analyser = ctx.createAnalyser();
+        analyser.fftSize = 2048;
+        analyser.smoothingTimeConstant = 0.85;
+
+        // chain
+        src
+          .connect(lowShelf)
+          .connect(midPeak)
+          .connect(presPeak)
+          .connect(highShelf)
+          .connect(outGain)
+          .connect(limiter)
+          .connect(analyser)
+          .connect(ctx.destination);
+
+        applyParams(true);
+        startViz();
+      }
+
+      function applyParams(instant=false){
+        if (!ctx) return;
+        const t = ctx.currentTime;
+        const k = instant ? 0.001 : 0.06;
+
+        lowShelf.gain.setTargetAtTime(state.low, t, k);
+        midPeak.gain.setTargetAtTime(state.mid, t, k);
+        presPeak.gain.setTargetAtTime(state.pres, t, k);
+        highShelf.gain.setTargetAtTime(state.air, t, k);
+
+        outGain.gain.setTargetAtTime(dbToGain(state.out), t, k);
+      }
+
+      // ===== Knobs =====
+      const knobEls = [...document.querySelectorAll(".knob")];
+      const valEls = {
+        low: document.getElementById("vLow"),
+        mid: document.getElementById("vMid"),
+        pres: document.getElementById("vPres"),
+        air: document.getElementById("vAir"),
+        out: document.getElementById("vOut")
+      };
+
+      const ranges = {
+        low:  {min:-12, max: 12},
+        mid:  {min:-12, max: 12},
+        pres: {min:-12, max: 12},
+        air:  {min:-12, max: 12},
+        out:  {min:-12, max: 6}
+      };
+
+      function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
+      function valueToAngle(v, key){
+        const r = ranges[key];
+        const p = (v - r.min) / (r.max - r.min);
+        return (-120 + p * 240);
+      }
+      function angleToValue(a, key){
+        const r = ranges[key];
+        const p = (a + 120) / 240;
+        return r.min + p * (r.max - r.min);
+      }
+
+      function setKnobUI(key){
+        const el = knobEls.find(x => x.dataset.knob === key);
+        if (!el) return;
+        el.style.setProperty("--ang", valueToAngle(state[key], key) + "deg");
+        if (valEls[key]) valEls[key].textContent = (state[key] >= 0 ? "+" : "") + state[key].toFixed(1) + " dB";
+      }
+
+      function initKnobs(){
+        Object.keys(state).forEach(setKnobUI);
+
+        knobEls.forEach(el => {
+          const key = el.dataset.knob;
+          let active = false;
+
+          const onDown = (e) => {
+            active = true;
+            ensureAudioGraph();
+            try { el.setPointerCapture(e.pointerId); } catch {}
+          };
+
+          const onMove = (e) => {
+            if (!active) return;
+
+            const rect = el.getBoundingClientRect();
+            const cx = rect.left + rect.width/2;
+            const cy = rect.top + rect.height/2;
+
+            const dx = e.clientX - cx;
+            const dy = e.clientY - cy;
+
+            let ang = Math.atan2(dy, dx) * (180/Math.PI);
+            ang = ang - 90;
+            while (ang < -180) ang += 360;
+            while (ang > 180) ang -= 360;
+            ang = clamp(ang, -120, 120);
+
+            let v = angleToValue(ang, key);
+            v = clamp(v, ranges[key].min, ranges[key].max);
+
+            const step = 0.2;
+            v = Math.round(v/step)*step;
+
+            state[key] = v;
+            setKnobUI(key);
+            applyParams(false);
+          };
+
+          const onUp = () => { active = false; };
+
+          el.addEventListener("pointerdown", onDown);
+          window.addEventListener("pointermove", onMove);
+          window.addEventListener("pointerup", onUp);
+          window.addEventListener("pointercancel", onUp);
+        });
+      }
+
+      // ===== Visual =====
+      function drawGrid(){
+        if (!g) return;
+        const w = canvas.width, h = canvas.height;
+        g.clearRect(0,0,w,h);
+
+        g.fillStyle = "rgba(0,0,0,.18)";
+        g.fillRect(0,0,w,h);
+
+        g.strokeStyle = "rgba(255,255,255,.06)";
+        g.lineWidth = 1;
+        for(let x=0; x<=10; x++){
+          const px = Math.round((x/10)*w);
+          g.beginPath(); g.moveTo(px,0); g.lineTo(px,h); g.stroke();
+        }
+        for(let y=0; y<=6; y++){
+          const py = Math.round((y/6)*h);
+          g.beginPath(); g.moveTo(0,py); g.lineTo(w,py); g.stroke();
+        }
+
+        g.strokeStyle = "rgba(255,255,255,.10)";
+        g.beginPath(); g.moveTo(0, h*0.5); g.lineTo(w, h*0.5); g.stroke();
+      }
+
+      function drawSpectrum(){
+        if (!analyser || !g) return;
+        analyser.getByteFrequencyData(buf);
+        const w = canvas.width, h = canvas.height;
+
+        g.beginPath();
+        for(let i=0; i<buf.length; i++){
+          const x = (i/(buf.length-1))*w;
+          const v = buf[i]/255;
+          const y = h - (v*v)*h*0.92;
+          if(i===0) g.moveTo(x,y); else g.lineTo(x,y);
+        }
+        g.lineTo(w,h); g.lineTo(0,h); g.closePath();
+
+        const grad = g.createLinearGradient(0,0,0,h);
+        grad.addColorStop(0, "rgba(109,94,252,.18)");
+        grad.addColorStop(1, "rgba(45,212,191,.10)");
+        g.fillStyle = grad;
+        g.fill();
+
+        g.strokeStyle = "rgba(255,255,255,.16)";
+        g.lineWidth = 1.5;
+        g.stroke();
+      }
+
+      function drawEQCurve(){
+        if (!g) return;
+        const w = canvas.width, h = canvas.height;
+
+        function yFromDb(db){
+          const maxDb = 12;
+          const p = db / maxDb;
+          return h*0.5 - p*(h*0.22);
+        }
+
+        const pts = [
+          {x: w*0.12, y: yFromDb(state.low)},
+          {x: w*0.35, y: yFromDb(state.mid)},
+          {x: w*0.55, y: yFromDb(state.pres)},
+          {x: w*0.78, y: yFromDb(state.air)}
+        ];
+
+        g.strokeStyle = "rgba(255,255,255,.90)";
+        g.lineWidth = 2.2;
+        g.beginPath();
+        g.moveTo(0, h*0.5);
+
+        for(let i=0; i<pts.length; i++){
+          const p = pts[i];
+          const prev = pts[i-1] || {x:0, y:h*0.5};
+          const next = pts[i+1] || {x:w, y:h*0.5};
+
+          const cp1x = prev.x + (p.x - prev.x)*0.55;
+          const cp1y = prev.y + (p.y - prev.y)*0.55;
+          const cp2x = p.x - (next.x - prev.x)*0.10;
+          const cp2y = p.y;
+
+          g.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p.x, p.y);
+        }
+
+        g.lineTo(w, h*0.5);
+        g.stroke();
+
+        g.fillStyle = "rgba(255,255,255,.95)";
+        pts.forEach(p=>{
+          g.beginPath();
+          g.arc(p.x, p.y, 4.6, 0, Math.PI*2);
+          g.fill();
+        });
+      }
+
+      function startViz(){
+        if (!g || !analyser) return;
+        cancelAnimationFrame(rafId);
+        const tick = () => {
+          drawGrid();
+          drawSpectrum();
+          drawEQCurve();
+          rafId = requestAnimationFrame(tick);
+        };
+        tick();
+      }
+
+      // iOS/Android: activar al play o al gesto (perilla ya lo hace)
+      masterAudio.addEventListener("play", () => {
+        ensureAudioGraph();
+        if (ctx && ctx.state === "suspended") ctx.resume().catch(()=>{});
+      }, {passive:true});
+
+      initKnobs();
+    })();
   </script>
 </body>
 </html>
