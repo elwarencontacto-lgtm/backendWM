@@ -20,8 +20,8 @@
 
       /* Plan colors (official) */
       --free:#ffffff;   /* FREE blanco */
-      --plus:#f5c542;   /* PLUS amarillo premium */
-      --pro:#4ea8ff;    /* PRO azul premium */
+      --plus:#f5c542;   /* PLUS amarillo */
+      --pro:#4ea8ff;    /* PRO azul */
 
       --warn:#f59e0b;
       --bad:#ef4444;
@@ -76,7 +76,6 @@
     .planPill{
       border-color: rgba(255,255,255,.18);
       background: rgba(255,255,255,.03);
-      color: var(--free);
       font-weight:900;
     }
     .planPill.plus{ color: var(--plus); border-color: rgba(245,197,66,.35); background: rgba(245,197,66,.08); }
@@ -215,7 +214,6 @@
       line-height:1.5;
     }
 
-    audio{width:100%}
     .divider{border:none;border-top:1px solid var(--line); margin:14px 0}
 
     .badge{
@@ -226,12 +224,102 @@
       border-radius:999px;
       border:1px solid rgba(255,255,255,.18);
       background: rgba(255,255,255,.03);
-      color: var(--free);
       margin-right:8px;
     }
     .badge.plus{ color: var(--plus); border-color: rgba(245,197,66,.35); background: rgba(245,197,66,.08); }
     .badge.pro{  color: var(--pro);  border-color: rgba(78,168,255,.35); background: rgba(78,168,255,.08); }
     .badge.free{ color: var(--free); border-color: rgba(255,255,255,.18); background: rgba(255,255,255,.03); }
+
+    /* ===== File picker corporativo ===== */
+    .fileRow{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      border-radius: 14px;
+      padding:10px;
+    }
+    .fileInputHidden{
+      position:absolute;
+      width:1px;height:1px;
+      opacity:0;
+      pointer-events:none;
+    }
+    .fileBtn{
+      white-space:nowrap;
+      padding:10px 14px;
+      border-radius:12px;
+    }
+    .fileMeta{min-width:0; flex:1}
+    .fileName{
+      font-weight:900;
+      font-size:13px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .fileHint{
+      margin-top:4px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    /* ===== Player custom WarMaster ===== */
+    .player{
+      position:relative;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      border-radius: 14px;
+    }
+    .playerPro{
+      border-color: rgba(109,94,252,.20);
+      background:
+        radial-gradient(420px 120px at 0% 0%, rgba(109,94,252,.12), transparent 65%),
+        rgba(255,255,255,.03);
+    }
+
+    .pBtn{
+      width:40px;height:40px;
+      border-radius: 12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.15);
+      color: var(--text);
+      font-weight:900;
+      cursor:pointer;
+    }
+    .pBtn:hover{background: rgba(255,255,255,.05)}
+
+    .pMid{flex:1; min-width:0}
+    .pTimeRow{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-bottom:6px;
+      color: var(--muted);
+      font-size:12px;
+    }
+    .pSep{opacity:.6}
+
+    .pSeek{
+      width:100%;
+      accent-color: var(--brand);
+      height: 18px;
+    }
+    .pVol{
+      width:90px;
+      accent-color: var(--brand2);
+      height: 18px;
+    }
+    @media (max-width:520px){
+      .pVol{display:none;}
+    }
+
+    .player audio{display:none;} /* ocultamos control nativo */
 
     /* Modal */
     .modalBack{
@@ -274,8 +362,16 @@
           <span class="pill" id="statusPill">Listo</span>
         </div>
         <div class="body">
+
           <label>Archivo (mp3/wav)</label>
-          <input class="input" type="file" id="file" accept="audio/*"/>
+          <div class="fileRow">
+            <input type="file" id="file" accept="audio/*" class="fileInputHidden"/>
+            <button class="btn btnPrimary fileBtn" id="btnPickFile">Elegir archivo</button>
+            <div class="fileMeta">
+              <div class="fileName" id="fileName">Sin archivo</div>
+              <div class="fileHint" id="fileHint">MAX 100MB · 6:00</div>
+            </div>
+          </div>
 
           <div style="height:12px"></div>
 
@@ -315,13 +411,38 @@
           <div id="resultEmpty" class="muted">Sube un archivo y presiona “Procesar”.</div>
 
           <div id="resultBox" style="display:none">
+
             <label>Original</label>
-            <audio id="audioOriginal" controls></audio>
+            <div class="player" id="playerOriginal">
+              <button class="pBtn" data-act="play" aria-label="play">▶</button>
+              <div class="pMid">
+                <div class="pTimeRow">
+                  <span class="pTime" data-k="cur">0:00</span>
+                  <span class="pSep">/</span>
+                  <span class="pTime" data-k="dur">0:00</span>
+                </div>
+                <input class="pSeek" type="range" min="0" max="1000" value="0" data-act="seek"/>
+              </div>
+              <input class="pVol" type="range" min="0" max="1" step="0.01" value="1" data-act="vol" aria-label="vol"/>
+              <audio id="audioOriginal"></audio>
+            </div>
 
             <div style="height:10px"></div>
 
             <label>Master</label>
-            <audio id="audioMaster" controls></audio>
+            <div class="player playerPro" id="playerMaster">
+              <button class="pBtn" data-act="play" aria-label="play">▶</button>
+              <div class="pMid">
+                <div class="pTimeRow">
+                  <span class="pTime" data-k="cur">0:00</span>
+                  <span class="pSep">/</span>
+                  <span class="pTime" data-k="dur">0:00</span>
+                </div>
+                <input class="pSeek" type="range" min="0" max="1000" value="0" data-act="seek"/>
+              </div>
+              <input class="pVol" type="range" min="0" max="1" step="0.01" value="1" data-act="vol" aria-label="vol"/>
+              <audio id="audioMaster"></audio>
+            </div>
 
             <div class="note" id="unlockHint"></div>
 
@@ -429,13 +550,11 @@
         document.getElementById("planNote").innerHTML =
           `<span class="badge free">■ FREE</span> Escucha completo. Descarga: 20s.`;
       }
-
-      renderOptions(); // re-eval locks
+      renderOptions();
     }
 
     async function loadPlan(){
-      // En tu backend actual no existe /api/me: por eso, ahora quedará FREE.
-      // En el siguiente paso (backend) lo añadimos para que funcione real.
+      // (Cuando actualicemos backend, /api/me devolverá el plan real)
       try{
         const res = await fetchWithTimeout((API_BASE||"") + "/api/me", {}, 12000);
         if(!res.ok) throw new Error("no /api/me");
@@ -449,14 +568,12 @@
     }
 
     // ========= OPTIONS =========
-    // OJO: Tu backend hoy usa preset: clean/warm/bright/heavy/club.
-    // Por eso aquí usamos esos mismos ids para que sea compatible.
     const TARGETS = [
       {id:"clean",  name:"Streaming", desc:"Balance general", lock:false},
       {id:"warm",   name:"Warm",      desc:"Cuerpo / suavidad", lock:false},
       {id:"bright", name:"Bright",    desc:"Brillo / presencia", lock:false},
       {id:"heavy",  name:"Heavy",     desc:"Grueso / denso", lock:false},
-      {id:"club",   name:"Club",      desc:"Impacto alto", lock:true}, // lock en FREE (como negocio)
+      {id:"club",   name:"Club",      desc:"Impacto alto", lock:true},
     ];
 
     const INTENSITIES = [
@@ -472,8 +589,8 @@
       const tBox = document.getElementById("targets");
       tBox.innerHTML = "";
       TARGETS.forEach(o=>{
-        const div = document.createElement("div");
         const locked = o.lock && currentPlan === "FREE";
+        const div = document.createElement("div");
         div.className = "opt" + (o.id===selectedTarget ? " active" : "");
         div.innerHTML =
           `<b>${o.name}</b><small>${o.desc}</small>` +
@@ -509,7 +626,6 @@
     let masterUrl = null;
     let originalUrl = null;
     let previewUrl = null;
-
     let paidQuality = null; // null / PLUS / PRO (unlock)
 
     function revoke(url){ try{ if(url) URL.revokeObjectURL(url); }catch(e){} }
@@ -533,6 +649,7 @@
       document.getElementById("btnDownloadFull").style.display = "none";
       document.getElementById("btnUpgradeToPro").style.display = "none";
 
+      // Reset players
       const ao = document.getElementById("audioOriginal");
       const am = document.getElementById("audioMaster");
       ao.removeAttribute("src"); am.removeAttribute("src");
@@ -540,11 +657,18 @@
 
       revoke(originalUrl); revoke(masterUrl); revoke(previewUrl);
       originalUrl=null; masterUrl=null; previewUrl=null;
+
+      // Reset UI
+      document.querySelectorAll(".pTime[data-k='cur']").forEach(el => el.textContent="0:00");
+      document.querySelectorAll(".pTime[data-k='dur']").forEach(el => el.textContent="0:00");
+      document.querySelectorAll(".pSeek").forEach(el => el.value="0");
+      document.querySelectorAll(".pBtn[data-act='play']").forEach(el => el.textContent="▶");
     }
 
     document.getElementById("btnReset").onclick = () => {
-      document.getElementById("file").value = "";
       resetResult();
+      document.getElementById("file").value = "";
+      document.getElementById("fileName").textContent = "Sin archivo";
       setStatus("Listo.", 0);
     };
 
@@ -575,31 +699,44 @@
     }
 
     function afterUnlockUI(){
-      // Si plan es PLUS/PRO, ya hay descarga completa.
-      // Si fue unlock individual, también.
-      document.getElementById("btnDownloadFull").style.display = "";
+      // Plan = full download, unlock = full download
+      const fullBtn = document.getElementById("btnDownloadFull");
+      const upBtn = document.getElementById("btnUpgradeToPro");
+
       if (paidQuality === "PLUS") {
-        document.getElementById("btnUpgradeToPro").style.display = "";
+        fullBtn.style.display = "";
+        upBtn.style.display = "";
         document.getElementById("unlockHint").innerHTML =
           `<span class="badge plus">◇ PLUS</span> Master desbloqueado. Disponible en dashboard para re-descarga.`;
-      } else if (paidQuality === "PRO") {
-        document.getElementById("btnUpgradeToPro").style.display = "none";
+        return;
+      }
+      if (paidQuality === "PRO") {
+        fullBtn.style.display = "";
+        upBtn.style.display = "none";
         document.getElementById("unlockHint").innerHTML =
           `<span class="badge pro">◆ PRO</span> Master desbloqueado. Disponible en dashboard para re-descarga.`;
-      } else if (currentPlan === "PLUS") {
-        document.getElementById("btnUpgradeToPro").style.display = "";
+        return;
+      }
+      if (currentPlan === "PLUS") {
+        fullBtn.style.display = "";
+        upBtn.style.display = "";
         document.getElementById("unlockHint").innerHTML =
           `<span class="badge plus">◇ PLUS</span> Descarga completa habilitada por plan.`;
-      } else if (currentPlan === "PRO") {
-        document.getElementById("btnUpgradeToPro").style.display = "none";
+        return;
+      }
+      if (currentPlan === "PRO") {
+        fullBtn.style.display = "";
+        upBtn.style.display = "none";
         document.getElementById("unlockHint").innerHTML =
           `<span class="badge pro">◆ PRO</span> Descarga completa habilitada por plan.`;
-      } else {
-        document.getElementById("btnDownloadFull").style.display = "none";
-        document.getElementById("btnUpgradeToPro").style.display = "none";
-        document.getElementById("unlockHint").innerHTML =
-          `<span class="badge free">■ FREE</span> Escucha completo. Descarga: 20s.`;
+        return;
       }
+
+      // FREE
+      fullBtn.style.display = "none";
+      upBtn.style.display = "none";
+      document.getElementById("unlockHint").innerHTML =
+        `<span class="badge free">■ FREE</span> Escucha completo. Descarga: 20s.`;
     }
 
     async function unlock(quality){
@@ -616,8 +753,7 @@
         closeModal();
         afterUnlockUI();
       }catch(e){
-        payMsg.textContent =
-          "Backend aún no tiene /api/unlock. En el siguiente paso lo añadimos para que el botón desbloquee la descarga.";
+        payMsg.textContent = "Falta backend /api/unlock (lo agregamos en el siguiente paso).";
       }
     }
 
@@ -629,11 +765,11 @@
       try{
         const res = await postJSON("/api/upgrade", { master_id:lastMasterId, from:"PLUS", to:"PRO" });
         if(!res.ok) throw new Error("upgrade fail");
-        const data = await res.json();
+        await res.json();
         paidQuality = "PRO";
         afterUnlockUI();
       }catch(e){
-        alert("Upgrade requiere endpoint /api/upgrade (lo añadimos en backend).");
+        alert("Upgrade requiere /api/upgrade (lo agregamos en backend).");
       }
     }
 
@@ -666,7 +802,7 @@
         downloadBlobUrl(previewUrl, "warmaster_preview_20s.mp3");
         setStatus("Listo.", 100);
       }catch(e){
-        alert("Preview 20s requiere /api/master/preview (lo añadimos en backend).");
+        alert("Preview 20s requiere /api/master/preview (lo agregamos en backend).");
         setStatus("Listo.", 100);
       }
     };
@@ -676,15 +812,89 @@
         alert("Primero procesa un master.");
         return;
       }
-      // Preferimos descarga desde backend (para respetar reglas paid)
       const url = (API_BASE||"") + `/api/masters/${encodeURIComponent(lastMasterId)}/download`;
-      // Abrimos directo; si backend devuelve 402, el navegador lo mostrará como error.
       window.open(url, "_blank");
     };
 
+    // ========= File picker UX =========
+    const fileInput = document.getElementById("file");
+    const btnPickFile = document.getElementById("btnPickFile");
+    const fileNameEl = document.getElementById("fileName");
+
+    btnPickFile.onclick = () => fileInput.click();
+    fileInput.addEventListener("change", () => {
+      const f = fileInput.files?.[0];
+      fileNameEl.textContent = f ? f.name : "Sin archivo";
+    });
+
+    // ========= Player custom =========
+    function fmtTime(sec){
+      sec = Math.max(0, Math.floor(sec || 0));
+      const m = Math.floor(sec/60);
+      const s = sec % 60;
+      return `${m}:${String(s).padStart(2,"0")}`;
+    }
+
+    function bindPlayer(containerId, audioId){
+      const box = document.getElementById(containerId);
+      const audio = document.getElementById(audioId);
+      if(!box || !audio) return;
+
+      const btn = box.querySelector('[data-act="play"]');
+      const seek = box.querySelector('[data-act="seek"]');
+      const vol  = box.querySelector('[data-act="vol"]');
+      const cur  = box.querySelector('[data-k="cur"]');
+      const dur  = box.querySelector('[data-k="dur"]');
+
+      let dragging = false;
+
+      function syncBtn(){
+        btn.textContent = audio.paused ? "▶" : "❚❚";
+      }
+
+      audio.addEventListener("loadedmetadata", () => {
+        dur.textContent = fmtTime(audio.duration);
+        cur.textContent = "0:00";
+        seek.value = "0";
+      });
+
+      audio.addEventListener("timeupdate", () => {
+        if(dragging) return;
+        cur.textContent = fmtTime(audio.currentTime);
+        const p = audio.duration ? (audio.currentTime / audio.duration) : 0;
+        seek.value = String(Math.round(p * 1000));
+      });
+
+      audio.addEventListener("play", syncBtn);
+      audio.addEventListener("pause", syncBtn);
+      audio.addEventListener("ended", () => { audio.currentTime = 0; audio.pause(); });
+
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("audio").forEach(a => { if(a !== audio) a.pause(); });
+        if(audio.paused) audio.play(); else audio.pause();
+      });
+
+      seek.addEventListener("input", () => { dragging = true; });
+      seek.addEventListener("change", () => {
+        dragging = false;
+        const p = Number(seek.value) / 1000;
+        if(audio.duration) audio.currentTime = p * audio.duration;
+      });
+
+      vol.addEventListener("input", () => {
+        audio.volume = Number(vol.value);
+      });
+
+      audio.volume = Number(vol.value);
+      syncBtn();
+    }
+
+    bindPlayer("playerOriginal", "audioOriginal");
+    bindPlayer("playerMaster", "audioMaster");
+
     // ========= PROCESS =========
     document.getElementById("btnMaster").onclick = async () => {
-      const file = document.getElementById("file").files?.[0];
+      const file = fileInput.files?.[0];
       if(!file){ alert("Selecciona un archivo."); return; }
 
       resetResult();
@@ -695,13 +905,10 @@
       const ao = document.getElementById("audioOriginal");
       ao.src = originalUrl; ao.load();
 
-      // Tu backend actual usa preset + intensity
       const form = new FormData();
       form.append("file", file);
       form.append("preset", selectedTarget);
       form.append("intensity", String(selectedIntensity));
-
-      // Extras (no rompen nada si backend los ignora)
       form.append("requested_quality", currentPlan);
       form.append("target", selectedTarget);
 
@@ -718,12 +925,10 @@
           throw new Error(txt);
         }
 
-        // master_id desde header (lo añadimos en backend en el paso 2)
         const hdrId = res.headers.get("X-Master-Id") || res.headers.get("x-master-id");
         if(hdrId) lastMasterId = hdrId;
 
         const blob = await res.blob();
-
         setStatus("Finalizando...", 85);
 
         revoke(masterUrl);
@@ -735,13 +940,11 @@
         document.getElementById("resultBox").style.display = "";
         document.getElementById("resultPill").textContent = "Master listo";
 
-        // Si backend no dio id aún, avisamos (porque preview/download necesitan master_id real)
         document.getElementById("backendNote").textContent = lastMasterId
           ? ("master_id: " + lastMasterId)
-          : "Falta header X-Master-Id en /api/master. En el siguiente paso lo añadimos al backend.";
+          : "Falta header X-Master-Id en /api/master (lo añadimos en backend).";
 
-        // Regla: si plan PLUS/PRO => descarga completa habilitada
-        // Si FREE => solo 20s (hasta que haga unlock)
+        // Si plan PLUS/PRO => descarga completa
         if(currentPlan === "PLUS" || currentPlan === "PRO"){
           paidQuality = currentPlan;
         } else {
