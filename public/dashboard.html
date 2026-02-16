@@ -201,7 +201,7 @@ body{
   box-shadow: 0 10px 30px rgba(0,0,0,.30), 0 0 0 1px rgba(78,168,255,.10), 0 0 22px rgba(78,168,255,.06);
 }
 
-/* Mini waveform */
+/* Mini waveform corporativo (NO por plan todavía) */
 .wave{
   height:30px;
   display:flex;
@@ -237,14 +237,13 @@ body{
 .item.playing .wave .bar:nth-child(10){animation-delay:.45s}
 .item.playing .wave .bar:nth-child(11){animation-delay:.50s}
 .item.playing .wave .bar:nth-child(12){animation-delay:.55s}
-
 @keyframes bounce{
   0%{ transform: scaleY(.35); }
   50%{ transform: scaleY(1.6); }
   100%{ transform: scaleY(.45); }
 }
 
-/* Player custom compact */
+/* Player */
 .player{
   display:flex;
   align-items:center;
@@ -290,6 +289,7 @@ body{
   display:flex; gap:10px; flex-wrap:wrap;
   margin-top:12px; align-items:center;
 }
+
 .smallNote{
   margin-top:10px;
   color: var(--muted);
@@ -531,10 +531,8 @@ body{
   }
 
   function waveHTML(){
-    // 12 barras, visual estilo “estudio”
     let s = `<div class="wave" aria-label="waveform">`;
     for(let i=0;i<12;i++){
-      // alturas iniciales variadas (estático)
       const h = 8 + ((i*7) % 16);
       s += `<span class="bar" style="height:${h}px"></span>`;
     }
