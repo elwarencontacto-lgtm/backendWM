@@ -8,6 +8,7 @@
 <style>
 :root{
   --bg:#0b0c10;
+  --panel: rgba(18,20,27,.92);
   --line:#232736;
   --text:#e9ecf3;
   --muted:#a8b0c3;
@@ -20,11 +21,10 @@
   --pro:#4ea8ff;
 
   --shadow: 0 10px 30px rgba(0,0,0,.45);
-  --radius: 16px;
+  --radius: 18px;
 }
 
 *{box-sizing:border-box}
-
 body{
   margin:0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
@@ -36,25 +36,25 @@ body{
   min-height:100vh;
   padding:18px;
 }
+.wrap{width:min(1180px,100%); margin:0 auto}
 
-.wrap{width:min(1120px,100%); margin:0 auto}
+a{color:inherit; text-decoration:none}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.space{height:12px}
 
 .top{
   display:flex; align-items:center; justify-content:space-between;
   gap:12px; margin-bottom:14px;
 }
-
 .brand{
   display:flex; align-items:center; gap:10px;
   font-weight:900; letter-spacing:.3px;
 }
-
 .dot{
   width:12px;height:12px;border-radius:999px;
   background: linear-gradient(135deg, var(--brand), var(--brand2));
   box-shadow: 0 0 0 6px rgba(109,94,252,.12);
 }
-
 .nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
 
 .pill{
@@ -64,28 +64,12 @@ body{
   border-radius:999px;
   background: rgba(255,255,255,.03);
   color:var(--muted);
+  white-space:nowrap;
 }
-
-.planPill{
-  font-weight:900;
-}
-
-.planPill.free{
-  color: var(--free);
-  border-color: rgba(255,255,255,.20);
-}
-
-.planPill.plus{
-  color: var(--plus);
-  border-color: rgba(245,197,66,.35);
-  background: rgba(245,197,66,.08);
-}
-
-.planPill.pro{
-  color: var(--pro);
-  border-color: rgba(78,168,255,.35);
-  background: rgba(78,168,255,.08);
-}
+.planPill{font-weight:900}
+.planPill.free{ color: var(--free); border-color: rgba(255,255,255,.20); }
+.planPill.plus{ color: var(--plus); border-color: rgba(245,197,66,.35); background: rgba(245,197,66,.08); }
+.planPill.pro{  color: var(--pro);  border-color: rgba(78,168,255,.35); background: rgba(78,168,255,.08); }
 
 .btn{
   border:1px solid var(--line);
@@ -95,20 +79,39 @@ body{
   border-radius: 12px;
   cursor:pointer;
   font-weight:900;
-  transition: .15s ease;
-  display:inline-flex; align-items:center;
+  transition: transform .06s ease, background .15s ease, border-color .15s ease, filter .15s ease;
+  display:inline-flex; align-items:center; gap:8px;
+  user-select:none;
 }
-
 .btn:hover{background: rgba(255,255,255,.06)}
-
+.btn:active{transform: translateY(1px)}
 .btnPrimary{
   border-color: transparent;
   background: linear-gradient(135deg, rgba(109,94,252,.95), rgba(45,212,191,.55));
   color: #fff;
 }
+.btnPrimary:hover{filter:brightness(1.06)}
+
+.input{
+  border:1px solid var(--line);
+  background: rgba(255,255,255,.03);
+  color: var(--text);
+  border-radius: 12px;
+  padding:10px 12px;
+  outline:none;
+  min-width: 240px;
+}
+.select{
+  border:1px solid var(--line);
+  background: rgba(255,255,255,.03);
+  color: var(--text);
+  border-radius: 12px;
+  padding:10px 12px;
+  outline:none;
+}
 
 .card{
-  background: rgba(18,20,27,.92);
+  background: var(--panel);
   border:1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -119,64 +122,87 @@ body{
   padding:16px 18px;
   border-bottom:1px solid var(--line);
   background: rgba(255,255,255,.02);
-  display:flex; justify-content:space-between;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
 }
-
 .head h2{margin:0; font-size:16px}
 
 .body{padding:16px 18px}
 
+.stats{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap:12px;
+}
+@media (max-width: 980px){ .stats{grid-template-columns: repeat(2, 1fr);} }
+@media (max-width: 520px){ .stats{grid-template-columns: 1fr;} }
+
+.stat{
+  border:1px solid rgba(255,255,255,.06);
+  border-radius: 16px;
+  padding:14px;
+  background: rgba(255,255,255,.02);
+}
+.stat .k{color: var(--muted); font-size:12px}
+.stat .v{margin-top:6px; font-weight:900; font-size:18px}
+
 .grid{
   display:grid;
+  grid-template-columns: 1fr;
   gap:12px;
 }
 
-.empty{
-  padding:18px;
-  border:1px dashed rgba(255,255,255,.15);
-  border-radius: 14px;
-  color: var(--muted);
-  background: rgba(255,255,255,.02);
-}
-
+/* Modern item card */
 .item{
   border:1px solid rgba(255,255,255,.06);
-  border-radius: 14px;
-  background: rgba(255,255,255,.02);
+  border-radius: 18px;
   padding:14px;
+  background: rgba(255,255,255,.02);
+  transition: transform .08s ease, background .15s ease, border-color .15s ease;
 }
-
+.item:hover{
+  transform: translateY(-1px);
+  background: rgba(255,255,255,.03);
+  border-color: rgba(255,255,255,.10);
+}
+.itemTop{
+  display:flex; justify-content:space-between; align-items:flex-start;
+  gap:12px; flex-wrap:wrap;
+}
 .title{
   font-weight:900;
+  max-width: 760px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
-
 .meta{
+  margin-top:6px;
   color: var(--muted);
   font-size:12px;
-  margin-top:6px;
+  line-height:1.45;
 }
+.badges{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
 
+/* Plan badges (serios) */
 .badge{
   font-weight:900;
   font-size:12px;
-  padding:4px 8px;
+  padding:6px 10px;
   border-radius:999px;
   border:1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.03);
+  white-space:nowrap;
+}
+.badge.plus{ color: var(--plus); border-color: rgba(245,197,66,.35); background: rgba(245,197,66,.08); }
+.badge.pro{  color: var(--pro);  border-color: rgba(78,168,255,.35); background: rgba(78,168,255,.08); }
+
+/* subtle glow by quality */
+.item.plus{
+  box-shadow: 0 10px 30px rgba(0,0,0,.35), 0 0 0 1px rgba(245,197,66,.10), 0 0 22px rgba(245,197,66,.06);
+}
+.item.pro{
+  box-shadow: 0 10px 30px rgba(0,0,0,.35), 0 0 0 1px rgba(78,168,255,.10), 0 0 22px rgba(78,168,255,.06);
 }
 
-.badge.plus{
-  color: var(--plus);
-  border-color: rgba(245,197,66,.35);
-  background: rgba(245,197,66,.08);
-}
-
-.badge.pro{
-  color: var(--pro);
-  border-color: rgba(78,168,255,.35);
-  background: rgba(78,168,255,.08);
-}
-
-/* Player */
+/* Player custom compact */
 .player{
   display:flex;
   align-items:center;
@@ -185,9 +211,8 @@ body{
   border:1px solid var(--line);
   background: rgba(255,255,255,.03);
   border-radius: 14px;
-  margin-top:10px;
+  margin-top:12px;
 }
-
 .pBtn{
   width:40px;height:40px;
   border-radius: 12px;
@@ -197,9 +222,8 @@ body{
   font-weight:900;
   cursor:pointer;
 }
-
-.pMid{flex:1}
-
+.pBtn:hover{background: rgba(255,255,255,.05)}
+.pMid{flex:1; min-width:0}
 .pTimeRow{
   display:flex;
   gap:8px;
@@ -207,145 +231,414 @@ body{
   color:var(--muted);
   margin-bottom:6px;
 }
-
 .pSeek{
   width:100%;
   accent-color: var(--brand);
+  height:18px;
 }
-
+.pVol{
+  width:90px;
+  accent-color: var(--brand2);
+  height:18px;
+}
+@media (max-width:520px){ .pVol{display:none} }
 .player audio{display:none}
 
 .actions{
-  display:flex;
-  gap:10px;
-  margin-top:12px;
+  display:flex; gap:10px; flex-wrap:wrap;
+  margin-top:12px; align-items:center;
 }
+.smallNote{
+  margin-top:10px;
+  color: var(--muted);
+  font-size:12px;
+  line-height:1.55;
+}
+
+.empty{
+  padding:18px;
+  border:1px dashed rgba(255,255,255,.15);
+  border-radius: 16px;
+  color: var(--muted);
+  background: rgba(255,255,255,.02);
+}
+
+/* Skeleton */
+.skel{
+  border:1px solid rgba(255,255,255,.06);
+  border-radius: 18px;
+  padding:14px;
+  background: rgba(255,255,255,.02);
+}
+.sline{
+  height:12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.10), rgba(255,255,255,.04));
+  background-size: 200% 100%;
+  animation: shimmer 1.1s infinite linear;
+}
+@keyframes shimmer{
+  0%{background-position: 0% 0%}
+  100%{background-position: 200% 0%}
+}
+.sline.t{height:14px; width:52%}
+.sline.m{height:12px; width:75%; margin-top:10px}
+.sline.b{height:12px; width:65%; margin-top:10px}
 </style>
 </head>
 
 <body>
 <div class="wrap">
-
-<div class="top">
-  <div class="brand"><span class="dot"></span> WarMaster</div>
-  <div class="nav">
-    <span class="pill" id="apiPill">API</span>
-    <span class="pill planPill free" id="planPill">FREE</span>
-    <button class="btn" onclick="location.href='index.html'">Inicio</button>
-    <button class="btn btnPrimary" onclick="location.href='master.html'">Nuevo Master</button>
+  <div class="top">
+    <div class="brand"><span class="dot"></span> WarMaster</div>
+    <div class="nav">
+      <span class="pill" id="apiPill">API: auto</span>
+      <span class="pill planPill free" id="planPill">FREE</span>
+      <button class="btn" id="goHome">Inicio</button>
+      <button class="btn btnPrimary" id="goMaster">Nuevo Master</button>
+    </div>
   </div>
-</div>
 
-<div class="card">
-  <div class="head">
-    <h2>Masters Desbloqueados</h2>
-    <span class="pill" id="countPill">0</span>
-  </div>
-  <div class="body">
-    <div id="list" class="grid"></div>
-    <div id="empty" class="empty" style="display:none">
-      No tienes masters desbloqueados todavía.
+  <div class="card">
+    <div class="head">
+      <h2>Dashboard</h2>
+      <span class="pill" id="countPill">0</span>
+    </div>
+    <div class="body">
+
+      <div class="stats" id="stats">
+        <div class="stat"><div class="k">Masters desbloqueados</div><div class="v" id="stTotal">0</div></div>
+        <div class="stat"><div class="k">PLUS</div><div class="v" id="stPlus">0</div></div>
+        <div class="stat"><div class="k">PRO</div><div class="v" id="stPro">0</div></div>
+        <div class="stat"><div class="k">Último</div><div class="v" id="stLast">—</div></div>
+      </div>
+
+      <div class="space"></div>
+
+      <div class="row">
+        <input class="input" id="q" placeholder="Buscar por nombre o ID" autocomplete="off"/>
+        <select class="select" id="filterQ">
+          <option value="ALL">Todos</option>
+          <option value="PLUS">PLUS</option>
+          <option value="PRO">PRO</option>
+        </select>
+        <select class="select" id="sortQ">
+          <option value="NEW">Más recientes</option>
+          <option value="OLD">Más antiguos</option>
+          <option value="NAME">Nombre</option>
+        </select>
+        <button class="btn" id="btnRefresh">Actualizar</button>
+      </div>
+
+      <div class="space"></div>
+
+      <div id="list" class="grid"></div>
+      <div id="empty" class="empty" style="display:none">
+        Aún no tienes masters desbloqueados. <br/>
+        Ve a “Nuevo Master”, procesa una canción y usa “Desbloquear”.
+      </div>
+
+      <div class="smallNote">
+        Regla: puedes re-descargar el mismo master cuando quieras. Si subes nuevamente el audio y haces un master nuevo, es un nuevo producto.
+      </div>
+
     </div>
   </div>
 </div>
 
-</div>
-
 <script>
-const API_BASE = "";
-document.getElementById("apiPill").textContent = "API: mismo dominio";
+  // ========= API BASE =========
+  function getApiBase() {
+    const qs = new URLSearchParams(location.search);
+    const fromQS = qs.get("api");
+    if (fromQS) return fromQS.replace(/\/+$/,'');
+    const stored = localStorage.getItem("WM_API_BASE");
+    if (stored) return stored.replace(/\/+$/,'');
+    return "";
+  }
+  const API_BASE = getApiBase();
+  document.getElementById("apiPill").textContent = "API: " + (API_BASE || "mismo dominio");
 
-async function loadPlan(){
-  try{
-    const r = await fetch("/api/me");
-    const d = await r.json();
-    const plan = (d.plan||"FREE").toUpperCase();
+  function qsCarry(path){
+    const qs = new URLSearchParams(location.search);
+    const api = qs.get("api");
+    return api ? (path + "?api=" + encodeURIComponent(api)) : path;
+  }
+  document.getElementById("goHome").onclick = () => location.href = qsCarry("/index.html");
+  document.getElementById("goMaster").onclick = () => location.href = qsCarry("/master.html");
+
+  async function fetchWithTimeout(url, options={}, timeoutMs=180000) {
+    const ctrl = new AbortController();
+    const id = setTimeout(() => ctrl.abort(), timeoutMs);
+    try { return await fetch(url, { ...options, signal: ctrl.signal }); }
+    finally { clearTimeout(id); }
+  }
+
+  // ========= PLAN =========
+  let currentPlan = "FREE";
+  function applyPlanUI(){
     const pill = document.getElementById("planPill");
     pill.classList.remove("free","plus","pro");
-    pill.classList.add(plan.toLowerCase());
-    pill.textContent = plan;
-  }catch{}
-}
+    if(currentPlan === "PLUS"){ pill.classList.add("plus"); pill.textContent = "PLUS"; }
+    else if(currentPlan === "PRO"){ pill.classList.add("pro"); pill.textContent = "PRO"; }
+    else { pill.classList.add("free"); pill.textContent = "FREE"; }
+  }
 
-function fmt(sec){
-  sec=Math.floor(sec||0);
-  const m=Math.floor(sec/60);
-  const s=sec%60;
-  return m+":"+String(s).padStart(2,"0");
-}
+  async function loadPlan(){
+    try{
+      const res = await fetchWithTimeout((API_BASE||"") + "/api/me", {}, 12000);
+      if(!res.ok) throw new Error("no /api/me");
+      const data = await res.json();
+      currentPlan = (data.plan || "FREE").toUpperCase();
+      if(!["FREE","PLUS","PRO"].includes(currentPlan)) currentPlan="FREE";
+    }catch(e){
+      currentPlan = "FREE";
+    }
+    applyPlanUI();
+  }
 
-function bindPlayer(box){
-  const audio=box.querySelector("audio");
-  const btn=box.querySelector(".pBtn");
-  const seek=box.querySelector(".pSeek");
-  const cur=box.querySelector(".cur");
-  const dur=box.querySelector(".dur");
+  // ========= Player custom =========
+  function fmtTime(sec){
+    sec = Math.max(0, Math.floor(sec || 0));
+    const m = Math.floor(sec/60);
+    const s = sec % 60;
+    return `${m}:${String(s).padStart(2,"0")}`;
+  }
 
-  audio.addEventListener("loadedmetadata",()=>{
-    dur.textContent=fmt(audio.duration);
-  });
+  function bindPlayer(box){
+    const audio = box.querySelector("audio");
+    const btn = box.querySelector('[data-act="play"]');
+    const seek = box.querySelector('[data-act="seek"]');
+    const vol  = box.querySelector('[data-act="vol"]');
+    const cur  = box.querySelector('[data-k="cur"]');
+    const dur  = box.querySelector('[data-k="dur"]');
 
-  audio.addEventListener("timeupdate",()=>{
-    cur.textContent=fmt(audio.currentTime);
-    seek.value=(audio.currentTime/audio.duration)*1000||0;
-  });
+    let dragging = false;
 
-  btn.onclick=()=>{
-    document.querySelectorAll("audio").forEach(a=>{if(a!==audio)a.pause();});
-    audio.paused?audio.play():audio.pause();
-    btn.textContent=audio.paused?"Play":"Pause";
-  };
+    function syncBtn(){ btn.textContent = audio.paused ? "Play" : "Pause"; }
 
-  seek.oninput=()=>{
-    audio.currentTime=(seek.value/1000)*audio.duration;
-  };
-}
+    audio.addEventListener("loadedmetadata", () => {
+      dur.textContent = fmtTime(audio.duration);
+      cur.textContent = "0:00";
+      seek.value = "0";
+    });
 
-async function load(){
-  const r=await fetch("/api/masters");
-  if(!r.ok)return;
-  const items=await r.json();
-  const list=document.getElementById("list");
-  const empty=document.getElementById("empty");
-  document.getElementById("countPill").textContent=items.length;
-  if(!items.length){empty.style.display="";return;}
-  empty.style.display="none";
+    audio.addEventListener("timeupdate", () => {
+      if(dragging) return;
+      cur.textContent = fmtTime(audio.currentTime);
+      const p = audio.duration ? (audio.currentTime / audio.duration) : 0;
+      seek.value = String(Math.round(p * 1000));
+    });
 
-  items.forEach(it=>{
-    const div=document.createElement("div");
-    div.className="item";
+    audio.addEventListener("play", syncBtn);
+    audio.addEventListener("pause", syncBtn);
+    audio.addEventListener("ended", () => { audio.currentTime = 0; audio.pause(); });
 
-    div.innerHTML=`
-      <div class="title">${it.title||it.id}</div>
-      <div class="meta">Preset: ${it.preset} · Intensidad: ${it.intensity}</div>
-      <span class="badge ${it.quality.toLowerCase()}">${it.quality}</span>
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("audio").forEach(a => { if(a !== audio) a.pause(); });
+      if(audio.paused) audio.play(); else audio.pause();
+    });
 
-      <div class="player">
-        <button class="pBtn">Play</button>
-        <div class="pMid">
-          <div class="pTimeRow">
-            <span class="cur">0:00</span> /
-            <span class="dur">0:00</span>
+    seek.addEventListener("input", () => { dragging = true; });
+    seek.addEventListener("change", () => {
+      dragging = false;
+      const p = Number(seek.value) / 1000;
+      if(audio.duration) audio.currentTime = p * audio.duration;
+    });
+
+    vol.addEventListener("input", () => { audio.volume = Number(vol.value); });
+    audio.volume = Number(vol.value);
+
+    syncBtn();
+  }
+
+  // ========= UI Helpers =========
+  function setStats(items){
+    const total = items.length;
+    const plus = items.filter(x => (x.quality||"").toUpperCase() === "PLUS").length;
+    const pro  = items.filter(x => (x.quality||"").toUpperCase() === "PRO").length;
+
+    document.getElementById("stTotal").textContent = String(total);
+    document.getElementById("stPlus").textContent = String(plus);
+    document.getElementById("stPro").textContent  = String(pro);
+
+    const last = items[0]?.created_at || "—";
+    document.getElementById("stLast").textContent = last === "—" ? "—" : last.slice(0,19).replace("T"," ");
+  }
+
+  function badgeHTML(q){
+    q = (q||"PLUS").toUpperCase();
+    if(q === "PRO") return `<span class="badge pro">PRO</span>`;
+    return `<span class="badge plus">PLUS</span>`;
+  }
+
+  function showSkeleton(){
+    const list = document.getElementById("list");
+    list.innerHTML = "";
+    for(let i=0;i<4;i++){
+      const d = document.createElement("div");
+      d.className = "skel";
+      d.innerHTML = `
+        <div class="sline t"></div>
+        <div class="sline m"></div>
+        <div class="sline b"></div>
+      `;
+      list.appendChild(d);
+    }
+  }
+
+  // ========= Data + Render =========
+  let allItems = [];
+
+  function applyFilters(){
+    const q = (document.getElementById("q").value || "").toLowerCase().trim();
+    const f = document.getElementById("filterQ").value;
+    const s = document.getElementById("sortQ").value;
+
+    let items = [...allItems];
+
+    if(f !== "ALL"){
+      items = items.filter(x => (x.quality||"").toUpperCase() === f);
+    }
+
+    if(q){
+      items = items.filter(x => {
+        const t = (x.title || "").toLowerCase();
+        const id = (x.id || "").toLowerCase();
+        return t.includes(q) || id.includes(q);
+      });
+    }
+
+    if(s === "OLD"){
+      items.sort((a,b)=> String(a.created_at||"").localeCompare(String(b.created_at||"")));
+    } else if(s === "NAME"){
+      items.sort((a,b)=> String(a.title||"").localeCompare(String(b.title||"")));
+    } else { // NEW
+      items.sort((a,b)=> String(b.created_at||"").localeCompare(String(a.created_at||"")));
+    }
+
+    render(items);
+  }
+
+  function render(items){
+    const list = document.getElementById("list");
+    const empty = document.getElementById("empty");
+    list.innerHTML = "";
+
+    document.getElementById("countPill").textContent = String(items.length);
+    setStats(items);
+
+    if(!items.length){
+      empty.style.display = "";
+      return;
+    }
+    empty.style.display = "none";
+
+    items.forEach(it => {
+      const q = (it.quality||"PLUS").toUpperCase();
+      const card = document.createElement("div");
+      card.className = "item " + (q === "PRO" ? "pro" : "plus");
+
+      const title = it.title || ("Master " + it.id);
+      const created = (it.created_at || "").slice(0,19).replace("T"," ");
+      const preset = it.preset || "clean";
+      const intensity = (it.intensity ?? 55);
+
+      card.innerHTML = `
+        <div class="itemTop">
+          <div>
+            <div class="title">${escapeHtml(title)}</div>
+            <div class="meta">
+              ${escapeHtml(created || "—")} · Preset: ${escapeHtml(preset)} · Intensidad: ${escapeHtml(String(intensity))} · ID: ${escapeHtml(it.id)}
+            </div>
           </div>
-          <input class="pSeek" type="range" min="0" max="1000" value="0">
+          <div class="badges">
+            ${badgeHTML(q)}
+          </div>
         </div>
-        <audio src="/api/masters/${it.id}/stream"></audio>
-      </div>
 
-      <div class="actions">
-        <button class="btn btnPrimary" onclick="window.open('/api/masters/${it.id}/download')">
-          Descargar
-        </button>
-      </div>
-    `;
-    list.appendChild(div);
-    bindPlayer(div);
-  });
-}
+        <div class="player">
+          <button class="pBtn" data-act="play" type="button">Play</button>
+          <div class="pMid">
+            <div class="pTimeRow">
+              <span data-k="cur">0:00</span>
+              <span>/</span>
+              <span data-k="dur">0:00</span>
+            </div>
+            <input class="pSeek" type="range" min="0" max="1000" value="0" data-act="seek"/>
+          </div>
+          <input class="pVol" type="range" min="0" max="1" step="0.01" value="1" data-act="vol" aria-label="vol"/>
+          <audio preload="metadata"></audio>
+        </div>
 
-loadPlan();
-load();
+        <div class="actions">
+          <button class="btn btnPrimary" type="button" data-act="download">Descargar</button>
+          <button class="btn" type="button" data-act="open">Abrir</button>
+          <button class="btn" type="button" data-act="copy">Copiar ID</button>
+        </div>
+      `;
+
+      const audio = card.querySelector("audio");
+      audio.src = (API_BASE||"") + `/api/masters/${encodeURIComponent(it.id)}/stream`;
+
+      card.querySelector('[data-act="download"]').onclick = () => {
+        const url = (API_BASE||"") + `/api/masters/${encodeURIComponent(it.id)}/download`;
+        window.open(url, "_blank");
+      };
+
+      card.querySelector('[data-act="open"]').onclick = () => {
+        const url = (API_BASE||"") + `/api/masters/${encodeURIComponent(it.id)}/stream`;
+        window.open(url, "_blank");
+      };
+
+      card.querySelector('[data-act="copy"]').onclick = async () => {
+        try{
+          await navigator.clipboard.writeText(it.id);
+          const b = card.querySelector('[data-act="copy"]');
+          b.textContent = "Copiado";
+          setTimeout(()=> b.textContent = "Copiar ID", 900);
+        }catch(e){
+          alert("No se pudo copiar.");
+        }
+      };
+
+      bindPlayer(card);
+      list.appendChild(card);
+    });
+  }
+
+  function escapeHtml(s){
+    return String(s||"")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  async function loadMasters(){
+    showSkeleton();
+    const res = await fetchWithTimeout((API_BASE||"") + "/api/masters", {}, 180000);
+    if(!res.ok){
+      allItems = [];
+      render([]);
+      return;
+    }
+    const data = await res.json();
+    allItems = Array.isArray(data) ? data : [];
+    applyFilters();
+  }
+
+  // ========= Events =========
+  document.getElementById("btnRefresh").onclick = loadMasters;
+  document.getElementById("q").addEventListener("input", () => applyFilters());
+  document.getElementById("filterQ").addEventListener("change", () => applyFilters());
+  document.getElementById("sortQ").addEventListener("change", () => applyFilters());
+
+  (async function init(){
+    await loadPlan();
+    await loadMasters();
+  })();
 </script>
-
 </body>
 </html>
