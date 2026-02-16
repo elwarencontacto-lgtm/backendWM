@@ -13,9 +13,11 @@
   --text:#e9ecf3;
   --muted:#a8b0c3;
 
+  /* corporativo */
   --brand:#6d5efc;
   --brand2:#2dd4bf;
 
+  /* planes */
   --free:#ffffff;
   --plus:#f5c542;
   --pro:#4ea8ff;
@@ -38,7 +40,6 @@ body{
 }
 .wrap{width:min(1180px,100%); margin:0 auto}
 
-a{color:inherit; text-decoration:none}
 .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
 .space{height:12px}
 
@@ -117,7 +118,6 @@ a{color:inherit; text-decoration:none}
   box-shadow: var(--shadow);
   overflow:hidden;
 }
-
 .head{
   padding:16px 18px;
   border-bottom:1px solid var(--line);
@@ -125,7 +125,6 @@ a{color:inherit; text-decoration:none}
   display:flex; align-items:center; justify-content:space-between; gap:12px;
 }
 .head h2{margin:0; font-size:16px}
-
 .body{padding:16px 18px}
 
 .stats{
@@ -145,13 +144,15 @@ a{color:inherit; text-decoration:none}
 .stat .k{color: var(--muted); font-size:12px}
 .stat .v{margin-top:6px; font-weight:900; font-size:18px}
 
+/* LIST: 2 columnas en desktop */
 .grid{
   display:grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr;
   gap:12px;
 }
+@media (max-width: 980px){ .grid{grid-template-columns: 1fr;} }
 
-/* Modern item card */
+/* Item card */
 .item{
   border:1px solid rgba(255,255,255,.06);
   border-radius: 18px;
@@ -170,7 +171,7 @@ a{color:inherit; text-decoration:none}
 }
 .title{
   font-weight:900;
-  max-width: 760px;
+  max-width: 520px;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
 .meta{
@@ -181,7 +182,6 @@ a{color:inherit; text-decoration:none}
 }
 .badges{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
 
-/* Plan badges (serios) */
 .badge{
   font-weight:900;
   font-size:12px;
@@ -194,12 +194,54 @@ a{color:inherit; text-decoration:none}
 .badge.plus{ color: var(--plus); border-color: rgba(245,197,66,.35); background: rgba(245,197,66,.08); }
 .badge.pro{  color: var(--pro);  border-color: rgba(78,168,255,.35); background: rgba(78,168,255,.08); }
 
-/* subtle glow by quality */
 .item.plus{
-  box-shadow: 0 10px 30px rgba(0,0,0,.35), 0 0 0 1px rgba(245,197,66,.10), 0 0 22px rgba(245,197,66,.06);
+  box-shadow: 0 10px 30px rgba(0,0,0,.30), 0 0 0 1px rgba(245,197,66,.10), 0 0 22px rgba(245,197,66,.06);
 }
 .item.pro{
-  box-shadow: 0 10px 30px rgba(0,0,0,.35), 0 0 0 1px rgba(78,168,255,.10), 0 0 22px rgba(78,168,255,.06);
+  box-shadow: 0 10px 30px rgba(0,0,0,.30), 0 0 0 1px rgba(78,168,255,.10), 0 0 22px rgba(78,168,255,.06);
+}
+
+/* Mini waveform */
+.wave{
+  height:30px;
+  display:flex;
+  align-items:flex-end;
+  gap:4px;
+  padding:8px 10px;
+  border:1px solid var(--line);
+  background: rgba(255,255,255,.02);
+  border-radius: 14px;
+  margin-top:12px;
+  overflow:hidden;
+}
+.wave .bar{
+  width:5px;
+  height:8px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(109,94,252,.95), rgba(45,212,191,.55));
+  opacity:.65;
+  transform-origin: bottom;
+}
+.item.playing .wave .bar{
+  opacity: 1;
+  animation: bounce 0.62s infinite ease-in-out;
+}
+.item.playing .wave .bar:nth-child(2){animation-delay:.05s}
+.item.playing .wave .bar:nth-child(3){animation-delay:.10s}
+.item.playing .wave .bar:nth-child(4){animation-delay:.15s}
+.item.playing .wave .bar:nth-child(5){animation-delay:.20s}
+.item.playing .wave .bar:nth-child(6){animation-delay:.25s}
+.item.playing .wave .bar:nth-child(7){animation-delay:.30s}
+.item.playing .wave .bar:nth-child(8){animation-delay:.35s}
+.item.playing .wave .bar:nth-child(9){animation-delay:.40s}
+.item.playing .wave .bar:nth-child(10){animation-delay:.45s}
+.item.playing .wave .bar:nth-child(11){animation-delay:.50s}
+.item.playing .wave .bar:nth-child(12){animation-delay:.55s}
+
+@keyframes bounce{
+  0%{ transform: scaleY(.35); }
+  50%{ transform: scaleY(1.6); }
+  100%{ transform: scaleY(.45); }
 }
 
 /* Player custom compact */
@@ -254,7 +296,6 @@ a{color:inherit; text-decoration:none}
   font-size:12px;
   line-height:1.55;
 }
-
 .empty{
   padding:18px;
   border:1px dashed rgba(255,255,255,.15);
@@ -281,9 +322,9 @@ a{color:inherit; text-decoration:none}
   0%{background-position: 0% 0%}
   100%{background-position: 200% 0%}
 }
-.sline.t{height:14px; width:52%}
-.sline.m{height:12px; width:75%; margin-top:10px}
-.sline.b{height:12px; width:65%; margin-top:10px}
+.sline.t{height:14px; width:60%}
+.sline.m{height:12px; width:80%; margin-top:10px}
+.sline.b{height:12px; width:70%; margin-top:10px}
 </style>
 </head>
 
@@ -306,7 +347,7 @@ a{color:inherit; text-decoration:none}
     </div>
     <div class="body">
 
-      <div class="stats" id="stats">
+      <div class="stats">
         <div class="stat"><div class="k">Masters desbloqueados</div><div class="v" id="stTotal">0</div></div>
         <div class="stat"><div class="k">PLUS</div><div class="v" id="stPlus">0</div></div>
         <div class="stat"><div class="k">PRO</div><div class="v" id="stPro">0</div></div>
@@ -334,12 +375,11 @@ a{color:inherit; text-decoration:none}
 
       <div id="list" class="grid"></div>
       <div id="empty" class="empty" style="display:none">
-        Aún no tienes masters desbloqueados. <br/>
-        Ve a “Nuevo Master”, procesa una canción y usa “Desbloquear”.
+        Aún no tienes masters desbloqueados. Ve a “Nuevo Master” y usa “Desbloquear”.
       </div>
 
       <div class="smallNote">
-        Regla: puedes re-descargar el mismo master cuando quieras. Si subes nuevamente el audio y haces un master nuevo, es un nuevo producto.
+        Puedes re-descargar el mismo master cuando quieras. Si subes nuevamente el audio y haces un master nuevo, se considera un nuevo producto.
       </div>
 
     </div>
@@ -347,7 +387,6 @@ a{color:inherit; text-decoration:none}
 </div>
 
 <script>
-  // ========= API BASE =========
   function getApiBase() {
     const qs = new URLSearchParams(location.search);
     const fromQS = qs.get("api");
@@ -374,7 +413,16 @@ a{color:inherit; text-decoration:none}
     finally { clearTimeout(id); }
   }
 
-  // ========= PLAN =========
+  function escapeHtml(s){
+    return String(s||"")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  // PLAN
   let currentPlan = "FREE";
   function applyPlanUI(){
     const pill = document.getElementById("planPill");
@@ -383,7 +431,6 @@ a{color:inherit; text-decoration:none}
     else if(currentPlan === "PRO"){ pill.classList.add("pro"); pill.textContent = "PRO"; }
     else { pill.classList.add("free"); pill.textContent = "FREE"; }
   }
-
   async function loadPlan(){
     try{
       const res = await fetchWithTimeout((API_BASE||"") + "/api/me", {}, 12000);
@@ -397,7 +444,7 @@ a{color:inherit; text-decoration:none}
     applyPlanUI();
   }
 
-  // ========= Player custom =========
+  // Player
   function fmtTime(sec){
     sec = Math.max(0, Math.floor(sec || 0));
     const m = Math.floor(sec/60);
@@ -405,13 +452,13 @@ a{color:inherit; text-decoration:none}
     return `${m}:${String(s).padStart(2,"0")}`;
   }
 
-  function bindPlayer(box){
-    const audio = box.querySelector("audio");
-    const btn = box.querySelector('[data-act="play"]');
-    const seek = box.querySelector('[data-act="seek"]');
-    const vol  = box.querySelector('[data-act="vol"]');
-    const cur  = box.querySelector('[data-k="cur"]');
-    const dur  = box.querySelector('[data-k="dur"]');
+  function bindPlayer(card){
+    const audio = card.querySelector("audio");
+    const btn = card.querySelector('[data-act="play"]');
+    const seek = card.querySelector('[data-act="seek"]');
+    const vol  = card.querySelector('[data-act="vol"]');
+    const cur  = card.querySelector('[data-k="cur"]');
+    const dur  = card.querySelector('[data-k="dur"]');
 
     let dragging = false;
 
@@ -430,8 +477,8 @@ a{color:inherit; text-decoration:none}
       seek.value = String(Math.round(p * 1000));
     });
 
-    audio.addEventListener("play", syncBtn);
-    audio.addEventListener("pause", syncBtn);
+    audio.addEventListener("play", () => { card.classList.add("playing"); syncBtn(); });
+    audio.addEventListener("pause", () => { card.classList.remove("playing"); syncBtn(); });
     audio.addEventListener("ended", () => { audio.currentTime = 0; audio.pause(); });
 
     btn.addEventListener("click", () => {
@@ -448,34 +495,14 @@ a{color:inherit; text-decoration:none}
 
     vol.addEventListener("input", () => { audio.volume = Number(vol.value); });
     audio.volume = Number(vol.value);
-
     syncBtn();
   }
 
-  // ========= UI Helpers =========
-  function setStats(items){
-    const total = items.length;
-    const plus = items.filter(x => (x.quality||"").toUpperCase() === "PLUS").length;
-    const pro  = items.filter(x => (x.quality||"").toUpperCase() === "PRO").length;
-
-    document.getElementById("stTotal").textContent = String(total);
-    document.getElementById("stPlus").textContent = String(plus);
-    document.getElementById("stPro").textContent  = String(pro);
-
-    const last = items[0]?.created_at || "—";
-    document.getElementById("stLast").textContent = last === "—" ? "—" : last.slice(0,19).replace("T"," ");
-  }
-
-  function badgeHTML(q){
-    q = (q||"PLUS").toUpperCase();
-    if(q === "PRO") return `<span class="badge pro">PRO</span>`;
-    return `<span class="badge plus">PLUS</span>`;
-  }
-
+  // Skeleton
   function showSkeleton(){
     const list = document.getElementById("list");
     list.innerHTML = "";
-    for(let i=0;i<4;i++){
+    for(let i=0;i<6;i++){
       const d = document.createElement("div");
       d.className = "skel";
       d.innerHTML = `
@@ -487,7 +514,35 @@ a{color:inherit; text-decoration:none}
     }
   }
 
-  // ========= Data + Render =========
+  // Stats
+  function setStats(items){
+    document.getElementById("stTotal").textContent = String(items.length);
+    document.getElementById("stPlus").textContent  = String(items.filter(x => (x.quality||"").toUpperCase()==="PLUS").length);
+    document.getElementById("stPro").textContent   = String(items.filter(x => (x.quality||"").toUpperCase()==="PRO").length);
+
+    const last = items[0]?.created_at || "—";
+    document.getElementById("stLast").textContent = last==="—" ? "—" : last.slice(0,19).replace("T"," ");
+  }
+
+  function badgeHTML(q){
+    q = (q||"PLUS").toUpperCase();
+    if(q === "PRO") return `<span class="badge pro">PRO</span>`;
+    return `<span class="badge plus">PLUS</span>`;
+  }
+
+  function waveHTML(){
+    // 12 barras, visual estilo “estudio”
+    let s = `<div class="wave" aria-label="waveform">`;
+    for(let i=0;i<12;i++){
+      // alturas iniciales variadas (estático)
+      const h = 8 + ((i*7) % 16);
+      s += `<span class="bar" style="height:${h}px"></span>`;
+    }
+    s += `</div>`;
+    return s;
+  }
+
+  // Data + filtros
   let allItems = [];
 
   function applyFilters(){
@@ -513,7 +568,7 @@ a{color:inherit; text-decoration:none}
       items.sort((a,b)=> String(a.created_at||"").localeCompare(String(b.created_at||"")));
     } else if(s === "NAME"){
       items.sort((a,b)=> String(a.title||"").localeCompare(String(b.title||"")));
-    } else { // NEW
+    } else {
       items.sort((a,b)=> String(b.created_at||"").localeCompare(String(a.created_at||"")));
     }
 
@@ -539,23 +594,22 @@ a{color:inherit; text-decoration:none}
       const card = document.createElement("div");
       card.className = "item " + (q === "PRO" ? "pro" : "plus");
 
-      const title = it.title || ("Master " + it.id);
-      const created = (it.created_at || "").slice(0,19).replace("T"," ");
-      const preset = it.preset || "clean";
-      const intensity = (it.intensity ?? 55);
+      const title = escapeHtml(it.title || ("Master " + it.id));
+      const created = escapeHtml((it.created_at || "").slice(0,19).replace("T"," "));
+      const preset = escapeHtml(it.preset || "clean");
+      const intensity = escapeHtml(String(it.intensity ?? 55));
+      const id = escapeHtml(it.id);
 
       card.innerHTML = `
         <div class="itemTop">
           <div>
-            <div class="title">${escapeHtml(title)}</div>
-            <div class="meta">
-              ${escapeHtml(created || "—")} · Preset: ${escapeHtml(preset)} · Intensidad: ${escapeHtml(String(intensity))} · ID: ${escapeHtml(it.id)}
-            </div>
+            <div class="title">${title}</div>
+            <div class="meta">${created || "—"} · Preset: ${preset} · Intensidad: ${intensity} · ID: ${id}</div>
           </div>
-          <div class="badges">
-            ${badgeHTML(q)}
-          </div>
+          <div class="badges">${badgeHTML(q)}</div>
         </div>
+
+        ${waveHTML()}
 
         <div class="player">
           <button class="pBtn" data-act="play" type="button">Play</button>
@@ -607,15 +661,6 @@ a{color:inherit; text-decoration:none}
     });
   }
 
-  function escapeHtml(s){
-    return String(s||"")
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
-
   async function loadMasters(){
     showSkeleton();
     const res = await fetchWithTimeout((API_BASE||"") + "/api/masters", {}, 180000);
@@ -629,11 +674,10 @@ a{color:inherit; text-decoration:none}
     applyFilters();
   }
 
-  // ========= Events =========
   document.getElementById("btnRefresh").onclick = loadMasters;
-  document.getElementById("q").addEventListener("input", () => applyFilters());
-  document.getElementById("filterQ").addEventListener("change", () => applyFilters());
-  document.getElementById("sortQ").addEventListener("change", () => applyFilters());
+  document.getElementById("q").addEventListener("input", applyFilters);
+  document.getElementById("filterQ").addEventListener("change", applyFilters);
+  document.getElementById("sortQ").addEventListener("change", applyFilters);
 
   (async function init(){
     await loadPlan();
