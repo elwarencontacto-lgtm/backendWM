@@ -152,14 +152,6 @@
     .selectGrid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px}
     @media (max-width: 520px){ .selectGrid{grid-template-columns:1fr} }
 
-    /* ===== UI GATE: visible pero bloqueado hasta subir archivo ===== */
-    .uiLocked{
-      opacity:.55;
-      filter: grayscale(.18);
-      pointer-events:none;
-    }
-    .uiLocked .opt{ cursor:not-allowed; }
-
     .opt{
       border:1px solid var(--line);
       background: rgba(255,255,255,.02);
@@ -485,29 +477,16 @@
               <div class="fileHint" id="fileHint">MAX 100MB · 6:00</div>
             </div>
           </div>
-          <div class="note" id="uploadGateNote" style="margin-top:10px">
-            Sube tu canción para habilitar <b>Preset</b>, <b>Intensidad</b> y el botón <b>Procesar</b>.
-          </div>
 
           <div style="height:12px"></div>
 
           <label>Destino / Preset</label>
-          <div class="selectGrid uiLocked" id="targets">
-            <div class="opt active"><b>Streaming</b><small>Balance general</small></div>
-            <div class="opt"><b>Warm</b><small>Cuerpo / suavidad</small></div>
-            <div class="opt"><b>Bright</b><small>Brillo / presencia</small></div>
-            <div class="opt"><b>Heavy</b><small>Grueso / denso</small></div>
-            <div class="opt"><b>Club</b><small>Impacto alto</small><span class="lock">PLUS / PRO</span></div>
-          </div>
+          <div class="selectGrid" id="targets"></div>
 
           <div style="height:12px"></div>
 
           <label>Intensidad</label>
-          <div class="selectGrid uiLocked" id="intensity">
-            <div class="opt"><b>Suave</b><small>Más dinámico</small><span class="lock">PLUS / PRO</span></div>
-            <div class="opt active"><b>Balanceado</b><small>Default</small></div>
-            <div class="opt"><b>Agresivo</b><small>Más loud</small><span class="lock">PLUS / PRO</span></div>
-          </div>
+          <div class="selectGrid" id="intensity"></div>
 
           <div class="note" id="planNote">
             <span class="badge free">■ FREE</span>
@@ -738,8 +717,16 @@
         pill.textContent = "■ FREE";
         pill.classList.add("free");
         document.getElementById("planNote").innerHTML =
-          `<span class="badge free">■ FREE</span> Escucha el master completo. Descarga: 30s.`;
+          `<span class="badge free">■ FREE</span> Escucha completo. Descarga: 30s.`;
       }
+
+      // texto botón principal según plan (FREE preview / PLUS-PRO full)
+      const btnPrev = document.getElementById("btnDownloadPreview");
+      if (btnPrev){
+        btnPrev.textContent = (currentPlan === "FREE") ? "Descargar 30s" : "Descargar completo";
+      }
+
+      renderOptions();
     }
 
     async function loadPlan(){
@@ -754,74 +741,75 @@
       }
       applyPlanUI();
     }
-    loadPlan();
 
-    // ========= PRESETS =========
-    const PRESETS = [
-      { id:"streaming", label:"Streaming", desc:"Balance general", pro:false },
-      { id:"warm",      label:"Warm",      desc:"Cuerpo / suavidad", pro:false },
-      { id:"bright",    label:"Bright",    desc:"Brillo / presencia", pro:false },
-      { id:"heavy",     label:"Heavy",     desc:"Grueso / denso", pro:false },
-      { id:"club",      label:"Club",      desc:"Impacto alto", pro:true }
-    ];
-    const INTENSITY = [
-      { id:"soft", label:"Suave", desc:"Más dinámico", pro:true },
-      { id:"mid",  label:"Balanceado", desc:"Default", pro:false },
-      { id:"hard", label:"Agresivo", desc:"Más loud", pro:true }
+    // ========= OPTIONS =========
+    const TARGETS = [
+      {id:"clean",  name:"Streaming", desc:"Balance general", lock:false},
+      {id:"warm",   name:"Warm",      desc:"Cuerpo / suavidad", lock:false},
+      {id:"bright", name:"Bright",    desc:"Brillo / presencia", lock:false},
+      {id:"heavy",  name:"Heavy",     desc:"Grueso / denso", lock:false},
+      {id:"club",   name:"Club",      desc:"Impacto alto", lock:true},
     ];
 
-    let selectedPreset = "streaming";
-    let selectedIntensity = "mid";
+    const INTENSITIES = [
+      {id:35, name:"Suave",      desc:"Más dinámico", lock:true},
+      {id:55, name:"Balanceado", desc:"Default",      lock:false},
+      {id:80, name:"Agresivo",   desc:"Más loud",     lock:true},
+    ];
+
+    let selectedTarget = "clean";
+    let selectedIntensity = 55;
 
     function renderOptions(){
-      const tgt = document.getElementById("targets");
-      const inten = document.getElementById("intensity");
-
-      tgt.innerHTML = "";
-      inten.innerHTML = "";
-
-      PRESETS.forEach(p=>{
+      const tBox = document.getElementById("targets");
+      tBox.innerHTML = "";
+      TARGETS.forEach(o=>{
+        const locked = o.lock && currentPlan === "FREE";
         const div = document.createElement("div");
-        div.className = "opt" + (p.id===selectedPreset ? " active" : "");
-        div.innerHTML = `<b>${p.label}</b><small>${p.desc}</small>` + (p.pro ? `<span class="lock">PLUS / PRO</span>` : "");
-        div.onclick = ()=>{
-          if(p.pro && currentPlan==="FREE"){ alert("Este preset es PLUS / PRO."); return; }
-          selectedPreset = p.id;
+        div.className = "opt" + (o.id===selectedTarget ? " active" : "");
+        div.innerHTML =
+          `<b>${o.name}</b><small>${o.desc}</small>` +
+          (locked ? `<span class="lock">◇ PLUS / ◆ PRO</span>` : "");
+        div.onclick = () => {
+          if (locked) { openModal("Este preset está disponible en PLUS/PRO o unlock por canción."); return; }
+          selectedTarget = o.id;
           renderOptions();
         };
-        tgt.appendChild(div);
+        tBox.appendChild(div);
       });
 
-      INTENSITY.forEach(i=>{
+      const iBox = document.getElementById("intensity");
+      iBox.innerHTML = "";
+      INTENSITIES.forEach(o=>{
+        const locked = o.lock && currentPlan === "FREE";
         const div = document.createElement("div");
-        div.className = "opt" + (i.id===selectedIntensity ? " active" : "");
-        div.innerHTML = `<b>${i.label}</b><small>${i.desc}</small>` + (i.pro ? `<span class="lock">PLUS / PRO</span>` : "");
-        div.onclick = ()=>{
-          if(i.pro && currentPlan==="FREE"){ alert("Esta intensidad es PLUS / PRO."); return; }
-          selectedIntensity = i.id;
+        div.className = "opt" + (o.id===selectedIntensity ? " active" : "");
+        div.innerHTML =
+          `<b>${o.name}</b><small>${o.desc}</small>` +
+          (locked ? `<span class="lock">◇ PLUS / ◆ PRO</span>` : "");
+        div.onclick = () => {
+          if (locked) { openModal("Esta intensidad está disponible en PLUS/PRO."); return; }
+          selectedIntensity = o.id;
           renderOptions();
         };
-        inten.appendChild(div);
+        iBox.appendChild(div);
       });
     }
-    renderOptions();
 
-    // ========= STATE =========
+    // ========= RESULT STATE =========
     let lastMasterId = null;
-    let paidQuality = null; // null | "PLUS" | "PRO"
-
-    let originalUrl = null;
     let masterUrl = null;
+    let originalUrl = null;
     let previewUrl = null;
+    let paidQuality = null; // null / PLUS / PRO (unlock)
 
-    function revoke(u){
-      try{ if(u) URL.revokeObjectURL(u); }catch(e){}
-    }
+    function revoke(url){ try{ if(url) URL.revokeObjectURL(url); }catch(e){} }
 
     function setStatus(msg, pct){
-      document.getElementById("status").textContent = msg || "";
-      document.getElementById("statusPill").textContent = pct>=100 ? "Listo" : (msg || "…");
-      document.getElementById("barFill").style.width = String(Math.max(0, Math.min(100, pct||0))) + "%";
+      document.getElementById("status").textContent = msg;
+      document.getElementById("statusPill").textContent = msg.length > 18 ? "Procesando" : msg;
+      const p = Math.max(0, Math.min(100, pct ?? 0));
+      document.getElementById("barFill").style.width = p + "%";
     }
 
     function resetResult(){
@@ -852,7 +840,18 @@
       // EQ vuelve a OFF visual
       if (typeof window.WM_setEqEnabled === "function") window.WM_setEqEnabled(false);
     }
-    // ========= DOWNLOAD / UNLOCK =========
+
+    document.getElementById("btnReset").onclick = () => {
+      resetResult();
+      document.getElementById("file").value = "";
+      document.getElementById("fileName").textContent = "Sin archivo";
+      setStatus("Listo.", 0);
+    };
+
+    // ========= MODAL =========
+    const modalBack = document.getElementById("modalBack");
+    const payMsg = document.getElementById("payMsg");
+
     function openModal(msg){
       payMsg.textContent = msg || "";
       modalBack.style.display = "flex";
@@ -908,19 +907,28 @@
         return;
       }
 
-      // FREE sin unlock
       fullBtn.style.display = "none";
       upBtn.style.display = "none";
       document.getElementById("unlockHint").innerHTML =
-        `<span class="badge free">■ FREE</span> Descarga: preview 30s.`;
+        `<span class="badge free">■ FREE</span> Escucha completo. Descarga: 30s.`;
     }
 
     async function unlock(quality){
-      if(!lastMasterId){ alert("Primero procesa un master."); return; }
-      paidQuality = quality;
-      closeModal();
-      afterUnlockUI();
-      alert("Demo: unlock simulado. Luego conectamos pagos reales.");
+      if(!lastMasterId){
+        openModal("Primero procesa un master.");
+        return;
+      }
+      payMsg.textContent = "Procesando unlock...";
+      try{
+        const res = await postJSON("/api/unlock", { master_id:lastMasterId, quality });
+        if(!res.ok) throw new Error("unlock fail");
+        const data = await res.json();
+        paidQuality = (data.quality || quality).toUpperCase();
+        closeModal();
+        afterUnlockUI();
+      }catch(e){
+        payMsg.textContent = "Falta backend /api/unlock (lo agregamos en backend).";
+      }
     }
 
     async function upgradeToPro(){
@@ -943,6 +951,7 @@
     document.getElementById("buyPro").onclick  = () => unlock("PRO");
     document.getElementById("btnUpgradeToPro").onclick = upgradeToPro;
 
+    // ========= DOWNLOAD =========
     function downloadBlobUrl(url, filename){
       const a = document.createElement("a");
       a.href = url;
@@ -952,18 +961,21 @@
       a.remove();
     }
 
+    // FREE: preview 30s | PLUS/PRO: completo (o si unlock)
     document.getElementById("btnDownloadPreview").onclick = async () => {
       if(!lastMasterId){
         alert("Primero procesa un master.");
         return;
       }
 
+      // PLUS/PRO o unlock => descarga completa
       if (currentPlan === "PLUS" || currentPlan === "PRO" || paidQuality === "PLUS" || paidQuality === "PRO") {
         const url = (API_BASE||"") + `/download/${encodeURIComponent(lastMasterId)}`;
         window.open(url, "_blank");
         return;
       }
 
+      // FREE => preview 30s
       try{
         setStatus("Generando preview...", 70);
         const seconds = 30;
@@ -997,33 +1009,12 @@
     const fileInput = document.getElementById("file");
     const btnPickFile = document.getElementById("btnPickFile");
     const fileNameEl = document.getElementById("fileName");
-    const btnMaster = document.getElementById("btnMaster");
-    const targetsGrid = document.getElementById("targets");
-    const intensityGrid = document.getElementById("intensity");
-    const uploadGateNote = document.getElementById("uploadGateNote");
-
-    function setUploadGate(){
-      const hasFile = !!fileInput.files?.[0];
-      if (btnMaster) btnMaster.disabled = !hasFile;
-      if (targetsGrid) targetsGrid.classList.toggle("uiLocked", !hasFile);
-      if (intensityGrid) intensityGrid.classList.toggle("uiLocked", !hasFile);
-      if (uploadGateNote) uploadGateNote.style.display = hasFile ? "none" : "block";
-    }
 
     btnPickFile.onclick = () => fileInput.click();
     fileInput.addEventListener("change", () => {
       const f = fileInput.files?.[0];
       fileNameEl.textContent = f ? f.name : "Sin archivo";
-
-      if(!f){
-        resetResult();
-        setStatus("Listo.", 0);
-      }
-      setUploadGate();
     });
-
-    // Estado inicial: UI visible, pero bloqueada hasta subir archivo
-    setUploadGate();
 
     // ========= Player custom =========
     function fmtTime(sec){
@@ -1092,6 +1083,7 @@
       const file = fileInput.files?.[0];
       if(!file){ alert("Selecciona un archivo."); return; }
 
+      // Al presionar "Procesar", pedimos activar EQ preview cuando esté listo el master
       window.WM_eqEnableRequested = true;
 
       resetResult();
@@ -1102,59 +1094,521 @@
       const ao = document.getElementById("audioOriginal");
       ao.src = originalUrl; ao.load();
 
+      const form = new FormData();
+      form.append("file", file);
+      form.append("preset", selectedTarget);
+      form.append("intensity", String(selectedIntensity));
+
+      // ===== enviar knobs al backend =====
+      const K = window.WM_KNOBS || { low:0, mid:0, pres:0, air:0, glue:0, width:100, sat:0, out:0 };
+      form.append("k_low",   String(K.low));
+      form.append("k_mid",   String(K.mid));
+      form.append("k_pres",  String(K.pres));
+      form.append("k_air",   String(K.air));
+      form.append("k_glue",  String(K.glue));
+      form.append("k_width", String(K.width));
+      form.append("k_sat",   String(K.sat));
+      form.append("k_out",   String(K.out));
+
+      // compat
+      form.append("requested_quality", currentPlan);
+      form.append("target", selectedTarget);
+
       try{
-        const fd = new FormData();
-        fd.append("file", file);
-        fd.append("preset", selectedPreset);
-        fd.append("intensity", selectedIntensity);
+        setStatus("Procesando...", 40);
 
         const res = await fetchWithTimeout((API_BASE||"") + "/api/master", {
           method:"POST",
-          body: fd
+          body: form
         }, 180000);
 
         if(!res.ok){
-          const t = await res.text().catch(()=> "");
-          throw new Error(t || "Error");
+          const txt = await res.text().catch(()=>"(sin detalle)");
+          throw new Error(txt);
         }
 
-        const data = await res.json();
-        lastMasterId = data.master_id || data.id || null;
+        const hdrId = res.headers.get("X-Master-Id") || res.headers.get("x-master-id");
+        if(hdrId) lastMasterId = hdrId;
 
-        document.getElementById("resultPill").textContent = lastMasterId ? "OK" : "OK";
+        const blob = await res.blob();
+        setStatus("Finalizando...", 85);
+
+        revoke(masterUrl);
+        masterUrl = URL.createObjectURL(blob);
+        const am = document.getElementById("audioMaster");
+        am.src = masterUrl; am.load();
+
         document.getElementById("resultEmpty").style.display = "none";
         document.getElementById("resultBox").style.display = "";
+        document.getElementById("resultPill").textContent = "Master listo";
 
-        const am = document.getElementById("audioMaster");
-        masterUrl = (API_BASE||"") + `/stream/${encodeURIComponent(lastMasterId)}`;
-        am.src = masterUrl;
-        am.load();
+        document.getElementById("backendNote").textContent = lastMasterId
+          ? ("master_id: " + lastMasterId)
+          : "Falta header X-Master-Id en /api/master (lo añadimos en backend).";
 
+        // Si plan PLUS/PRO => descarga completa
+        if(currentPlan === "PLUS" || currentPlan === "PRO"){
+          paidQuality = currentPlan;
+        } else {
+          paidQuality = null;
+        }
         afterUnlockUI();
 
-        setStatus("Listo.", 100);
-
-        if(window.WM_eqEnableRequested && typeof window.WM_setEqEnabled==="function"){
-          window.WM_setEqEnabled(true);
+        // Activar EQ Live automáticamente ahora que existe master para previsualizar
+        if (window.WM_eqEnableRequested && typeof window.WM_enableEqGraph === "function"){
+          window.WM_enableEqGraph();
           window.WM_eqEnableRequested = false;
         }
-      }catch(e){
-        alert("Error procesando: " + (e?.message || e));
-        setStatus("Listo.", 0);
+
+        setStatus("Listo.", 100);
+      }catch(err){
+        console.error(err);
+        setStatus("Error", 0);
+        alert("Error al masterizar. " + (err?.message || ""));
       }
     };
 
-    document.getElementById("btnReset").onclick = () => {
-      resetResult();
-      document.getElementById("file").value = "";
-      document.getElementById("fileName").textContent = "Sin archivo";
-      setStatus("Listo.", 0);
-      setUploadGate();
-    };
+    // ========= Init =========
+    window.addEventListener("beforeunload", () => {
+      revoke(originalUrl); revoke(masterUrl); revoke(previewUrl);
+    });
 
-    // ========= MODAL =========
-    const modalBack = document.getElementById("modalBack");
-    const payMsg = document.getElementById("payMsg");
+    renderOptions();
+    loadPlan();
+    // ========= EQ LIVE (WebAudio real-time preview, activación al "Procesar") =========
+    (() => {
+      const masterAudio = document.getElementById("audioMaster");
+      const eqPanel = document.getElementById("eqPanel");
+      if (!masterAudio || !eqPanel) return;
+
+      const gateNote = document.getElementById("eqGateNote");
+
+      const state = { low:0, mid:0, pres:0, air:0, glue:0, width:100, sat:0, out:0 };
+      window.WM_KNOBS = state;
+
+      let eqEnabled = false;
+
+      function setEqEnabled(on){
+        eqEnabled = !!on;
+        if(eqEnabled){
+          eqPanel.classList.remove("eqDisabled");
+          if(gateNote){
+            gateNote.innerHTML = `<span class="eqGateBadge on">PREVIEW ON</span> Ajuste en tiempo real habilitado.`;
+          }
+        }else{
+          eqPanel.classList.add("eqDisabled");
+          if(gateNote){
+            gateNote.innerHTML = `<span class="eqGateBadge off">PREVIEW OFF</span> Activa el preview al presionar “Procesar”.`;
+          }
+        }
+      }
+
+      // Exponer para usarlo desde el flujo de "Procesar" y Reset
+      window.WM_setEqEnabled = setEqEnabled;
+
+      let ctx=null, src=null, analyser=null, rafId=0;
+
+      let lowShelf=null, midPeak=null, presPeak=null, highShelf=null;
+      let glueComp=null;
+
+      let satShaper=null, satDry=null, satWet=null, satMix=null;
+
+      let widthSplitter=null, widthMerger=null;
+      let midSum=null, sideSum=null, sideScale=null;
+      let leftOut=null, rightOut=null;
+
+      let outGain=null, limiter=null;
+
+      const canvas = document.getElementById("eqViz");
+      const g = canvas ? canvas.getContext("2d") : null;
+      const buf = new Uint8Array(1024);
+
+      function dbToGain(db){ return Math.pow(10, db/20); }
+      function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
+
+      function makeWaveshaperCurve(drive){
+        const n = 2048;
+        const curve = new Float32Array(n);
+        const k = 1 + drive * 40;
+        for(let i=0;i<n;i++){
+          const x = (i * 2 / (n-1)) - 1;
+          curve[i] = Math.tanh(k * x) / Math.tanh(k);
+        }
+        return curve;
+      }
+
+      function ensureAudioGraph(){
+        if(!eqEnabled) return;   // << clave: NO crear graph hasta que eqEnabled sea true
+        if (ctx) return;
+
+        ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === "suspended") ctx.resume().catch(()=>{});
+
+        src = ctx.createMediaElementSource(masterAudio);
+
+        lowShelf = ctx.createBiquadFilter();
+        lowShelf.type = "lowshelf";
+        lowShelf.frequency.value = 120;
+
+        midPeak = ctx.createBiquadFilter();
+        midPeak.type = "peaking";
+        midPeak.frequency.value = 630;
+        midPeak.Q.value = 1.0;
+
+        presPeak = ctx.createBiquadFilter();
+        presPeak.type = "peaking";
+        presPeak.frequency.value = 1760;
+        presPeak.Q.value = 1.0;
+
+        highShelf = ctx.createBiquadFilter();
+        highShelf.type = "highshelf";
+        highShelf.frequency.value = 8500;
+
+        glueComp = ctx.createDynamicsCompressor();
+        glueComp.knee.value = 18;
+        glueComp.attack.value = 0.01;
+        glueComp.release.value = 0.18;
+
+        satDry = ctx.createGain();
+        satWet = ctx.createGain();
+        satMix = ctx.createGain();
+
+        satShaper = ctx.createWaveShaper();
+        satShaper.oversample = "4x";
+
+        widthSplitter = ctx.createChannelSplitter(2);
+        widthMerger = ctx.createChannelMerger(2);
+
+        const lToMid = ctx.createGain(); lToMid.gain.value = 0.5;
+        const rToMid = ctx.createGain(); rToMid.gain.value = 0.5;
+
+        const lToSide = ctx.createGain(); lToSide.gain.value = 0.5;
+        const rToSide = ctx.createGain(); rToSide.gain.value = -0.5;
+
+        midSum = ctx.createGain();
+        sideSum = ctx.createGain();
+
+        sideScale = ctx.createGain();
+
+        leftOut = ctx.createGain();
+        rightOut = ctx.createGain();
+
+        const invSide = ctx.createGain(); invSide.gain.value = -1;
+
+        outGain = ctx.createGain();
+        limiter = ctx.createDynamicsCompressor();
+        limiter.threshold.value = -1.0;
+        limiter.knee.value = 0.0;
+        limiter.ratio.value = 20.0;
+        limiter.attack.value = 0.003;
+        limiter.release.value = 0.09;
+
+        analyser = ctx.createAnalyser();
+        analyser.fftSize = 2048;
+        analyser.smoothingTimeConstant = 0.85;
+
+        src
+          .connect(lowShelf)
+          .connect(midPeak)
+          .connect(presPeak)
+          .connect(highShelf)
+          .connect(glueComp);
+
+        glueComp.connect(satDry);
+        glueComp.connect(satShaper);
+        satShaper.connect(satWet);
+
+        satDry.connect(satMix);
+        satWet.connect(satMix);
+
+        satMix.connect(widthSplitter);
+
+        const lToMid2 = lToMid, rToMid2 = rToMid;
+        const lToSide2 = lToSide, rToSide2 = rToSide;
+
+        widthSplitter.connect(lToMid2, 0);
+        widthSplitter.connect(rToMid2, 1);
+        lToMid2.connect(midSum);
+        rToMid2.connect(midSum);
+
+        widthSplitter.connect(lToSide2, 0);
+        widthSplitter.connect(rToSide2, 1);
+        lToSide2.connect(sideSum);
+        rToSide2.connect(sideSum);
+
+        sideSum.connect(sideScale);
+
+        midSum.connect(leftOut);
+        sideScale.connect(leftOut);
+
+        midSum.connect(rightOut);
+        sideScale.connect(invSide);
+        invSide.connect(rightOut);
+
+        leftOut.connect(widthMerger, 0, 0);
+        rightOut.connect(widthMerger, 0, 1);
+
+        widthMerger
+          .connect(outGain)
+          .connect(limiter)
+          .connect(analyser)
+          .connect(ctx.destination);
+
+        applyParams(true);
+        startViz();
+      }
+
+      function applyParams(instant=false){
+        if (!ctx) return;
+        const t = ctx.currentTime;
+        const k = instant ? 0.001 : 0.06;
+
+        lowShelf.gain.setTargetAtTime(state.low, t, k);
+        midPeak.gain.setTargetAtTime(state.mid, t, k);
+        presPeak.gain.setTargetAtTime(state.pres, t, k);
+        highShelf.gain.setTargetAtTime(state.air, t, k);
+
+        const gP = clamp(state.glue / 100, 0, 1);
+        const thr = -10 - gP * 18;
+        const rat = 1.5 + gP * 4.5;
+        const atk = 0.012 - gP * 0.007;
+        const rel = 0.20 + gP * 0.10;
+
+        glueComp.threshold.setTargetAtTime(thr, t, k);
+        glueComp.ratio.setTargetAtTime(rat, t, k);
+        glueComp.attack.setTargetAtTime(atk, t, k);
+        glueComp.release.setTargetAtTime(rel, t, k);
+
+        const sP = clamp(state.sat / 100, 0, 1);
+        satShaper.curve = makeWaveshaperCurve(sP);
+        satDry.gain.setTargetAtTime(1 - (sP * 0.55), t, k);
+        satWet.gain.setTargetAtTime(sP * 0.85, t, k);
+
+        const wP = clamp(state.width, 50, 150);
+        sideScale.gain.setTargetAtTime(wP / 100, t, k);
+
+        outGain.gain.setTargetAtTime(dbToGain(state.out), t, k);
+      }
+
+      const knobEls = [...document.querySelectorAll(".knob")];
+      const valEls = {
+        low: document.getElementById("vLow"),
+        mid: document.getElementById("vMid"),
+        pres: document.getElementById("vPres"),
+        air: document.getElementById("vAir"),
+        glue: document.getElementById("vGlue"),
+        width: document.getElementById("vWidth"),
+        sat: document.getElementById("vSat"),
+        out: document.getElementById("vOut"),
+      };
+
+      const ranges = {
+        low:   {min:-12, max: 12, step:0.2, fmt:"db"},
+        mid:   {min:-12, max: 12, step:0.2, fmt:"db"},
+        pres:  {min:-12, max: 12, step:0.2, fmt:"db"},
+        air:   {min:-12, max: 12, step:0.2, fmt:"db"},
+        glue:  {min:  0, max:100, step:1,   fmt:"pct"},
+        width: {min: 50, max:150, step:1,   fmt:"pct"},
+        sat:   {min:  0, max:100, step:1,   fmt:"pct"},
+        out:   {min:-12, max:  6, step:0.2, fmt:"db"},
+      };
+
+      function valueToAngle(v, key){
+        const r = ranges[key];
+        const p = (v - r.min) / (r.max - r.min);
+        return (-120 + p * 240);
+      }
+      function angleToValue(a, key){
+        const r = ranges[key];
+        const p = (a + 120) / 240;
+        return r.min + p * (r.max - r.min);
+      }
+
+      function setKnobUI(key){
+        const el = knobEls.find(x => x.dataset.knob === key);
+        if (!el) return;
+        el.style.setProperty("--ang", valueToAngle(state[key], key) + "deg");
+
+        const r = ranges[key];
+        if (!valEls[key]) return;
+
+        if (r.fmt === "db"){
+          valEls[key].textContent = (state[key] >= 0 ? "+" : "") + state[key].toFixed(1) + " dB";
+        } else {
+          valEls[key].textContent = String(Math.round(state[key])) + "%";
+        }
+      }
+
+      function initKnobs(){
+        Object.keys(state).forEach(setKnobUI);
+
+        knobEls.forEach(el => {
+          const key = el.dataset.knob;
+          let active = false;
+
+          const onDown = (e) => {
+            active = true;
+            // si está enabled, movida crea el graph; si no, no hace nada
+            ensureAudioGraph();
+            try { el.setPointerCapture(e.pointerId); } catch {}
+          };
+
+          const onMove = (e) => {
+            if (!active) return;
+
+            const rect = el.getBoundingClientRect();
+            const cx = rect.left + rect.width/2;
+            const cy = rect.top + rect.height/2;
+
+            const dx = e.clientX - cx;
+            const dy = e.clientY - cy;
+
+            let ang = Math.atan2(dy, dx) * (180/Math.PI);
+            ang = ang - 90;
+            while (ang < -180) ang += 360;
+            while (ang > 180) ang -= 360;
+            ang = clamp(ang, -120, 120);
+
+            let v = angleToValue(ang, key);
+            const r = ranges[key];
+            v = clamp(v, r.min, r.max);
+            v = Math.round(v / r.step) * r.step;
+
+            state[key] = v;
+            window.WM_KNOBS = state;
+
+            setKnobUI(key);
+            applyParams(false);
+          };
+
+          const onUp = () => { active = false; };
+
+          el.addEventListener("pointerdown", onDown);
+          window.addEventListener("pointermove", onMove);
+          window.addEventListener("pointerup", onUp);
+          window.addEventListener("pointercancel", onUp);
+        });
+      }
+
+      function drawGrid(){
+        if (!g) return;
+        const w = canvas.width, h = canvas.height;
+        g.clearRect(0,0,w,h);
+
+        g.fillStyle = "rgba(0,0,0,.18)";
+        g.fillRect(0,0,w,h);
+
+        g.strokeStyle = "rgba(255,255,255,.06)";
+        g.lineWidth = 1;
+        for(let x=0; x<=10; x++){
+          const px = Math.round((x/10)*w);
+          g.beginPath(); g.moveTo(px,0); g.lineTo(px,h); g.stroke();
+        }
+        for(let y=0; y<=6; y++){
+          const py = Math.round((y/6)*h);
+          g.beginPath(); g.moveTo(0,py); g.lineTo(w,py); g.stroke();
+        }
+
+        g.strokeStyle = "rgba(255,255,255,.10)";
+        g.beginPath(); g.moveTo(0, h*0.5); g.lineTo(w, h*0.5); g.stroke();
+      }
+
+      function drawSpectrum(){
+        if (!analyser || !g) return;
+        analyser.getByteFrequencyData(buf);
+        const w = canvas.width, h = canvas.height;
+
+        g.beginPath();
+        for(let i=0; i<buf.length; i++){
+          const x = (i/(buf.length-1))*w;
+          const v = buf[i]/255;
+          const y = h - (v*v)*h*0.92;
+          if(i===0) g.moveTo(x,y); else g.lineTo(x,y);
+        }
+        g.lineTo(w,h); g.lineTo(0,h); g.closePath();
+
+        const grad = g.createLinearGradient(0,0,0,h);
+        grad.addColorStop(0, "rgba(109,94,252,.18)");
+        grad.addColorStop(1, "rgba(45,212,191,.10)");
+        g.fillStyle = grad;
+        g.fill();
+
+        g.strokeStyle = "rgba(255,255,255,.16)";
+        g.lineWidth = 1.5;
+        g.stroke();
+      }
+
+      function drawEQCurve(){
+        if (!g) return;
+        const w = canvas.width, h = canvas.height;
+
+        function yFromDb(db){
+          const maxDb = 12;
+          const p = db / maxDb;
+          return h*0.5 - p*(h*0.22);
+        }
+
+        const pts = [
+          {x: w*0.12, y: yFromDb(state.low)},
+          {x: w*0.35, y: yFromDb(state.mid)},
+          {x: w*0.55, y: yFromDb(state.pres)},
+          {x: w*0.78, y: yFromDb(state.air)}
+        ];
+
+        g.strokeStyle = "rgba(255,255,255,.90)";
+        g.lineWidth = 2.2;
+        g.beginPath();
+        g.moveTo(0, h*0.5);
+
+        for(let i=0; i<pts.length; i++){
+          const p = pts[i];
+          const prev = pts[i-1] || {x:0, y:h*0.5};
+          const next = pts[i+1] || {x:w, y:h*0.5};
+
+          const cp1x = prev.x + (p.x - prev.x)*0.55;
+          const cp1y = prev.y + (p.y - prev.y)*0.55;
+          const cp2x = p.x - (next.x - prev.x)*0.10;
+          const cp2y = p.y;
+
+          g.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p.x, p.y);
+        }
+
+        g.lineTo(w, h*0.5);
+        g.stroke();
+
+        g.fillStyle = "rgba(255,255,255,.95)";
+        pts.forEach(p=>{
+          g.beginPath();
+          g.arc(p.x, p.y, 4.6, 0, Math.PI*2);
+          g.fill();
+        });
+      }
+
+      function startViz(){
+        if (!g || !analyser) return;
+        cancelAnimationFrame(rafId);
+        const tick = () => {
+          drawGrid();
+          drawSpectrum();
+          drawEQCurve();
+          rafId = requestAnimationFrame(tick);
+        };
+        tick();
+      }
+
+      // Activación pública: se llama automáticamente cuando termina "Procesar"
+      window.WM_enableEqGraph = () => {
+        setEqEnabled(true);
+        ensureAudioGraph();
+        if (ctx && ctx.state === "suspended") ctx.resume().catch(()=>{});
+      };
+
+      // Estado inicial: visible pero OFF
+      setEqEnabled(false);
+      initKnobs();
+      drawGrid();
+      drawEQCurve();
+    })();
   </script>
 </body>
 </html>
