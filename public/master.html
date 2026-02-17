@@ -358,19 +358,16 @@
       background: rgba(0,0,0,.18);
     }
 
-    /* 8 knobs */
+    /* ✅ FIX: Knobs responsive por ancho REAL del panel */
     .eqBottom{
       padding:14px;
       display:grid;
-      grid-template-columns: repeat(8, 1fr);
       gap:12px;
       background: rgba(255,255,255,.02);
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     }
-    @media (max-width: 1100px){
-      .eqBottom{grid-template-columns: repeat(4, 1fr);}
-    }
-    @media (max-width: 620px){
-      .eqBottom{grid-template-columns: repeat(2, 1fr);}
+    @media (max-width: 520px){
+      .eqBottom{ grid-template-columns: repeat(2, minmax(120px, 1fr)); }
     }
 
     .knobCol{
@@ -379,6 +376,7 @@
       border-radius:16px;
       padding:12px;
       text-align:center;
+      min-width:120px; /* ✅ evita que se corten */
     }
     .kLabel{margin-top:10px; font-weight:900; font-size:12px; letter-spacing:.2px}
     .kVal{margin-top:4px; color: rgba(255,255,255,.65); font-size:12px}
@@ -680,7 +678,6 @@
           `<span class="badge free">■ FREE</span> Escucha completo. Descarga: 30s.`;
       }
 
-      // botón descarga según plan
       const btnPrev = document.getElementById("btnDownloadPreview");
       if (btnPrev){
         btnPrev.textContent = (currentPlan === "FREE") ? "Descargar 30s" : "Descargar completo";
