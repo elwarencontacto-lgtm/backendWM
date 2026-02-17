@@ -454,7 +454,7 @@
 
           <div class="note" id="planNote">
             <span class="badge free">■ FREE</span>
-            Escucha el master completo. Descarga: 20s.
+            Escucha el master completo. Descarga: 30s.
           </div>
 
           <hr class="divider"/>
@@ -576,7 +576,7 @@
             <div class="note" id="unlockHint"></div>
 
             <div class="row" style="margin-top:12px">
-              <button class="btn" id="btnDownloadPreview">Descargar 20s</button>
+              <button class="btn" id="btnDownloadPreview">Descargar 30s</button>
               <button class="btn btnPlus" id="btnUnlock">◇ Desbloquear</button>
               <button class="btn btnPro" id="btnUpgradeToPro" style="display:none">◆ Upgrade PRO</button>
             </div>
@@ -677,8 +677,15 @@
         pill.textContent = "■ FREE";
         pill.classList.add("free");
         document.getElementById("planNote").innerHTML =
-          `<span class="badge free">■ FREE</span> Escucha completo. Descarga: 20s.`;
+          `<span class="badge free">■ FREE</span> Escucha completo. Descarga: 30s.`;
       }
+
+      // botón descarga según plan
+      const btnPrev = document.getElementById("btnDownloadPreview");
+      if (btnPrev){
+        btnPrev.textContent = (currentPlan === "FREE") ? "Descargar 30s" : "Descargar completo";
+      }
+
       renderOptions();
     }
 
@@ -860,7 +867,7 @@
       fullBtn.style.display = "none";
       upBtn.style.display = "none";
       document.getElementById("unlockHint").innerHTML =
-        `<span class="badge free">■ FREE</span> Escucha completo. Descarga: 20s.`;
+        `<span class="badge free">■ FREE</span> Escucha completo. Descarga: 30s.`;
     }
 
     async function unlock(quality){
@@ -911,22 +918,37 @@
       a.remove();
     }
 
+    // FREE: preview 30s | PLUS/PRO: completo
     document.getElementById("btnDownloadPreview").onclick = async () => {
       if(!lastMasterId){
         alert("Primero procesa un master.");
         return;
       }
+
+      // PLUS/PRO (o unlock): descarga completa
+      if (currentPlan === "PLUS" || currentPlan === "PRO" || paidQuality === "PLUS" || paidQuality === "PRO") {
+        const url = (API_BASE||"") + `/download/${encodeURIComponent(lastMasterId)}`;
+        window.open(url, "_blank");
+        return;
+      }
+
+      // FREE: preview 30s
       try{
         setStatus("Generando preview...", 70);
-        const res = await fetchWithTimeout((API_BASE||"") + `/api/master/preview?master_id=${encodeURIComponent(lastMasterId)}`, {}, 180000);
+        const seconds = 30;
+        const res = await fetchWithTimeout(
+          (API_BASE||"") + `/api/master/preview?master_id=${encodeURIComponent(lastMasterId)}&seconds=${seconds}`,
+          {},
+          180000
+        );
         if(!res.ok) throw new Error("preview fail");
         const blob = await res.blob();
         revoke(previewUrl);
         previewUrl = URL.createObjectURL(blob);
-        downloadBlobUrl(previewUrl, "warmaster_preview_20s.wav");
+        downloadBlobUrl(previewUrl, "warmaster_preview_30s.wav");
         setStatus("Listo.", 100);
       }catch(e){
-        alert("Preview 20s requiere /api/master/preview (lo agregamos en backend).");
+        alert("Preview requiere /api/master/preview con seconds (lo ajustamos en backend).");
         setStatus("Listo.", 100);
       }
     };
@@ -936,7 +958,7 @@
         alert("Primero procesa un master.");
         return;
       }
-      const url = (API_BASE||"") + `/api/masters/${encodeURIComponent(lastMasterId)}/download`;
+      const url = (API_BASE||"") + `/download/${encodeURIComponent(lastMasterId)}`;
       window.open(url, "_blank");
     };
 
@@ -1042,7 +1064,7 @@
       form.append("k_sat",   String(K.sat));
       form.append("k_out",   String(K.out));
 
-      // (compat)
+      // compat
       form.append("requested_quality", currentPlan);
       form.append("target", selectedTarget);
 
@@ -1107,33 +1129,20 @@
       const eqPanel = document.getElementById("eqPanel");
       if (!masterAudio || !eqPanel) return;
 
-      // dB knobs + macros (%)
-      const state = {
-        low:0, mid:0, pres:0, air:0,
-        glue:0,      // 0..100 %
-        width:100,   // 50..150 %
-        sat:0,       // 0..100 %
-        out:0
-      };
-
-      // Exponer para el submit (backend)
+      const state = { low:0, mid:0, pres:0, air:0, glue:0, width:100, sat:0, out:0 };
       window.WM_KNOBS = state;
 
       let ctx=null, src=null, analyser=null, rafId=0;
 
-      // core nodes
       let lowShelf=null, midPeak=null, presPeak=null, highShelf=null;
       let glueComp=null;
 
-      // saturation nodes (dry/wet)
       let satShaper=null, satDry=null, satWet=null, satMix=null;
 
-      // width (mid/side)
       let widthSplitter=null, widthMerger=null;
       let midSum=null, sideSum=null, sideScale=null;
       let leftOut=null, rightOut=null;
 
-      // output / limiter
       let outGain=null, limiter=null;
 
       const canvas = document.getElementById("eqViz");
@@ -1144,10 +1153,9 @@
       function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
 
       function makeWaveshaperCurve(drive){
-        // drive: 0..1
         const n = 2048;
         const curve = new Float32Array(n);
-        const k = 1 + drive * 40; // 1..41
+        const k = 1 + drive * 40;
         for(let i=0;i<n;i++){
           const x = (i * 2 / (n-1)) - 1;
           curve[i] = Math.tanh(k * x) / Math.tanh(k);
@@ -1163,7 +1171,6 @@
 
         src = ctx.createMediaElementSource(masterAudio);
 
-        // EQ
         lowShelf = ctx.createBiquadFilter();
         lowShelf.type = "lowshelf";
         lowShelf.frequency.value = 120;
@@ -1182,42 +1189,37 @@
         highShelf.type = "highshelf";
         highShelf.frequency.value = 8500;
 
-        // Glue compressor
         glueComp = ctx.createDynamicsCompressor();
         glueComp.knee.value = 18;
         glueComp.attack.value = 0.01;
         glueComp.release.value = 0.18;
 
-        // Saturation (dry/wet)
         satDry = ctx.createGain();
         satWet = ctx.createGain();
-        satMix = ctx.createGain(); // sum point
+        satMix = ctx.createGain();
 
         satShaper = ctx.createWaveShaper();
         satShaper.oversample = "4x";
 
-        // Width M/S
         widthSplitter = ctx.createChannelSplitter(2);
         widthMerger = ctx.createChannelMerger(2);
 
-        // mid/side sums
         const lToMid = ctx.createGain(); lToMid.gain.value = 0.5;
         const rToMid = ctx.createGain(); rToMid.gain.value = 0.5;
 
         const lToSide = ctx.createGain(); lToSide.gain.value = 0.5;
         const rToSide = ctx.createGain(); rToSide.gain.value = -0.5;
 
-        midSum = ctx.createGain();   // receives L+R
-        sideSum = ctx.createGain();  // receives L-R
+        midSum = ctx.createGain();
+        sideSum = ctx.createGain();
 
-        sideScale = ctx.createGain(); // width control
+        sideScale = ctx.createGain();
 
-        leftOut = ctx.createGain();  // mid + side
-        rightOut = ctx.createGain(); // mid - side
+        leftOut = ctx.createGain();
+        rightOut = ctx.createGain();
 
-        const invSide = ctx.createGain(); invSide.gain.value = -1; // for right channel
+        const invSide = ctx.createGain(); invSide.gain.value = -1;
 
-        // Output chain
         outGain = ctx.createGain();
         limiter = ctx.createDynamicsCompressor();
         limiter.threshold.value = -1.0;
@@ -1230,7 +1232,6 @@
         analyser.fftSize = 2048;
         analyser.smoothingTimeConstant = 0.85;
 
-        // Wiring:
         src
           .connect(lowShelf)
           .connect(midPeak)
@@ -1238,47 +1239,37 @@
           .connect(highShelf)
           .connect(glueComp);
 
-        // saturation split
         glueComp.connect(satDry);
         glueComp.connect(satShaper);
         satShaper.connect(satWet);
 
-        // mix sum
         satDry.connect(satMix);
         satWet.connect(satMix);
 
-        // width
         satMix.connect(widthSplitter);
 
-        // build mid
         widthSplitter.connect(lToMid, 0);
         widthSplitter.connect(rToMid, 1);
         lToMid.connect(midSum);
         rToMid.connect(midSum);
 
-        // build side
         widthSplitter.connect(lToSide, 0);
         widthSplitter.connect(rToSide, 1);
         lToSide.connect(sideSum);
         rToSide.connect(sideSum);
 
-        // width scaling
         sideSum.connect(sideScale);
 
-        // L = mid + side
         midSum.connect(leftOut);
         sideScale.connect(leftOut);
 
-        // R = mid - side
         midSum.connect(rightOut);
         sideScale.connect(invSide);
         invSide.connect(rightOut);
 
-        // to stereo
         leftOut.connect(widthMerger, 0, 0);
         rightOut.connect(widthMerger, 0, 1);
 
-        // to output
         widthMerger
           .connect(outGain)
           .connect(limiter)
@@ -1294,40 +1285,33 @@
         const t = ctx.currentTime;
         const k = instant ? 0.001 : 0.06;
 
-        // EQ dB
         lowShelf.gain.setTargetAtTime(state.low, t, k);
         midPeak.gain.setTargetAtTime(state.mid, t, k);
         presPeak.gain.setTargetAtTime(state.pres, t, k);
         highShelf.gain.setTargetAtTime(state.air, t, k);
 
-        // GLUE 0..100 -> threshold/ratio/makeup (soft)
         const gP = clamp(state.glue / 100, 0, 1);
-        const thr = -10 - gP * 18;      // -10 .. -28 dB
-        const rat = 1.5 + gP * 4.5;     // 1.5 .. 6.0
-        const atk = 0.012 - gP * 0.007; // 12ms .. 5ms
-        const rel = 0.20 + gP * 0.10;   // 200ms .. 300ms
+        const thr = -10 - gP * 18;
+        const rat = 1.5 + gP * 4.5;
+        const atk = 0.012 - gP * 0.007;
+        const rel = 0.20 + gP * 0.10;
 
         glueComp.threshold.setTargetAtTime(thr, t, k);
         glueComp.ratio.setTargetAtTime(rat, t, k);
         glueComp.attack.setTargetAtTime(atk, t, k);
         glueComp.release.setTargetAtTime(rel, t, k);
 
-        // SAT 0..100 -> dry/wet + drive curve
         const sP = clamp(state.sat / 100, 0, 1);
         satShaper.curve = makeWaveshaperCurve(sP);
         satDry.gain.setTargetAtTime(1 - (sP * 0.55), t, k);
         satWet.gain.setTargetAtTime(sP * 0.85, t, k);
 
-        // WIDTH 50..150 -> side gain 0.5..1.5
         const wP = clamp(state.width, 50, 150);
-        const side = wP / 100; // 0.5..1.5
-        sideScale.gain.setTargetAtTime(side, t, k);
+        sideScale.gain.setTargetAtTime(wP / 100, t, k);
 
-        // OUTPUT dB
         outGain.gain.setTargetAtTime(dbToGain(state.out), t, k);
       }
 
-      // ======= Knobs =======
       const knobEls = [...document.querySelectorAll(".knob")];
       const valEls = {
         low: document.getElementById("vLow"),
@@ -1412,11 +1396,9 @@
             v = Math.round(v / r.step) * r.step;
 
             state[key] = v;
-            setKnobUI(key);
-
-            // asegurar que el submit tenga los últimos valores
             window.WM_KNOBS = state;
 
+            setKnobUI(key);
             applyParams(false);
           };
 
@@ -1429,7 +1411,6 @@
         });
       }
 
-      // ======= Visual =======
       function drawGrid(){
         if (!g) return;
         const w = canvas.width, h = canvas.height;
