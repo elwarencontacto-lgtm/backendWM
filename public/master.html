@@ -358,16 +358,19 @@
       background: rgba(0,0,0,.18);
     }
 
-    /* ✅ FIX: Knobs responsive por ancho REAL del panel */
+    /* 8 knobs */
     .eqBottom{
       padding:14px;
       display:grid;
+      grid-template-columns: repeat(8, 1fr);
       gap:12px;
       background: rgba(255,255,255,.02);
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     }
-    @media (max-width: 520px){
-      .eqBottom{ grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+    @media (max-width: 1100px){
+      .eqBottom{grid-template-columns: repeat(4, 1fr);}
+    }
+    @media (max-width: 620px){
+      .eqBottom{grid-template-columns: repeat(2, 1fr);}
     }
 
     .knobCol{
@@ -376,7 +379,6 @@
       border-radius:16px;
       padding:12px;
       text-align:center;
-      min-width:120px; /* ✅ evita que se corten */
     }
     .kLabel{margin-top:10px; font-weight:900; font-size:12px; letter-spacing:.2px}
     .kVal{margin-top:4px; color: rgba(255,255,255,.65); font-size:12px}
@@ -405,6 +407,42 @@
       transform: translate(-50%,-100%) rotate(var(--ang, -120deg));
       border-radius:999px;
       box-shadow: 0 0 10px rgba(109,94,252,.25);
+    }
+
+    /* ===== EQ visible, pero desactivado hasta "Procesar" ===== */
+    .eqPanel.eqDisabled{ opacity:.90; }
+    .eqPanel.eqDisabled .eqBottom{
+      filter: grayscale(.25);
+      pointer-events:none;
+      opacity:.55;
+    }
+    .eqPanel.eqDisabled #eqViz{ opacity:.55; }
+
+    .eqGateNote{
+      margin-top:10px;
+      font-size:12px;
+      color: rgba(255,255,255,.65);
+      line-height:1.5;
+    }
+    .eqGateBadge{
+      display:inline-block;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.03);
+      font-weight:900;
+      margin-right:8px;
+      white-space:nowrap;
+    }
+    .eqGateBadge.on{
+      border-color: rgba(45,212,191,.25);
+      background: rgba(45,212,191,.08);
+      color: rgba(45,212,191,.95);
+    }
+    .eqGateBadge.off{
+      border-color: rgba(255,255,255,.14);
+      background: rgba(255,255,255,.03);
+      color: rgba(255,255,255,.80);
     }
   </style>
 </head>
@@ -511,12 +549,16 @@
               <audio id="audioMaster"></audio>
             </div>
 
-            <!-- ===== PLUGIN PANEL ===== -->
-            <div class="eqPanel" id="eqPanel">
+            <!-- ===== PLUGIN PANEL (visible desde inicio, preview OFF hasta Procesar) ===== -->
+            <div class="eqPanel eqDisabled" id="eqPanel">
               <div class="eqTop">
                 <div class="eqTitle">EQ Live</div>
-                <div class="eqSub">Ajuste en tiempo real (preview)</div>
+                <div class="eqSub">Vista pro (se activa al procesar)</div>
                 <canvas id="eqViz" width="900" height="220"></canvas>
+                <div class="eqGateNote" id="eqGateNote">
+                  <span class="eqGateBadge off" id="eqGateBadge">PREVIEW OFF</span>
+                  Activa el preview al presionar “Procesar”.
+                </div>
               </div>
 
               <div class="eqBottom">
@@ -619,7 +661,7 @@
     </div>
   </div>
 
-  <script>
+  <script> 
     // ========= API BASE =========
     function getApiBase() {
       const qs = new URLSearchParams(location.search);
@@ -678,6 +720,7 @@
           `<span class="badge free">■ FREE</span> Escucha completo. Descarga: 30s.`;
       }
 
+      // texto botón principal según plan (FREE preview / PLUS-PRO full)
       const btnPrev = document.getElementById("btnDownloadPreview");
       if (btnPrev){
         btnPrev.textContent = (currentPlan === "FREE") ? "Descargar 30s" : "Descargar completo";
@@ -793,6 +836,9 @@
       document.querySelectorAll(".pTime[data-k='dur']").forEach(el => el.textContent="0:00");
       document.querySelectorAll(".pSeek").forEach(el => el.value="0");
       document.querySelectorAll(".pBtn[data-act='play']").forEach(el => el.textContent="▶");
+
+      // EQ vuelve a OFF visual
+      if (typeof window.WM_setEqEnabled === "function") window.WM_setEqEnabled(false);
     }
 
     document.getElementById("btnReset").onclick = () => {
@@ -915,21 +961,21 @@
       a.remove();
     }
 
-    // FREE: preview 30s | PLUS/PRO: completo
+    // FREE: preview 30s | PLUS/PRO: completo (o si unlock)
     document.getElementById("btnDownloadPreview").onclick = async () => {
       if(!lastMasterId){
         alert("Primero procesa un master.");
         return;
       }
 
-      // PLUS/PRO (o unlock): descarga completa
+      // PLUS/PRO o unlock => descarga completa
       if (currentPlan === "PLUS" || currentPlan === "PRO" || paidQuality === "PLUS" || paidQuality === "PRO") {
         const url = (API_BASE||"") + `/download/${encodeURIComponent(lastMasterId)}`;
         window.open(url, "_blank");
         return;
       }
 
-      // FREE: preview 30s
+      // FREE => preview 30s
       try{
         setStatus("Generando preview...", 70);
         const seconds = 30;
@@ -992,7 +1038,7 @@
       let dragging = false;
 
       function syncBtn(){
-        btn.textContent = audio.paused ? "▶" : "II";
+        btn.textContent = audio.paused ? "▶" : "❚❚";
       }
 
       audio.addEventListener("loadedmetadata", () => {
@@ -1037,6 +1083,9 @@
       const file = fileInput.files?.[0];
       if(!file){ alert("Selecciona un archivo."); return; }
 
+      // Al presionar "Procesar", pedimos activar EQ preview cuando esté listo el master
+      window.WM_eqEnableRequested = true;
+
       resetResult();
       setStatus("Subiendo...", 10);
 
@@ -1050,7 +1099,7 @@
       form.append("preset", selectedTarget);
       form.append("intensity", String(selectedIntensity));
 
-      // ===== enviar knobs al backend (para que el archivo final descargado sea igual a lo escuchado) =====
+      // ===== enviar knobs al backend =====
       const K = window.WM_KNOBS || { low:0, mid:0, pres:0, air:0, glue:0, width:100, sat:0, out:0 };
       form.append("k_low",   String(K.low));
       form.append("k_mid",   String(K.mid));
@@ -1097,12 +1146,19 @@
           ? ("master_id: " + lastMasterId)
           : "Falta header X-Master-Id en /api/master (lo añadimos en backend).";
 
+        // Si plan PLUS/PRO => descarga completa
         if(currentPlan === "PLUS" || currentPlan === "PRO"){
           paidQuality = currentPlan;
         } else {
           paidQuality = null;
         }
         afterUnlockUI();
+
+        // Activar EQ Live automáticamente ahora que existe master para previsualizar
+        if (window.WM_eqEnableRequested && typeof window.WM_enableEqGraph === "function"){
+          window.WM_enableEqGraph();
+          window.WM_eqEnableRequested = false;
+        }
 
         setStatus("Listo.", 100);
       }catch(err){
@@ -1119,15 +1175,36 @@
 
     renderOptions();
     loadPlan();
-
-    // ========= EQ LIVE (WebAudio real-time preview) =========
+    // ========= EQ LIVE (WebAudio real-time preview, activación al "Procesar") =========
     (() => {
       const masterAudio = document.getElementById("audioMaster");
       const eqPanel = document.getElementById("eqPanel");
       if (!masterAudio || !eqPanel) return;
 
+      const gateNote = document.getElementById("eqGateNote");
+
       const state = { low:0, mid:0, pres:0, air:0, glue:0, width:100, sat:0, out:0 };
       window.WM_KNOBS = state;
+
+      let eqEnabled = false;
+
+      function setEqEnabled(on){
+        eqEnabled = !!on;
+        if(eqEnabled){
+          eqPanel.classList.remove("eqDisabled");
+          if(gateNote){
+            gateNote.innerHTML = `<span class="eqGateBadge on">PREVIEW ON</span> Ajuste en tiempo real habilitado.`;
+          }
+        }else{
+          eqPanel.classList.add("eqDisabled");
+          if(gateNote){
+            gateNote.innerHTML = `<span class="eqGateBadge off">PREVIEW OFF</span> Activa el preview al presionar “Procesar”.`;
+          }
+        }
+      }
+
+      // Exponer para usarlo desde el flujo de "Procesar" y Reset
+      window.WM_setEqEnabled = setEqEnabled;
 
       let ctx=null, src=null, analyser=null, rafId=0;
 
@@ -1161,6 +1238,7 @@
       }
 
       function ensureAudioGraph(){
+        if(!eqEnabled) return;   // << clave: NO crear graph hasta que eqEnabled sea true
         if (ctx) return;
 
         ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1245,15 +1323,18 @@
 
         satMix.connect(widthSplitter);
 
-        widthSplitter.connect(lToMid, 0);
-        widthSplitter.connect(rToMid, 1);
-        lToMid.connect(midSum);
-        rToMid.connect(midSum);
+        const lToMid2 = lToMid, rToMid2 = rToMid;
+        const lToSide2 = lToSide, rToSide2 = rToSide;
 
-        widthSplitter.connect(lToSide, 0);
-        widthSplitter.connect(rToSide, 1);
-        lToSide.connect(sideSum);
-        rToSide.connect(sideSum);
+        widthSplitter.connect(lToMid2, 0);
+        widthSplitter.connect(rToMid2, 1);
+        lToMid2.connect(midSum);
+        rToMid2.connect(midSum);
+
+        widthSplitter.connect(lToSide2, 0);
+        widthSplitter.connect(rToSide2, 1);
+        lToSide2.connect(sideSum);
+        rToSide2.connect(sideSum);
 
         sideSum.connect(sideScale);
 
@@ -1367,6 +1448,7 @@
 
           const onDown = (e) => {
             active = true;
+            // si está enabled, movida crea el graph; si no, no hace nada
             ensureAudioGraph();
             try { el.setPointerCapture(e.pointerId); } catch {}
           };
@@ -1514,12 +1596,18 @@
         tick();
       }
 
-      masterAudio.addEventListener("play", () => {
+      // Activación pública: se llama automáticamente cuando termina "Procesar"
+      window.WM_enableEqGraph = () => {
+        setEqEnabled(true);
         ensureAudioGraph();
         if (ctx && ctx.state === "suspended") ctx.resume().catch(()=>{});
-      }, {passive:true});
+      };
 
+      // Estado inicial: visible pero OFF
+      setEqEnabled(false);
       initKnobs();
+      drawGrid();
+      drawEQCurve();
     })();
   </script>
 </body>
