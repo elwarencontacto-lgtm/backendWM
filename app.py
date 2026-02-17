@@ -9,7 +9,6 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Query
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from starlette.background import BackgroundTask
 
 
 # =========================
@@ -31,9 +30,7 @@ app = FastAPI()
 # =========================
 # STORAGE (MEMORIA)
 # =========================
-# Importante: Render puede reiniciar y esto se pierde (es ok para beta).
 masters: Dict[str, Dict[str, Any]] = {}  # master_id -> metadata
-
 
 # =========================
 # CORS
@@ -87,12 +84,7 @@ def get_audio_duration_seconds(path: Path) -> float:
         "-of", "default=noprint_wrappers=1:nokey=1",
         str(path)
     ]
-    proc = subprocess.run(
-        cmd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
+    proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     if proc.returncode != 0:
         raise HTTPException(status_code=400, detail="No se pudo analizar duración.")
     try:
@@ -119,11 +111,6 @@ def clamp_int(x: Any, lo: int, hi: int, default: int) -> int:
         return default
 
 
-def db_to_gain(db: float) -> float:
-    # gain = 10^(db/20)
-    return 10 ** (db / 20.0)
-
-
 def preset_chain(
     preset: str,
     intensity: Any,
@@ -139,11 +126,10 @@ def preset_chain(
     """
     Devuelve cadena de filtros FFmpeg -af
 
-    FIX PRINCIPAL (tu error):
-    - 'makeup' del acompressor SIEMPRE en rango [1..64]
+    FIX 1: 'makeup' acompressor SIEMPRE en rango [1..64]
+    FIX 2: WIDTH sin stereowiden (usamos pan mid/side, compatible)
     """
 
-    # intensity robusto
     intensity_i = clamp_int(intensity, 0, 100, 55)
 
     thr = -18.0 - (intensity_i * 0.10)
@@ -157,7 +143,7 @@ def preset_chain(
 
     preset = (preset or "clean").lower()
 
-    # EQ base por preset (simple y seguro)
+    # EQ base por preset
     if preset == "club":
         eq_base = "bass=g=4:f=90,treble=g=2:f=9000"
     elif preset == "warm":
@@ -170,9 +156,7 @@ def preset_chain(
         eq_base = "bass=g=2:f=120,treble=g=1:f=8000"
 
     # ===== KNOBS (aplican al audio final) =====
-    # EQ Live: usamos equalizer (peaking/shelf)
-    # Rango knobs ya viene clamp en endpoint:
-    # low/mid/pres/air: -12..+12 dB
+    # EQ Live
     eq_live = (
         f"equalizer=f=120:width_type=h:width=1:g={k_low},"
         f"equalizer=f=630:width_type=h:width=1:g={k_mid},"
@@ -180,27 +164,26 @@ def preset_chain(
         f"equalizer=f=8500:width_type=h:width=1:g={k_air}"
     )
 
-    # Glue (0..100): ajusta compresión extra (suave)
-    # (no rompe si está en 0)
+    # Glue (0..100): compresión suave adicional
     glue_p = max(0.0, min(100.0, k_glue)) / 100.0
     glue_thr = -12.0 - glue_p * 18.0
     glue_ratio = 1.2 + glue_p * 3.8
     glue_attack = 0.012 - glue_p * 0.007
     glue_release = 0.20 + glue_p * 0.10
-    glue_comp = (
-        f"acompressor=threshold={glue_thr}dB:ratio={glue_ratio}:attack={glue_attack}:release={glue_release}:makeup=1"
-    )
+    glue_comp = f"acompressor=threshold={glue_thr}dB:ratio={glue_ratio}:attack={glue_attack}:release={glue_release}:makeup=1"
 
-    # Width (50..150): usamos stereowiden (seguro). amount = 0..1 aprox
-    width_amt = max(50.0, min(150.0, k_width))
-    # map 50..150 -> 0.0..1.0
-    widen = (width_amt - 50.0) / 100.0
-    width_fx = f"stereowiden=amount={widen}"
+    # ✅ WIDTH (50..150) usando PAN mid/side (compatible)
+    # mid=(L+R)/2, side=(L-R)/2
+    # L = mid + side*k ; R = mid - side*k ; k = width/100
+    k = max(50.0, min(150.0, k_width)) / 100.0
+    a = (1.0 + k) / 2.0
+    b = (1.0 - k) / 2.0
+    width_fx = f"pan=stereo|c0={a:.6f}*c0+{b:.6f}*c1|c1={b:.6f}*c0+{a:.6f}*c1"
 
-    # Saturation (0..100): drive con volume + asoftclip (type=tanh es válido)
+    # Saturation (0..100): drive + asoftclip (type=tanh)
     sat_p = max(0.0, min(100.0, k_sat)) / 100.0
-    drive_db = sat_p * 9.0  # hasta +9dB
-    back_db = -sat_p * 6.0  # compensa un poco
+    drive_db = sat_p * 9.0
+    back_db = -sat_p * 6.0
     sat_fx = f"volume={drive_db}dB,asoftclip=type=tanh,volume={back_db}dB"
 
     # Output (dB)
@@ -209,7 +192,7 @@ def preset_chain(
     # Limiter final
     limiter = "alimiter=limit=-1.0dB"
 
-    # Comp base (tu cadena original) + live knobs
+    # Comp base + knobs
     return (
         f"{eq_base},"
         f"{eq_live},"
@@ -238,7 +221,6 @@ def me():
 
 @app.get("/api/masters")
 def list_masters():
-    # Devuelve array tal cual lo espera dashboard.html
     items = []
     for mid, m in masters.items():
         items.append({
@@ -249,7 +231,6 @@ def list_masters():
             "intensity": m.get("intensity", 55),
             "created_at": m.get("created_at"),
         })
-    # más recientes primero
     items.sort(key=lambda x: str(x.get("created_at") or ""), reverse=True)
     return items
 
@@ -264,7 +245,6 @@ def stream_master(master_id: str):
     if not out_path.exists():
         raise HTTPException(status_code=404, detail="Archivo no encontrado.")
 
-    # stream inline
     return FileResponse(
         path=str(out_path),
         media_type="audio/wav",
@@ -295,9 +275,6 @@ def preview_master(
     master_id: str = Query(...),
     seconds: int = Query(30, ge=5, le=60),
 ):
-    """
-    FREE: descarga preview 30s (o el que pases)
-    """
     m = masters.get(master_id)
     if not m:
         raise HTTPException(status_code=404, detail="Master no encontrado.")
@@ -329,7 +306,6 @@ def preview_master(
         path=str(prev_path),
         media_type="audio/wav",
         filename=f"warmaster_preview_{seconds}s.wav",
-        background=BackgroundTask(cleanup_files, prev_path),
     )
 
 
@@ -339,7 +315,7 @@ async def master(
     preset: str = Form("clean"),
     intensity: int = Form(55),
 
-    # knobs (llegan desde tu master.html)
+    # knobs
     k_low: float = Form(0.0),
     k_mid: float = Form(0.0),
     k_pres: float = Form(0.0),
@@ -349,7 +325,7 @@ async def master(
     k_sat: float = Form(0.0),
     k_out: float = Form(0.0),
 
-    # compat (no rompe)
+    # compat
     requested_quality: Optional[str] = Form(None),
     target: Optional[str] = Form(None),
 ):
@@ -358,16 +334,16 @@ async def master(
 
     master_id = uuid.uuid4().hex[:8]
     name = safe_filename(file.filename)
+
     in_path = TMP_DIR / f"in_{master_id}_{name}"
     out_path = TMP_DIR / f"master_{master_id}.wav"
 
-    # Guardamos metadata (para dashboard)
     masters[master_id] = {
         "id": master_id,
         "title": name,
         "preset": preset,
         "intensity": int(clamp_int(intensity, 0, 100, 55)),
-        "quality": (requested_quality or "PLUS").upper(),  # beta
+        "quality": (requested_quality or "PLUS").upper(),
         "created_at": datetime.utcnow().isoformat(),
         "knobs": {
             "low": k_low, "mid": k_mid, "pres": k_pres, "air": k_air,
@@ -385,18 +361,18 @@ async def master(
         except Exception:
             pass
 
-    # VALIDAR TAMAÑO
+    # Validar tamaño
     if in_path.stat().st_size > MAX_FILE_SIZE_BYTES:
         cleanup_files(in_path)
         raise HTTPException(status_code=400, detail="Supera 100MB.")
 
-    # VALIDAR DURACIÓN
+    # Validar duración
     duration = get_audio_duration_seconds(in_path)
     if duration > MAX_DURATION_SECONDS:
         cleanup_files(in_path)
         raise HTTPException(status_code=400, detail="Supera 6 minutos.")
 
-    # Clamp knobs (seguro)
+    # Clamp knobs
     k_low = clamp_float(k_low, -12, 12, 0.0)
     k_mid = clamp_float(k_mid, -12, 12, 0.0)
     k_pres = clamp_float(k_pres, -12, 12, 0.0)
@@ -425,24 +401,18 @@ async def master(
         str(out_path)
     ]
 
-    # Ejecutar ffmpeg
     try:
         run_cmd(cmd)
     except Exception:
-        # si falla, limpiamos input y output (output puede no existir)
         cleanup_files(in_path, out_path)
-        # dejamos metadata igual (para debug), pero si quieres puedes borrar masters[master_id]
         raise
 
-    # Validación salida
     if not out_path.exists() or out_path.stat().st_size < 1024:
         cleanup_files(in_path, out_path)
         raise HTTPException(status_code=500, detail="Master vacío.")
 
-    # Limpia SOLO el input. (No borres el master, porque dashboard/descarga lo necesita)
     cleanup_files(in_path)
 
-    # Respuesta: devolvemos el master + header para que tu front lo capture
     return FileResponse(
         path=str(out_path),
         media_type="audio/wav",
