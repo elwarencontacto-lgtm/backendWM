@@ -18,6 +18,8 @@ MAX_FILE_SIZE_MB = 100
 MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
 MAX_DURATION_SECONDS = 6 * 60  # 6 minutos
 
+FREE_PREVIEW_SECONDS = 30  # ✅ FREE descarga 30s
+
 BASE_DIR = Path(__file__).parent
 TMP_DIR = BASE_DIR / "tmp"
 TMP_DIR.mkdir(exist_ok=True)
@@ -42,7 +44,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 # =========================
 # UTILS
@@ -111,6 +112,13 @@ def clamp_int(x: Any, lo: int, hi: int, default: int) -> int:
         return default
 
 
+def normalize_quality(q: Optional[str]) -> str:
+    q = (q or "FREE").strip().upper()
+    if q not in ("FREE", "PLUS", "PRO"):
+        return "FREE"
+    return q
+
+
 def preset_chain(
     preset: str,
     intensity: Any,
@@ -126,8 +134,9 @@ def preset_chain(
     """
     Devuelve cadena de filtros FFmpeg -af
 
-    FIX 1: 'makeup' acompressor SIEMPRE en rango [1..64]
-    FIX 2: WIDTH sin stereowiden (usamos pan mid/side, compatible)
+    ✅ FIX makeup: siempre en rango [1..64]
+    ✅ FIX width: sin stereowiden (pan compatible)
+    ✅ FIX sat: sin asoftclip (evita incompatibilidades)
     """
 
     intensity_i = clamp_int(intensity, 0, 100, 55)
@@ -135,7 +144,7 @@ def preset_chain(
     thr = -18.0 - (intensity_i * 0.10)
     ratio = 2.0 + (intensity_i * 0.04)
 
-    # ✅ FIX: makeup siempre válido [1..64]
+    # ✅ makeup siempre válido [1..64]
     makeup = 2.0 + (intensity_i * 0.06)
     if makeup != makeup:
         makeup = 2.0
@@ -156,7 +165,7 @@ def preset_chain(
         eq_base = "bass=g=2:f=120,treble=g=1:f=8000"
 
     # ===== KNOBS (aplican al audio final) =====
-    # EQ Live
+    # EQ Live: 4 bandas
     eq_live = (
         f"equalizer=f=120:width_type=h:width=1:g={k_low},"
         f"equalizer=f=630:width_type=h:width=1:g={k_mid},"
@@ -164,35 +173,44 @@ def preset_chain(
         f"equalizer=f=8500:width_type=h:width=1:g={k_air}"
     )
 
-    # Glue (0..100): compresión suave adicional
+    # Glue 0..100 (compresión suave adicional)
     glue_p = max(0.0, min(100.0, k_glue)) / 100.0
     glue_thr = -12.0 - glue_p * 18.0
     glue_ratio = 1.2 + glue_p * 3.8
-    glue_attack = 0.012 - glue_p * 0.007
+    glue_attack = max(0.001, 0.012 - glue_p * 0.007)
     glue_release = 0.20 + glue_p * 0.10
-    glue_comp = f"acompressor=threshold={glue_thr}dB:ratio={glue_ratio}:attack={glue_attack}:release={glue_release}:makeup=1"
+    glue_comp = (
+        f"acompressor=threshold={glue_thr}dB:"
+        f"ratio={glue_ratio}:attack={glue_attack}:release={glue_release}:makeup=1"
+    )
 
-    # ✅ WIDTH (50..150) usando PAN mid/side (compatible)
-    # mid=(L+R)/2, side=(L-R)/2
-    # L = mid + side*k ; R = mid - side*k ; k = width/100
+    # ✅ WIDTH (50..150) PAN compatible
+    # L = a*L + b*R ; R = b*L + a*R
+    # k = width/100
     k = max(50.0, min(150.0, k_width)) / 100.0
     a = (1.0 + k) / 2.0
     b = (1.0 - k) / 2.0
     width_fx = f"pan=stereo|c0={a:.6f}*c0+{b:.6f}*c1|c1={b:.6f}*c0+{a:.6f}*c1"
 
-    # Saturation (0..100): drive + asoftclip (type=tanh)
+    # ✅ SAT (0..100): “densidad” segura sin asoftclip
+    # Drive -> comp suave -> back
     sat_p = max(0.0, min(100.0, k_sat)) / 100.0
-    drive_db = sat_p * 9.0
-    back_db = -sat_p * 6.0
-    sat_fx = f"volume={drive_db}dB,asoftclip=type=tanh,volume={back_db}dB"
+    drive_db = sat_p * 6.0
+    back_db = -sat_p * 4.0
+    sat_comp_thr = -14.0 + sat_p * 6.0
+    sat_comp_ratio = 1.2 + sat_p * 2.8
+    sat_fx = (
+        f"volume={drive_db}dB,"
+        f"acompressor=threshold={sat_comp_thr}dB:ratio={sat_comp_ratio}:attack=2:release=80:makeup=1,"
+        f"volume={back_db}dB"
+    )
 
-    # Output (dB)
+    # Output
     out_fx = f"volume={k_out}dB"
 
     # Limiter final
     limiter = "alimiter=limit=-1.0dB"
 
-    # Comp base + knobs
     return (
         f"{eq_base},"
         f"{eq_live},"
@@ -203,6 +221,50 @@ def preset_chain(
         f"{out_fx},"
         f"{limiter}"
     )
+
+
+def build_preview_wav(master_id: str, seconds: int) -> Path:
+    in_path = TMP_DIR / f"master_{master_id}.wav"
+    if not in_path.exists():
+        raise HTTPException(status_code=404, detail="Archivo no encontrado.")
+
+    seconds = int(max(5, min(60, seconds)))
+    prev_path = TMP_DIR / f"preview_{master_id}_{seconds}.wav"
+
+    cmd = [
+        "ffmpeg", "-y",
+        "-hide_banner",
+        "-i", str(in_path),
+        "-t", str(seconds),
+        "-vn",
+        "-ar", "44100",
+        "-ac", "2",
+        "-sample_fmt", "s16",
+        str(prev_path)
+    ]
+    run_cmd(cmd)
+
+    if not prev_path.exists() or prev_path.stat().st_size < 1024:
+        cleanup_files(prev_path)
+        raise HTTPException(status_code=500, detail="Preview vacío.")
+    return prev_path
+
+
+def resolve_download_path(master_id: str) -> Path:
+    m = masters.get(master_id)
+    if not m:
+        raise HTTPException(status_code=404, detail="Master no encontrado.")
+
+    quality = normalize_quality(m.get("quality"))
+    if quality == "FREE":
+        # ✅ FREE: 30s
+        return build_preview_wav(master_id, FREE_PREVIEW_SECONDS)
+
+    # PLUS/PRO: completo
+    out_path = TMP_DIR / f"master_{master_id}.wav"
+    if not out_path.exists():
+        raise HTTPException(status_code=404, detail="Archivo no encontrado.")
+    return out_path
 
 
 # =========================
@@ -226,7 +288,7 @@ def list_masters():
         items.append({
             "id": mid,
             "title": m.get("title") or f"Master {mid}",
-            "quality": m.get("quality", "PLUS"),
+            "quality": normalize_quality(m.get("quality", "FREE")),
             "preset": m.get("preset", "clean"),
             "intensity": m.get("intensity", 55),
             "created_at": m.get("created_at"),
@@ -235,6 +297,19 @@ def list_masters():
     return items
 
 
+# ✅ Dashboard URL (nuevo)
+@app.get("/api/masters/{master_id}/stream")
+def api_stream_master(master_id: str):
+    return stream_master(master_id)
+
+
+# ✅ Dashboard URL (nuevo) con enforcement FREE 30s
+@app.get("/api/masters/{master_id}/download")
+def api_download_master(master_id: str):
+    return download_master(master_id)
+
+
+# LEGACY (tu master.html actual puede usar estos)
 @app.get("/stream/{master_id}")
 def stream_master(master_id: str):
     m = masters.get(master_id)
@@ -255,18 +330,17 @@ def stream_master(master_id: str):
 
 @app.get("/download/{master_id}")
 def download_master(master_id: str):
-    m = masters.get(master_id)
-    if not m:
-        raise HTTPException(status_code=404, detail="Master no encontrado.")
+    dl_path = resolve_download_path(master_id)
 
-    out_path = TMP_DIR / f"master_{master_id}.wav"
-    if not out_path.exists():
-        raise HTTPException(status_code=404, detail="Archivo no encontrado.")
+    # nombre según plan
+    m = masters.get(master_id) or {}
+    q = normalize_quality(m.get("quality"))
+    fname = "warmaster_master.wav" if q in ("PLUS", "PRO") else f"warmaster_preview_{FREE_PREVIEW_SECONDS}s.wav"
 
     return FileResponse(
-        path=str(out_path),
+        path=str(dl_path),
         media_type="audio/wav",
-        filename="warmaster_master.wav"
+        filename=fname
     )
 
 
@@ -279,28 +353,7 @@ def preview_master(
     if not m:
         raise HTTPException(status_code=404, detail="Master no encontrado.")
 
-    in_path = TMP_DIR / f"master_{master_id}.wav"
-    if not in_path.exists():
-        raise HTTPException(status_code=404, detail="Archivo no encontrado.")
-
-    prev_path = TMP_DIR / f"preview_{master_id}_{seconds}.wav"
-
-    cmd = [
-        "ffmpeg", "-y",
-        "-hide_banner",
-        "-i", str(in_path),
-        "-t", str(seconds),
-        "-vn",
-        "-ar", "44100",
-        "-ac", "2",
-        "-sample_fmt", "s16",
-        str(prev_path)
-    ]
-    run_cmd(cmd)
-
-    if not prev_path.exists() or prev_path.stat().st_size < 1024:
-        cleanup_files(prev_path)
-        raise HTTPException(status_code=500, detail="Preview vacío.")
+    prev_path = build_preview_wav(master_id, seconds)
 
     return FileResponse(
         path=str(prev_path),
@@ -338,12 +391,14 @@ async def master(
     in_path = TMP_DIR / f"in_{master_id}_{name}"
     out_path = TMP_DIR / f"master_{master_id}.wav"
 
+    rq = normalize_quality(requested_quality)
+
     masters[master_id] = {
         "id": master_id,
         "title": name,
         "preset": preset,
         "intensity": int(clamp_int(intensity, 0, 100, 55)),
-        "quality": (requested_quality or "PLUS").upper(),
+        "quality": rq,
         "created_at": datetime.utcnow().isoformat(),
         "knobs": {
             "low": k_low, "mid": k_mid, "pres": k_pres, "air": k_air,
