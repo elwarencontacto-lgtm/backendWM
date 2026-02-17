@@ -72,7 +72,6 @@
       white-space:nowrap;
     }
 
-    /* Plan pill */
     .planPill{
       border-color: rgba(255,255,255,.18);
       background: rgba(255,255,255,.03);
@@ -82,7 +81,6 @@
     .planPill.pro{  color: var(--pro);  border-color: rgba(78,168,255,.35); background: rgba(78,168,255,.08); }
     .planPill.free{ color: var(--free); border-color: rgba(255,255,255,.20); background: rgba(255,255,255,.03); }
 
-    /* Card + optional plan glow */
     .card{
       background: rgba(18,20,27,.92);
       border:1px solid var(--line);
@@ -121,7 +119,6 @@
     .btn:active{transform: translateY(1px)}
     .btn:disabled{opacity:.5; cursor:not-allowed}
 
-    /* Plan buttons accents */
     .btnPlus{
       border-color: rgba(245,197,66,.45);
       background: rgba(245,197,66,.10);
@@ -171,7 +168,6 @@
       background: rgba(109,94,252,.10);
     }
 
-    /* Lock badge (no emojis) */
     .lock{
       position:absolute; top:10px; right:10px;
       font-size:12px;
@@ -309,7 +305,7 @@
       .pVol{display:none;}
     }
 
-    .player audio{display:none;} /* ocultamos control nativo */
+    .player audio{display:none;}
 
     /* Modal */
     .modalBack{
@@ -330,13 +326,14 @@
     .modal .body{padding:16px 18px}
     .priceBtn{ width:100%; justify-content:center; }
 
-    /* ===== EQ LIVE (Plugin panel) ===== */
+    /* ===== EQ LIVE (visible al entrar, apagado por defecto) ===== */
     .eqPanel{
       margin-top:12px;
       border:1px solid rgba(255,255,255,.10);
       background: rgba(18,20,27,.65);
       border-radius:18px;
       overflow:hidden;
+      position:relative;
     }
     .eqTop{
       padding:14px 14px 10px;
@@ -345,6 +342,12 @@
         radial-gradient(900px 260px at 10% 0%, rgba(109,94,252,.18), transparent 55%),
         radial-gradient(900px 260px at 90% 0%, rgba(45,212,191,.12), transparent 55%),
         rgba(255,255,255,.02);
+    }
+    .eqTitleRow{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
     }
     .eqTitle{font-weight:900; letter-spacing:.3px}
     .eqSub{color: rgba(255,255,255,.60); font-size:12px; margin-top:2px}
@@ -358,7 +361,18 @@
       background: rgba(0,0,0,.18);
     }
 
-    /* 8 knobs */
+    .eqStatusPill{
+      font-size:12px;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.03);
+      color: rgba(255,255,255,.75);
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    /* Knobs grid */
     .eqBottom{
       padding:14px;
       display:grid;
@@ -379,6 +393,7 @@
       border-radius:16px;
       padding:12px;
       text-align:center;
+      position:relative;
     }
     .kLabel{margin-top:10px; font-weight:900; font-size:12px; letter-spacing:.2px}
     .kVal{margin-top:4px; color: rgba(255,255,255,.65); font-size:12px}
@@ -409,45 +424,43 @@
       box-shadow: 0 0 10px rgba(109,94,252,.25);
     }
 
-    /* ===== EQ visible, pero desactivado hasta "Procesar" ===== */
-    .eqPanel.eqDisabled{ opacity:.90; }
-    .eqPanel.eqDisabled .eqBottom{
-      filter: grayscale(.25);
-      pointer-events:none;
+    /* ✅ EQ apagado (locked) */
+    .eqLocked{
+      opacity:.88;
+    }
+    .eqLocked .knobCol{
       opacity:.55;
     }
-    .eqPanel.eqDisabled #eqViz{ opacity:.55; }
+    .eqLocked .knob{
+      filter: grayscale(.15);
+    }
+    .eqLocked .knob,
+    .eqLocked .knobCol{
+      pointer-events:none;
+    }
 
-    .eqGateNote{
-      margin-top:10px;
+    /* Overlay sutil */
+    .eqOverlay{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:flex-end;
+      justify-content:flex-end;
+      padding:12px;
+      pointer-events:none;
+    }
+    .eqOverlay .hint{
       font-size:12px;
-      color: rgba(255,255,255,.65);
-      line-height:1.5;
-    }
-    .eqGateBadge{
-      display:inline-block;
-      padding:4px 8px;
+      color: rgba(255,255,255,.78);
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.22);
       border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.03);
-      font-weight:900;
-      margin-right:8px;
-      white-space:nowrap;
-    }
-    .eqGateBadge.on{
-      border-color: rgba(45,212,191,.25);
-      background: rgba(45,212,191,.08);
-      color: rgba(45,212,191,.95);
-    }
-    .eqGateBadge.off{
-      border-color: rgba(255,255,255,.14);
-      background: rgba(255,255,255,.03);
-      color: rgba(255,255,255,.80);
+      padding:6px 10px;
+      backdrop-filter: blur(6px);
     }
   </style>
 </head>
-
-<body>
+  <body>
   <div class="wrap">
     <div class="top">
       <div class="brand"><span class="dot"></span> WarMaster</div>
@@ -549,16 +562,17 @@
               <audio id="audioMaster"></audio>
             </div>
 
-            <!-- ===== PLUGIN PANEL (visible desde inicio, preview OFF hasta Procesar) ===== -->
-            <div class="eqPanel eqDisabled" id="eqPanel">
+            <!-- ===== EQ LIVE (visible siempre, bloqueado hasta Procesar) ===== -->
+            <div class="eqPanel eqLocked" id="eqPanel">
               <div class="eqTop">
-                <div class="eqTitle">EQ Live</div>
-                <div class="eqSub">Vista pro (se activa al procesar)</div>
-                <canvas id="eqViz" width="900" height="220"></canvas>
-                <div class="eqGateNote" id="eqGateNote">
-                  <span class="eqGateBadge off" id="eqGateBadge">PREVIEW OFF</span>
-                  Activa el preview al presionar “Procesar”.
+                <div class="eqTitleRow">
+                  <div>
+                    <div class="eqTitle">EQ Live</div>
+                    <div class="eqSub" id="eqSub">Vista previa en tiempo real · Se activa al procesar</div>
+                  </div>
+                  <div class="eqStatusPill" id="eqStatus">OFF</div>
                 </div>
+                <canvas id="eqViz" width="900" height="220"></canvas>
               </div>
 
               <div class="eqBottom">
@@ -610,8 +624,12 @@
                   <div class="kVal" id="vOut">0.0 dB</div>
                 </div>
               </div>
+
+              <div class="eqOverlay" id="eqOverlay">
+                <div class="hint" id="eqHint">Se activa al presionar “Procesar”</div>
+              </div>
             </div>
-            <!-- ===== /PLUGIN PANEL ===== -->
+            <!-- ===== /EQ LIVE ===== -->
 
             <div class="note" id="unlockHint"></div>
 
@@ -660,8 +678,7 @@
       </div>
     </div>
   </div>
-
-  <script> 
+    <script>
     // ========= API BASE =========
     function getApiBase() {
       const qs = new URLSearchParams(location.search);
@@ -689,7 +706,7 @@
       finally { clearTimeout(id); }
     }
 
-    // ========= PLAN STATE (dynamic) =========
+    // ========= PLAN STATE =========
     let currentPlan = "FREE"; // FREE / PLUS / PRO
     function applyPlanUI(){
       const pill = document.getElementById("planPill");
@@ -720,7 +737,6 @@
           `<span class="badge free">■ FREE</span> Escucha completo. Descarga: 30s.`;
       }
 
-      // texto botón principal según plan (FREE preview / PLUS-PRO full)
       const btnPrev = document.getElementById("btnDownloadPreview");
       if (btnPrev){
         btnPrev.textContent = (currentPlan === "FREE") ? "Descargar 30s" : "Descargar completo";
@@ -836,9 +852,6 @@
       document.querySelectorAll(".pTime[data-k='dur']").forEach(el => el.textContent="0:00");
       document.querySelectorAll(".pSeek").forEach(el => el.value="0");
       document.querySelectorAll(".pBtn[data-act='play']").forEach(el => el.textContent="▶");
-
-      // EQ vuelve a OFF visual
-      if (typeof window.WM_setEqEnabled === "function") window.WM_setEqEnabled(false);
     }
 
     document.getElementById("btnReset").onclick = () => {
@@ -961,21 +974,20 @@
       a.remove();
     }
 
-    // FREE: preview 30s | PLUS/PRO: completo (o si unlock)
     document.getElementById("btnDownloadPreview").onclick = async () => {
       if(!lastMasterId){
         alert("Primero procesa un master.");
         return;
       }
 
-      // PLUS/PRO o unlock => descarga completa
+      // PLUS/PRO (o unlock): descarga completa
       if (currentPlan === "PLUS" || currentPlan === "PRO" || paidQuality === "PLUS" || paidQuality === "PRO") {
         const url = (API_BASE||"") + `/download/${encodeURIComponent(lastMasterId)}`;
         window.open(url, "_blank");
         return;
       }
 
-      // FREE => preview 30s
+      // FREE: preview 30s
       try{
         setStatus("Generando preview...", 70);
         const seconds = 30;
@@ -991,7 +1003,7 @@
         downloadBlobUrl(previewUrl, "warmaster_preview_30s.wav");
         setStatus("Listo.", 100);
       }catch(e){
-        alert("Preview requiere /api/master/preview con seconds (lo ajustamos en backend).");
+        alert("Preview requiere /api/master/preview con seconds (backend).");
         setStatus("Listo.", 100);
       }
     };
@@ -1038,7 +1050,7 @@
       let dragging = false;
 
       function syncBtn(){
-        btn.textContent = audio.paused ? "▶" : "❚❚";
+        btn.textContent = audio.paused ? "▶" : "II";
       }
 
       audio.addEventListener("loadedmetadata", () => {
@@ -1078,318 +1090,76 @@
     bindPlayer("playerOriginal", "audioOriginal");
     bindPlayer("playerMaster", "audioMaster");
 
-    // ========= PROCESS =========
-    document.getElementById("btnMaster").onclick = async () => {
-      const file = fileInput.files?.[0];
-      if(!file){ alert("Selecciona un archivo."); return; }
-
-      // Al presionar "Procesar", pedimos activar EQ preview cuando esté listo el master
-      window.WM_eqEnableRequested = true;
-
-      resetResult();
-      setStatus("Subiendo...", 10);
-
-      revoke(originalUrl);
-      originalUrl = URL.createObjectURL(file);
-      const ao = document.getElementById("audioOriginal");
-      ao.src = originalUrl; ao.load();
-
-      const form = new FormData();
-      form.append("file", file);
-      form.append("preset", selectedTarget);
-      form.append("intensity", String(selectedIntensity));
-
-      // ===== enviar knobs al backend =====
-      const K = window.WM_KNOBS || { low:0, mid:0, pres:0, air:0, glue:0, width:100, sat:0, out:0 };
-      form.append("k_low",   String(K.low));
-      form.append("k_mid",   String(K.mid));
-      form.append("k_pres",  String(K.pres));
-      form.append("k_air",   String(K.air));
-      form.append("k_glue",  String(K.glue));
-      form.append("k_width", String(K.width));
-      form.append("k_sat",   String(K.sat));
-      form.append("k_out",   String(K.out));
-
-      // compat
-      form.append("requested_quality", currentPlan);
-      form.append("target", selectedTarget);
-
-      try{
-        setStatus("Procesando...", 40);
-
-        const res = await fetchWithTimeout((API_BASE||"") + "/api/master", {
-          method:"POST",
-          body: form
-        }, 180000);
-
-        if(!res.ok){
-          const txt = await res.text().catch(()=>"(sin detalle)");
-          throw new Error(txt);
-        }
-
-        const hdrId = res.headers.get("X-Master-Id") || res.headers.get("x-master-id");
-        if(hdrId) lastMasterId = hdrId;
-
-        const blob = await res.blob();
-        setStatus("Finalizando...", 85);
-
-        revoke(masterUrl);
-        masterUrl = URL.createObjectURL(blob);
-        const am = document.getElementById("audioMaster");
-        am.src = masterUrl; am.load();
-
-        document.getElementById("resultEmpty").style.display = "none";
-        document.getElementById("resultBox").style.display = "";
-        document.getElementById("resultPill").textContent = "Master listo";
-
-        document.getElementById("backendNote").textContent = lastMasterId
-          ? ("master_id: " + lastMasterId)
-          : "Falta header X-Master-Id en /api/master (lo añadimos en backend).";
-
-        // Si plan PLUS/PRO => descarga completa
-        if(currentPlan === "PLUS" || currentPlan === "PRO"){
-          paidQuality = currentPlan;
-        } else {
-          paidQuality = null;
-        }
-        afterUnlockUI();
-
-        // Activar EQ Live automáticamente ahora que existe master para previsualizar
-        if (window.WM_eqEnableRequested && typeof window.WM_enableEqGraph === "function"){
-          window.WM_enableEqGraph();
-          window.WM_eqEnableRequested = false;
-        }
-
-        setStatus("Listo.", 100);
-      }catch(err){
-        console.error(err);
-        setStatus("Error", 0);
-        alert("Error al masterizar. " + (err?.message || ""));
-      }
-    };
-
-    // ========= Init =========
-    window.addEventListener("beforeunload", () => {
-      revoke(originalUrl); revoke(masterUrl); revoke(previewUrl);
-    });
-
-    renderOptions();
-    loadPlan();
-    // ========= EQ LIVE (WebAudio real-time preview, activación al "Procesar") =========
-    (() => {
-      const masterAudio = document.getElementById("audioMaster");
+    // ========= EQ LIVE: visible OFF al entrar, se activa en "Procesar" =========
+    (function initEQLive(){
       const eqPanel = document.getElementById("eqPanel");
-      if (!masterAudio || !eqPanel) return;
+      const eqStatus = document.getElementById("eqStatus");
+      const eqSub = document.getElementById("eqSub");
+      const eqHint = document.getElementById("eqHint");
+      const eqOverlay = document.getElementById("eqOverlay");
 
-      const gateNote = document.getElementById("eqGateNote");
+      const canvas = document.getElementById("eqViz");
+      const g = canvas ? canvas.getContext("2d") : null;
 
       const state = { low:0, mid:0, pres:0, air:0, glue:0, width:100, sat:0, out:0 };
       window.WM_KNOBS = state;
 
-      let eqEnabled = false;
+      let enabled = false;
 
-      function setEqEnabled(on){
-        eqEnabled = !!on;
-        if(eqEnabled){
-          eqPanel.classList.remove("eqDisabled");
-          if(gateNote){
-            gateNote.innerHTML = `<span class="eqGateBadge on">PREVIEW ON</span> Ajuste en tiempo real habilitado.`;
-          }
-        }else{
-          eqPanel.classList.add("eqDisabled");
-          if(gateNote){
-            gateNote.innerHTML = `<span class="eqGateBadge off">PREVIEW OFF</span> Activa el preview al presionar “Procesar”.`;
-          }
-        }
-      }
-
-      // Exponer para usarlo desde el flujo de "Procesar" y Reset
-      window.WM_setEqEnabled = setEqEnabled;
-
-      let ctx=null, src=null, analyser=null, rafId=0;
-
-      let lowShelf=null, midPeak=null, presPeak=null, highShelf=null;
-      let glueComp=null;
-
-      let satShaper=null, satDry=null, satWet=null, satMix=null;
-
-      let widthSplitter=null, widthMerger=null;
-      let midSum=null, sideSum=null, sideScale=null;
-      let leftOut=null, rightOut=null;
-
-      let outGain=null, limiter=null;
-
-      const canvas = document.getElementById("eqViz");
-      const g = canvas ? canvas.getContext("2d") : null;
-      const buf = new Uint8Array(1024);
-
-      function dbToGain(db){ return Math.pow(10, db/20); }
       function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
 
-      function makeWaveshaperCurve(drive){
-        const n = 2048;
-        const curve = new Float32Array(n);
-        const k = 1 + drive * 40;
-        for(let i=0;i<n;i++){
-          const x = (i * 2 / (n-1)) - 1;
-          curve[i] = Math.tanh(k * x) / Math.tanh(k);
+      // Dibujo “pro” aunque esté apagado (grid + curva)
+      function drawStatic(){
+        if(!g) return;
+        const w = canvas.width, h = canvas.height;
+        g.clearRect(0,0,w,h);
+
+        g.fillStyle = "rgba(0,0,0,.18)";
+        g.fillRect(0,0,w,h);
+
+        g.strokeStyle = "rgba(255,255,255,.06)";
+        g.lineWidth = 1;
+        for(let x=0; x<=10; x++){
+          const px = Math.round((x/10)*w);
+          g.beginPath(); g.moveTo(px,0); g.lineTo(px,h); g.stroke();
         }
-        return curve;
+        for(let y=0; y<=6; y++){
+          const py = Math.round((y/6)*h);
+          g.beginPath(); g.moveTo(0,py); g.lineTo(w,py); g.stroke();
+        }
+        g.strokeStyle = "rgba(255,255,255,.10)";
+        g.beginPath(); g.moveTo(0, h*0.5); g.lineTo(w, h*0.5); g.stroke();
+
+        // Curva (solo estética si OFF)
+        function yFromDb(db){
+          const maxDb = 12;
+          const p = db / maxDb;
+          return h*0.5 - p*(h*0.22);
+        }
+        const pts = [
+          {x: w*0.12, y: yFromDb(state.low)},
+          {x: w*0.35, y: yFromDb(state.mid)},
+          {x: w*0.55, y: yFromDb(state.pres)},
+          {x: w*0.78, y: yFromDb(state.air)}
+        ];
+
+        g.strokeStyle = "rgba(255,255,255,.85)";
+        g.lineWidth = 2.2;
+        g.beginPath();
+        g.moveTo(0, h*0.5);
+        pts.forEach((p)=> g.lineTo(p.x, p.y));
+        g.lineTo(w, h*0.5);
+        g.stroke();
+
+        g.fillStyle = "rgba(255,255,255,.95)";
+        pts.forEach(p=>{
+          g.beginPath();
+          g.arc(p.x, p.y, 4.6, 0, Math.PI*2);
+          g.fill();
+        });
       }
 
-      function ensureAudioGraph(){
-        if(!eqEnabled) return;   // << clave: NO crear graph hasta que eqEnabled sea true
-        if (ctx) return;
-
-        ctx = new (window.AudioContext || window.webkitAudioContext)();
-        if (ctx.state === "suspended") ctx.resume().catch(()=>{});
-
-        src = ctx.createMediaElementSource(masterAudio);
-
-        lowShelf = ctx.createBiquadFilter();
-        lowShelf.type = "lowshelf";
-        lowShelf.frequency.value = 120;
-
-        midPeak = ctx.createBiquadFilter();
-        midPeak.type = "peaking";
-        midPeak.frequency.value = 630;
-        midPeak.Q.value = 1.0;
-
-        presPeak = ctx.createBiquadFilter();
-        presPeak.type = "peaking";
-        presPeak.frequency.value = 1760;
-        presPeak.Q.value = 1.0;
-
-        highShelf = ctx.createBiquadFilter();
-        highShelf.type = "highshelf";
-        highShelf.frequency.value = 8500;
-
-        glueComp = ctx.createDynamicsCompressor();
-        glueComp.knee.value = 18;
-        glueComp.attack.value = 0.01;
-        glueComp.release.value = 0.18;
-
-        satDry = ctx.createGain();
-        satWet = ctx.createGain();
-        satMix = ctx.createGain();
-
-        satShaper = ctx.createWaveShaper();
-        satShaper.oversample = "4x";
-
-        widthSplitter = ctx.createChannelSplitter(2);
-        widthMerger = ctx.createChannelMerger(2);
-
-        const lToMid = ctx.createGain(); lToMid.gain.value = 0.5;
-        const rToMid = ctx.createGain(); rToMid.gain.value = 0.5;
-
-        const lToSide = ctx.createGain(); lToSide.gain.value = 0.5;
-        const rToSide = ctx.createGain(); rToSide.gain.value = -0.5;
-
-        midSum = ctx.createGain();
-        sideSum = ctx.createGain();
-
-        sideScale = ctx.createGain();
-
-        leftOut = ctx.createGain();
-        rightOut = ctx.createGain();
-
-        const invSide = ctx.createGain(); invSide.gain.value = -1;
-
-        outGain = ctx.createGain();
-        limiter = ctx.createDynamicsCompressor();
-        limiter.threshold.value = -1.0;
-        limiter.knee.value = 0.0;
-        limiter.ratio.value = 20.0;
-        limiter.attack.value = 0.003;
-        limiter.release.value = 0.09;
-
-        analyser = ctx.createAnalyser();
-        analyser.fftSize = 2048;
-        analyser.smoothingTimeConstant = 0.85;
-
-        src
-          .connect(lowShelf)
-          .connect(midPeak)
-          .connect(presPeak)
-          .connect(highShelf)
-          .connect(glueComp);
-
-        glueComp.connect(satDry);
-        glueComp.connect(satShaper);
-        satShaper.connect(satWet);
-
-        satDry.connect(satMix);
-        satWet.connect(satMix);
-
-        satMix.connect(widthSplitter);
-
-        const lToMid2 = lToMid, rToMid2 = rToMid;
-        const lToSide2 = lToSide, rToSide2 = rToSide;
-
-        widthSplitter.connect(lToMid2, 0);
-        widthSplitter.connect(rToMid2, 1);
-        lToMid2.connect(midSum);
-        rToMid2.connect(midSum);
-
-        widthSplitter.connect(lToSide2, 0);
-        widthSplitter.connect(rToSide2, 1);
-        lToSide2.connect(sideSum);
-        rToSide2.connect(sideSum);
-
-        sideSum.connect(sideScale);
-
-        midSum.connect(leftOut);
-        sideScale.connect(leftOut);
-
-        midSum.connect(rightOut);
-        sideScale.connect(invSide);
-        invSide.connect(rightOut);
-
-        leftOut.connect(widthMerger, 0, 0);
-        rightOut.connect(widthMerger, 0, 1);
-
-        widthMerger
-          .connect(outGain)
-          .connect(limiter)
-          .connect(analyser)
-          .connect(ctx.destination);
-
-        applyParams(true);
-        startViz();
-      }
-
-      function applyParams(instant=false){
-        if (!ctx) return;
-        const t = ctx.currentTime;
-        const k = instant ? 0.001 : 0.06;
-
-        lowShelf.gain.setTargetAtTime(state.low, t, k);
-        midPeak.gain.setTargetAtTime(state.mid, t, k);
-        presPeak.gain.setTargetAtTime(state.pres, t, k);
-        highShelf.gain.setTargetAtTime(state.air, t, k);
-
-        const gP = clamp(state.glue / 100, 0, 1);
-        const thr = -10 - gP * 18;
-        const rat = 1.5 + gP * 4.5;
-        const atk = 0.012 - gP * 0.007;
-        const rel = 0.20 + gP * 0.10;
-
-        glueComp.threshold.setTargetAtTime(thr, t, k);
-        glueComp.ratio.setTargetAtTime(rat, t, k);
-        glueComp.attack.setTargetAtTime(atk, t, k);
-        glueComp.release.setTargetAtTime(rel, t, k);
-
-        const sP = clamp(state.sat / 100, 0, 1);
-        satShaper.curve = makeWaveshaperCurve(sP);
-        satDry.gain.setTargetAtTime(1 - (sP * 0.55), t, k);
-        satWet.gain.setTargetAtTime(sP * 0.85, t, k);
-
-        const wP = clamp(state.width, 50, 150);
-        sideScale.gain.setTargetAtTime(wP / 100, t, k);
-
-        outGain.gain.setTargetAtTime(dbToGain(state.out), t, k);
-      }
-
+      // UI knobs
       const knobEls = [...document.querySelectorAll(".knob")];
       const valEls = {
         low: document.getElementById("vLow"),
@@ -1431,7 +1201,6 @@
 
         const r = ranges[key];
         if (!valEls[key]) return;
-
         if (r.fmt === "db"){
           valEls[key].textContent = (state[key] >= 0 ? "+" : "") + state[key].toFixed(1) + " dB";
         } else {
@@ -1447,14 +1216,13 @@
           let active = false;
 
           const onDown = (e) => {
+            if(!enabled) return;
             active = true;
-            // si está enabled, movida crea el graph; si no, no hace nada
-            ensureAudioGraph();
             try { el.setPointerCapture(e.pointerId); } catch {}
           };
 
           const onMove = (e) => {
-            if (!active) return;
+            if (!active || !enabled) return;
 
             const rect = el.getBoundingClientRect();
             const cx = rect.left + rect.width/2;
@@ -1476,9 +1244,8 @@
 
             state[key] = v;
             window.WM_KNOBS = state;
-
             setKnobUI(key);
-            applyParams(false);
+            drawStatic(); // mantiene pro la vista
           };
 
           const onUp = () => { active = false; };
@@ -1490,125 +1257,122 @@
         });
       }
 
-      function drawGrid(){
-        if (!g) return;
-        const w = canvas.width, h = canvas.height;
-        g.clearRect(0,0,w,h);
+      // Exponer un enable para que "Procesar" lo active
+      window.WM_EQ_ENABLE = () => {
+        if(enabled) return;
+        enabled = true;
 
-        g.fillStyle = "rgba(0,0,0,.18)";
-        g.fillRect(0,0,w,h);
+        eqPanel.classList.remove("eqLocked");
+        eqStatus.textContent = "ON";
+        eqSub.textContent = "Vista previa en tiempo real · Activo";
+        if(eqOverlay) eqOverlay.style.display = "none";
+        if(eqHint) eqHint.textContent = "";
 
-        g.strokeStyle = "rgba(255,255,255,.06)";
-        g.lineWidth = 1;
-        for(let x=0; x<=10; x++){
-          const px = Math.round((x/10)*w);
-          g.beginPath(); g.moveTo(px,0); g.lineTo(px,h); g.stroke();
-        }
-        for(let y=0; y<=6; y++){
-          const py = Math.round((y/6)*h);
-          g.beginPath(); g.moveTo(0,py); g.lineTo(w,py); g.stroke();
-        }
-
-        g.strokeStyle = "rgba(255,255,255,.10)";
-        g.beginPath(); g.moveTo(0, h*0.5); g.lineTo(w, h*0.5); g.stroke();
-      }
-
-      function drawSpectrum(){
-        if (!analyser || !g) return;
-        analyser.getByteFrequencyData(buf);
-        const w = canvas.width, h = canvas.height;
-
-        g.beginPath();
-        for(let i=0; i<buf.length; i++){
-          const x = (i/(buf.length-1))*w;
-          const v = buf[i]/255;
-          const y = h - (v*v)*h*0.92;
-          if(i===0) g.moveTo(x,y); else g.lineTo(x,y);
-        }
-        g.lineTo(w,h); g.lineTo(0,h); g.closePath();
-
-        const grad = g.createLinearGradient(0,0,0,h);
-        grad.addColorStop(0, "rgba(109,94,252,.18)");
-        grad.addColorStop(1, "rgba(45,212,191,.10)");
-        g.fillStyle = grad;
-        g.fill();
-
-        g.strokeStyle = "rgba(255,255,255,.16)";
-        g.lineWidth = 1.5;
-        g.stroke();
-      }
-
-      function drawEQCurve(){
-        if (!g) return;
-        const w = canvas.width, h = canvas.height;
-
-        function yFromDb(db){
-          const maxDb = 12;
-          const p = db / maxDb;
-          return h*0.5 - p*(h*0.22);
-        }
-
-        const pts = [
-          {x: w*0.12, y: yFromDb(state.low)},
-          {x: w*0.35, y: yFromDb(state.mid)},
-          {x: w*0.55, y: yFromDb(state.pres)},
-          {x: w*0.78, y: yFromDb(state.air)}
-        ];
-
-        g.strokeStyle = "rgba(255,255,255,.90)";
-        g.lineWidth = 2.2;
-        g.beginPath();
-        g.moveTo(0, h*0.5);
-
-        for(let i=0; i<pts.length; i++){
-          const p = pts[i];
-          const prev = pts[i-1] || {x:0, y:h*0.5};
-          const next = pts[i+1] || {x:w, y:h*0.5};
-
-          const cp1x = prev.x + (p.x - prev.x)*0.55;
-          const cp1y = prev.y + (p.y - prev.y)*0.55;
-          const cp2x = p.x - (next.x - prev.x)*0.10;
-          const cp2y = p.y;
-
-          g.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p.x, p.y);
-        }
-
-        g.lineTo(w, h*0.5);
-        g.stroke();
-
-        g.fillStyle = "rgba(255,255,255,.95)";
-        pts.forEach(p=>{
-          g.beginPath();
-          g.arc(p.x, p.y, 4.6, 0, Math.PI*2);
-          g.fill();
-        });
-      }
-
-      function startViz(){
-        if (!g || !analyser) return;
-        cancelAnimationFrame(rafId);
-        const tick = () => {
-          drawGrid();
-          drawSpectrum();
-          drawEQCurve();
-          rafId = requestAnimationFrame(tick);
-        };
-        tick();
-      }
-
-      // Activación pública: se llama automáticamente cuando termina "Procesar"
-      window.WM_enableEqGraph = () => {
-        setEqEnabled(true);
-        ensureAudioGraph();
-        if (ctx && ctx.state === "suspended") ctx.resume().catch(()=>{});
+        // Nota: el audio graph real se construye con gesto del usuario.
+        // Aquí solo “habilitamos” UI. El graph se arma cuando el usuario le da play al master (en tu bloque WebAudio si lo agregas luego).
       };
 
-      // Estado inicial: visible pero OFF
-      setEqEnabled(false);
+      drawStatic();
       initKnobs();
-      drawGrid();
-      drawEQCurve();
     })();
+
+    // ========= PROCESS =========
+    const fileInput2 = document.getElementById("file");
+
+    let lastMasterId = null; // redefinición segura para evitar undefined en algunos navegadores
+    let paidQualityLocal = null;
+
+    document.getElementById("btnMaster").onclick = async () => {
+      const file = fileInput2.files?.[0];
+      if(!file){ alert("Selecciona un archivo."); return; }
+
+      // ✅ Activar EQ Live al presionar Procesar
+      if(window.WM_EQ_ENABLE) window.WM_EQ_ENABLE();
+
+      resetResult();
+      setStatus("Subiendo...", 10);
+
+      revoke(originalUrl);
+      originalUrl = URL.createObjectURL(file);
+      const ao = document.getElementById("audioOriginal");
+      ao.src = originalUrl; ao.load();
+
+      const form = new FormData();
+      form.append("file", file);
+      form.append("preset", selectedTarget);
+      form.append("intensity", String(selectedIntensity));
+
+      // enviar knobs al backend (para que el archivo final sea igual a lo escuchado)
+      const K = window.WM_KNOBS || { low:0, mid:0, pres:0, air:0, glue:0, width:100, sat:0, out:0 };
+      form.append("k_low",   String(K.low));
+      form.append("k_mid",   String(K.mid));
+      form.append("k_pres",  String(K.pres));
+      form.append("k_air",   String(K.air));
+      form.append("k_glue",  String(K.glue));
+      form.append("k_width", String(K.width));
+      form.append("k_sat",   String(K.sat));
+      form.append("k_out",   String(K.out));
+
+      form.append("requested_quality", currentPlan);
+      form.append("target", selectedTarget);
+
+      try{
+        setStatus("Procesando...", 40);
+
+        const res = await fetchWithTimeout((API_BASE||"") + "/api/master", {
+          method:"POST",
+          body: form
+        }, 180000);
+
+        if(!res.ok){
+          const txt = await res.text().catch(()=>"(sin detalle)");
+          throw new Error(txt);
+        }
+
+        const hdrId = res.headers.get("X-Master-Id") || res.headers.get("x-master-id");
+        if(hdrId) lastMasterId = hdrId;
+
+        const blob = await res.blob();
+        setStatus("Finalizando...", 85);
+
+        revoke(masterUrl);
+        masterUrl = URL.createObjectURL(blob);
+        const am = document.getElementById("audioMaster");
+        am.src = masterUrl; am.load();
+
+        document.getElementById("resultEmpty").style.display = "none";
+        document.getElementById("resultBox").style.display = "";
+        document.getElementById("resultPill").textContent = "Master listo";
+
+        document.getElementById("backendNote").textContent = lastMasterId
+          ? ("master_id: " + lastMasterId)
+          : "Falta header X-Master-Id en /api/master (backend).";
+
+        // si plan PLUS/PRO => full
+        if(currentPlan === "PLUS" || currentPlan === "PRO"){
+          paidQuality = currentPlan;
+          paidQualityLocal = currentPlan;
+        } else {
+          paidQuality = null;
+          paidQualityLocal = null;
+        }
+        afterUnlockUI();
+
+        setStatus("Listo.", 100);
+      }catch(err){
+        console.error(err);
+        setStatus("Error", 0);
+        alert("Error al masterizar. " + (err?.message || ""));
+      }
+    };
+
+    // ========= Init =========
+    window.addEventListener("beforeunload", () => {
+      revoke(originalUrl); revoke(masterUrl); revoke(previewUrl);
+    });
+
+    renderOptions();
+    loadPlan();
   </script>
 </body>
 </html>
