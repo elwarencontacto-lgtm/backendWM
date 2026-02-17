@@ -191,6 +191,7 @@ body{
   background: rgba(255,255,255,.03);
   white-space:nowrap;
 }
+.badge.free{ color: var(--free); border-color: rgba(255,255,255,.20); }
 .badge.plus{ color: var(--plus); border-color: rgba(245,197,66,.35); background: rgba(245,197,66,.08); }
 .badge.pro{  color: var(--pro);  border-color: rgba(78,168,255,.35); background: rgba(78,168,255,.08); }
 
@@ -201,7 +202,7 @@ body{
   box-shadow: 0 10px 30px rgba(0,0,0,.30), 0 0 0 1px rgba(78,168,255,.10), 0 0 22px rgba(78,168,255,.06);
 }
 
-/* Mini waveform corporativo (NO por plan todavía) */
+/* Mini viz */
 .wave{
   height:30px;
   display:flex;
@@ -348,10 +349,10 @@ body{
     <div class="body">
 
       <div class="stats">
-        <div class="stat"><div class="k">Masters desbloqueados</div><div class="v" id="stTotal">0</div></div>
+        <div class="stat"><div class="k">Masters disponibles</div><div class="v" id="stTotal">0</div></div>
+        <div class="stat"><div class="k">FREE</div><div class="v" id="stFree">0</div></div>
         <div class="stat"><div class="k">PLUS</div><div class="v" id="stPlus">0</div></div>
         <div class="stat"><div class="k">PRO</div><div class="v" id="stPro">0</div></div>
-        <div class="stat"><div class="k">Último</div><div class="v" id="stLast">—</div></div>
       </div>
 
       <div class="space"></div>
@@ -360,6 +361,7 @@ body{
         <input class="input" id="q" placeholder="Buscar por nombre o ID" autocomplete="off"/>
         <select class="select" id="filterQ">
           <option value="ALL">Todos</option>
+          <option value="FREE">FREE</option>
           <option value="PLUS">PLUS</option>
           <option value="PRO">PRO</option>
         </select>
@@ -375,11 +377,11 @@ body{
 
       <div id="list" class="grid"></div>
       <div id="empty" class="empty" style="display:none">
-        Aún no tienes masters desbloqueados. Ve a “Nuevo Master” y usa “Desbloquear”.
+        Aún no tienes masters disponibles. Ve a “Nuevo Master” y procesa una canción.
       </div>
 
       <div class="smallNote">
-        Puedes re-descargar el mismo master cuando quieras. Si subes nuevamente el audio y haces un master nuevo, se considera un nuevo producto.
+        Puedes re-descargar el mismo master cuando quieras mientras esté disponible en el servidor. Si subes nuevamente el audio y haces un master nuevo, se considera un nuevo producto.
       </div>
 
     </div>
@@ -422,7 +424,7 @@ body{
       .replaceAll("'","&#039;");
   }
 
-  // PLAN
+  // PLAN (por ahora fallback FREE si no existe /api/me)
   let currentPlan = "FREE";
   function applyPlanUI(){
     const pill = document.getElementById("planPill");
@@ -461,7 +463,6 @@ body{
     const dur  = card.querySelector('[data-k="dur"]');
 
     let dragging = false;
-
     function syncBtn(){ btn.textContent = audio.paused ? "Play" : "Pause"; }
 
     audio.addEventListener("loadedmetadata", () => {
@@ -517,21 +518,20 @@ body{
   // Stats
   function setStats(items){
     document.getElementById("stTotal").textContent = String(items.length);
+    document.getElementById("stFree").textContent  = String(items.filter(x => (x.quality||"").toUpperCase()==="FREE").length);
     document.getElementById("stPlus").textContent  = String(items.filter(x => (x.quality||"").toUpperCase()==="PLUS").length);
     document.getElementById("stPro").textContent   = String(items.filter(x => (x.quality||"").toUpperCase()==="PRO").length);
-
-    const last = items[0]?.created_at || "—";
-    document.getElementById("stLast").textContent = last==="—" ? "—" : last.slice(0,19).replace("T"," ");
   }
 
   function badgeHTML(q){
-    q = (q||"PLUS").toUpperCase();
+    q = (q||"FREE").toUpperCase();
     if(q === "PRO") return `<span class="badge pro">PRO</span>`;
-    return `<span class="badge plus">PLUS</span>`;
+    if(q === "PLUS") return `<span class="badge plus">PLUS</span>`;
+    return `<span class="badge free">FREE</span>`;
   }
 
   function waveHTML(){
-    let s = `<div class="wave" aria-label="waveform">`;
+    let s = `<div class="wave" aria-label="viz">`;
     for(let i=0;i<12;i++){
       const h = 8 + ((i*7) % 16);
       s += `<span class="bar" style="height:${h}px"></span>`;
@@ -588,15 +588,17 @@ body{
     empty.style.display = "none";
 
     items.forEach(it => {
-      const q = (it.quality||"PLUS").toUpperCase();
+      const q = (it.quality||"FREE").toUpperCase();
       const card = document.createElement("div");
-      card.className = "item " + (q === "PRO" ? "pro" : "plus");
+      card.className = "item " + (q === "PRO" ? "pro" : (q==="PLUS" ? "plus" : ""));
 
       const title = escapeHtml(it.title || ("Master " + it.id));
       const created = escapeHtml((it.created_at || "").slice(0,19).replace("T"," "));
       const preset = escapeHtml(it.preset || "clean");
       const intensity = escapeHtml(String(it.intensity ?? 55));
       const id = escapeHtml(it.id);
+
+      const downloadLabel = (currentPlan === "FREE") ? "Descargar 30s" : "Descargar completo";
 
       card.innerHTML = `
         <div class="itemTop">
@@ -624,25 +626,34 @@ body{
         </div>
 
         <div class="actions">
-          <button class="btn btnPrimary" type="button" data-act="download">Descargar</button>
+          <button class="btn btnPrimary" type="button" data-act="download">${downloadLabel}</button>
           <button class="btn" type="button" data-act="open">Abrir</button>
           <button class="btn" type="button" data-act="copy">Copiar ID</button>
         </div>
       `;
 
+      // Reproducir inline (sin descarga)
       const audio = card.querySelector("audio");
-      audio.src = (API_BASE||"") + `/api/masters/${encodeURIComponent(it.id)}/stream`;
+      audio.src = (API_BASE||"") + `/stream/${encodeURIComponent(it.id)}`;
 
-      card.querySelector('[data-act="download"]').onclick = () => {
-        const url = (API_BASE||"") + `/api/masters/${encodeURIComponent(it.id)}/download`;
+      // Descargar según plan
+      card.querySelector('[data-act="download"]').onclick = async () => {
+        if (currentPlan === "FREE") {
+          const url = (API_BASE||"") + `/api/master/preview?master_id=${encodeURIComponent(it.id)}&seconds=30`;
+          window.open(url, "_blank");
+          return;
+        }
+        const url = (API_BASE||"") + `/download/${encodeURIComponent(it.id)}`;
         window.open(url, "_blank");
       };
 
+      // Abrir (stream)
       card.querySelector('[data-act="open"]').onclick = () => {
-        const url = (API_BASE||"") + `/api/masters/${encodeURIComponent(it.id)}/stream`;
+        const url = (API_BASE||"") + `/stream/${encodeURIComponent(it.id)}`;
         window.open(url, "_blank");
       };
 
+      // Copiar ID
       card.querySelector('[data-act="copy"]').onclick = async () => {
         try{
           await navigator.clipboard.writeText(it.id);
