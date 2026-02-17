@@ -2,57 +2,40 @@ import uuid
 import shutil
 import subprocess
 from pathlib import Path
-from datetime import datetime
-from typing import Dict, Optional
+from datetime import datetime, timedelta
+from typing import Dict
 
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
-from fastapi.responses import FileResponse, RedirectResponse, JSONResponse
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Query
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from starlette.background import BackgroundTask
 
 
 # =========================
 # CONFIG
 # =========================
 
-# FREE limits (tu versión actual)
-FREE_MAX_FILE_SIZE_MB = 100
-FREE_MAX_FILE_SIZE_BYTES = FREE_MAX_FILE_SIZE_MB * 1024 * 1024
-FREE_MAX_DURATION_SECONDS = 6 * 60  # 6 min
-
-# (Opcional) límites futuros por plan (puedes ajustar)
-PLUS_MAX_FILE_SIZE_MB = 250
-PLUS_MAX_FILE_SIZE_BYTES = PLUS_MAX_FILE_SIZE_MB * 1024 * 1024
-PLUS_MAX_DURATION_SECONDS = 15 * 60
-
-PRO_MAX_FILE_SIZE_MB = 500
-PRO_MAX_FILE_SIZE_BYTES = PRO_MAX_FILE_SIZE_MB * 1024 * 1024
-PRO_MAX_DURATION_SECONDS = 30 * 60
+MAX_FILE_SIZE_MB = 100
+MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
+MAX_DURATION_SECONDS = 6 * 60  # 6 minutos
 
 BASE_DIR = Path(__file__).parent
-
 TMP_DIR = BASE_DIR / "tmp"
 TMP_DIR.mkdir(exist_ok=True)
 
 PUBLIC_DIR = BASE_DIR / "public"
 PUBLIC_DIR.mkdir(exist_ok=True)
 
-# Persistencia
-DATA_DIR = BASE_DIR / "data"
-MASTERS_DIR = DATA_DIR / "masters"
-DATA_DIR.mkdir(exist_ok=True)
-MASTERS_DIR.mkdir(exist_ok=True)
+# mantener masters para re-descarga
+KEEP_MASTERS_HOURS = 24
 
 app = FastAPI()
 
 # =========================
-# STORAGE (MEMORIA)
+# JOB STORAGE (MEMORIA)
 # =========================
-# jobs[master_id] -> info para debug/UI
 jobs: Dict[str, dict] = {}
-
-# purchases[master_id] -> {paid: True, quality: "PLUS"/"PRO", paid_at: "..."}
-purchases: Dict[str, dict] = {}
 
 # =========================
 # CORS
@@ -68,6 +51,14 @@ app.add_middleware(
 # =========================
 # UTILS
 # =========================
+def cleanup_files(*paths: Path) -> None:
+    for p in paths:
+        try:
+            if p and p.exists():
+                p.unlink()
+        except Exception:
+            pass
+
 
 def run_ffmpeg(cmd: list[str]) -> None:
     proc = subprocess.run(
@@ -106,94 +97,120 @@ def get_audio_duration_seconds(path: Path) -> float:
     if proc.returncode != 0:
         raise HTTPException(status_code=400, detail="No se pudo analizar duración.")
 
-    try:
-        return float(proc.stdout.strip() or 0.0)
-    except Exception:
-        return 0.0
+    return float(proc.stdout.strip())
 
 
-def preset_chain(preset: str, intensity: int) -> str:
-    intensity = max(0, min(100, int(intensity)))
+def db_to_lin(db: float) -> float:
+    return 10 ** (db / 20.0)
 
-    thr = -18.0 - (intensity * 0.10)
-    ratio = 2.0 + (intensity * 0.04)
-    makeup = 2.0 + (intensity * 0.06)
+
+def clamp(v: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, v))
+
+
+def purge_old_jobs():
+    cutoff = datetime.utcnow() - timedelta(hours=KEEP_MASTERS_HOURS)
+    to_delete = []
+    for jid, job in jobs.items():
+        try:
+            created = datetime.fromisoformat(job.get("created_at"))
+        except Exception:
+            continue
+        if created < cutoff:
+            to_delete.append(jid)
+
+    for jid in to_delete:
+        job = jobs.get(jid, {})
+        out_path = TMP_DIR / job.get("out_file", f"master_{jid}.wav")
+        in_path = TMP_DIR / job.get("in_file", f"in_{jid}.wav")
+        cleanup_files(out_path, in_path)
+        jobs.pop(jid, None)
+
+
+def build_ffmpeg_filters(
+    preset: str,
+    intensity: int,
+    k_low: float,
+    k_mid: float,
+    k_pres: float,
+    k_air: float,
+    k_glue: float,
+    k_width: float,
+    k_sat: float,
+    k_out: float,
+) -> str:
+    intensity = int(clamp(intensity, 0, 100))
+
+    k_low  = float(clamp(k_low,  -12, 12))
+    k_mid  = float(clamp(k_mid,  -12, 12))
+    k_pres = float(clamp(k_pres, -12, 12))
+    k_air  = float(clamp(k_air,  -12, 12))
+
+    k_glue  = float(clamp(k_glue,  0, 100))
+    k_width = float(clamp(k_width, 50, 150))
+    k_sat   = float(clamp(k_sat,   0, 100))
+    k_out   = float(clamp(k_out,  -12, 6))
 
     preset = (preset or "clean").lower()
 
-    if preset == "club":
-        eq = "bass=g=4:f=90,treble=g=2:f=9000"
-    elif preset == "warm":
-        eq = "bass=g=3:f=160,treble=g=-2:f=4500"
-    elif preset == "bright":
-        eq = "bass=g=-1:f=120,treble=g=4:f=8500"
-    elif preset == "heavy":
-        eq = "bass=g=5:f=90,treble=g=2:f=3500"
-    else:
-        eq = "bass=g=2:f=120,treble=g=1:f=8000"
+    # Base master chain (tu lógica original)
+    thr_db = -18.0 - (intensity * 0.10)
+    ratio = 2.0 + (intensity * 0.04)
+    makeup = 2.0 + (intensity * 0.06)
 
-    return (
-        f"{eq},"
-        f"acompressor=threshold={thr}dB:ratio={ratio}:attack=12:release=120:makeup={makeup},"
-        f"alimiter=limit=-1.0dB"
+    if preset == "club":
+        base_eq = "bass=g=4:f=90,treble=g=2:f=9000"
+    elif preset == "warm":
+        base_eq = "bass=g=3:f=160,treble=g=-2:f=4500"
+    elif preset == "bright":
+        base_eq = "bass=g=-1:f=120,treble=g=4:f=8500"
+    elif preset == "heavy":
+        base_eq = "bass=g=5:f=90,treble=g=2:f=3500"
+    else:
+        base_eq = "bass=g=2:f=120,treble=g=1:f=8000"
+
+    base_comp = (
+        f"acompressor=threshold={db_to_lin(thr_db):.6f}:ratio={ratio:.3f}:attack=12:release=120:"
+        f"makeup={makeup:.3f}:knee=2:detection=peak"
     )
 
+    # Knob EQ (sobre el preset)
+    knob_eq = (
+        f"bass=g={k_low:.2f}:f=120,"
+        f"equalizer=f=630:width_type=o:width=1.0:g={k_mid:.2f},"
+        f"equalizer=f=1760:width_type=o:width=1.0:g={k_pres:.2f},"
+        f"treble=g={k_air:.2f}:f=8500"
+    )
 
-def master_path(master_id: str) -> Path:
-    return MASTERS_DIR / f"master_{master_id}.wav"
+    # GLUE 0..100
+    gP = k_glue / 100.0
+    glue_thr_db = -10.0 - (gP * 18.0)
+    glue_ratio = 1.5 + (gP * 4.5)
+    glue_attack = 12.0 - (gP * 7.0)
+    glue_release = 200.0 + (gP * 100.0)
+    glue_makeup = 0.0 + (gP * 6.0)
 
+    glue = (
+        f"acompressor=threshold={db_to_lin(glue_thr_db):.6f}:ratio={glue_ratio:.3f}:"
+        f"attack={glue_attack:.2f}:release={glue_release:.2f}:knee=2:makeup={glue_makeup:.2f}:detection=peak"
+    )
 
-def orig_path(master_id: str, safe_name: str) -> Path:
-    return MASTERS_DIR / f"orig_{master_id}_{safe_name}"
+    # WIDTH
+    width = f"stereotools=mlev=1:slev={(k_width/100.0):.3f}"
 
+    # SAT (softclip)
+    sP = k_sat / 100.0
+    soft_thr = 1.0 - (sP * 0.35)
+    sat = f"asoftclip=type=tanh:threshold={soft_thr:.3f}"
 
-def preview_path(master_id: str) -> Path:
-    return MASTERS_DIR / f"preview_{master_id}_20s.mp3"
+    # OUTPUT
+    out_gain = db_to_lin(k_out)
+    out = f"volume={out_gain:.6f}"
 
+    # limiter final
+    limiter = "alimiter=limit=-1.0dB"
 
-def is_paid(master_id: str) -> bool:
-    p = purchases.get(master_id)
-    return bool(p and p.get("paid") is True)
-
-
-def get_paid_quality(master_id: str) -> Optional[str]:
-    p = purchases.get(master_id)
-    if not p:
-        return None
-    q = (p.get("quality") or "").upper()
-    return q if q in ("PLUS", "PRO") else None
-
-
-def resolve_plan(req: Request) -> str:
-    """
-    Plan actual: por ahora FREE por defecto.
-    (Más adelante lo conectamos a login/suscripción real)
-    Para test, puedes enviar header: X-WM-Plan: PLUS/PRO
-    """
-    hdr = (req.headers.get("X-WM-Plan") or "").upper().strip()
-    if hdr in ("FREE", "PLUS", "PRO"):
-        return hdr
-    return "FREE"
-
-
-def enforce_limits(plan_or_quality: str, file_size_bytes: int, duration_seconds: float) -> None:
-    q = (plan_or_quality or "FREE").upper()
-
-    if q == "PRO":
-        max_bytes = PRO_MAX_FILE_SIZE_BYTES
-        max_sec = PRO_MAX_DURATION_SECONDS
-    elif q == "PLUS":
-        max_bytes = PLUS_MAX_FILE_SIZE_BYTES
-        max_sec = PLUS_MAX_DURATION_SECONDS
-    else:
-        max_bytes = FREE_MAX_FILE_SIZE_BYTES
-        max_sec = FREE_MAX_DURATION_SECONDS
-
-    if file_size_bytes > max_bytes:
-        raise HTTPException(status_code=400, detail=f"Supera el máximo de {max_bytes // (1024*1024)}MB.")
-
-    if duration_seconds > max_sec:
-        raise HTTPException(status_code=400, detail=f"Supera el máximo de {max_sec // 60} minutos.")
+    return ",".join([base_eq, knob_eq, base_comp, glue, width, sat, out, limiter])
 
 
 # =========================
@@ -202,68 +219,53 @@ def enforce_limits(plan_or_quality: str, file_size_bytes: int, duration_seconds:
 
 @app.get("/api/health")
 def health():
+    purge_old_jobs()
     return {"ok": True}
 
 
-@app.get("/api/me")
-def me(request: Request):
-    # Para el master.html dinámico
-    plan = resolve_plan(request)
-    return {"plan": plan}
-
-
-@app.get("/api/jobs")
-def list_jobs():
-    return {"jobs": jobs}
-
-
-@app.get("/api/job/{job_id}")
-def get_job(job_id: str):
-    job = jobs.get(job_id)
-    if not job:
-        raise HTTPException(status_code=404, detail="Job no encontrado.")
-    return job
-
-
-# -------------------------
-# MASTER (genera WAV completo)
-# -------------------------
 @app.post("/api/master")
 async def master(
-    request: Request,
     file: UploadFile = File(...),
     preset: str = Form("clean"),
     intensity: int = Form(55),
-    # compat con tu master.html nuevo
-    target: Optional[str] = Form(None),
-    requested_quality: str = Form("FREE"),
+
+    # knobs desde master.html
+    k_low: float = Form(0.0),
+    k_mid: float = Form(0.0),
+    k_pres: float = Form(0.0),
+    k_air: float = Form(0.0),
+    k_glue: float = Form(0.0),
+    k_width: float = Form(100.0),
+    k_sat: float = Form(0.0),
+    k_out: float = Form(0.0),
 ):
+    purge_old_jobs()
+
     if not file or not file.filename:
         raise HTTPException(status_code=400, detail="Archivo inválido.")
 
-    # Compat: si viene "target", lo usamos como preset
-    if target:
-        preset = target
-
-    master_id = uuid.uuid4().hex[:10]
+    job_id = uuid.uuid4().hex[:8]
     safe_name = safe_filename(file.filename)
 
-    tmp_in = TMP_DIR / f"in_{master_id}_{safe_name}"
-    out = master_path(master_id)
-    orig = orig_path(master_id, safe_name)
+    in_path = TMP_DIR / f"in_{job_id}_{safe_name}"
+    out_path = TMP_DIR / f"master_{job_id}.wav"
 
-    jobs[master_id] = {
+    jobs[job_id] = {
         "status": "processing",
         "filename": safe_name,
         "preset": preset,
-        "intensity": int(intensity),
+        "intensity": intensity,
         "created_at": datetime.utcnow().isoformat(),
-        "master_id": master_id,
+        "in_file": in_path.name,
+        "out_file": out_path.name,
+        "knobs": {
+            "low": k_low, "mid": k_mid, "pres": k_pres, "air": k_air,
+            "glue": k_glue, "width": k_width, "sat": k_sat, "out": k_out
+        }
     }
 
-    # Guardar upload temporal
     try:
-        with tmp_in.open("wb") as f:
+        with in_path.open("wb") as f:
             shutil.copyfileobj(file.file, f)
     finally:
         try:
@@ -271,213 +273,118 @@ async def master(
         except Exception:
             pass
 
-    # Validaciones (por ahora: según plan o requested_quality)
-    plan = resolve_plan(request)
-    quality = (requested_quality or plan or "FREE").upper()
-    if quality not in ("FREE", "PLUS", "PRO"):
-        quality = plan
+    if in_path.stat().st_size > MAX_FILE_SIZE_BYTES:
+        cleanup_files(in_path)
+        jobs[job_id]["status"] = "error"
+        raise HTTPException(status_code=400, detail="Supera 100MB.")
 
-    file_bytes = tmp_in.stat().st_size
-    duration = get_audio_duration_seconds(tmp_in)
+    duration = get_audio_duration_seconds(in_path)
+    if duration > MAX_DURATION_SECONDS:
+        cleanup_files(in_path)
+        jobs[job_id]["status"] = "error"
+        raise HTTPException(status_code=400, detail="Supera 6 minutos.")
 
-    # Mantén tus límites FREE, pero dejamos preparado PLUS/PRO
-    enforce_limits(quality, file_bytes, duration)
+    filters = build_ffmpeg_filters(
+        preset=preset,
+        intensity=intensity,
+        k_low=k_low, k_mid=k_mid, k_pres=k_pres, k_air=k_air,
+        k_glue=k_glue, k_width=k_width, k_sat=k_sat, k_out=k_out
+    )
 
-    # Persistimos original (para poder re-render/descargas)
-    try:
-        shutil.move(str(tmp_in), str(orig))
-    except Exception:
-        shutil.copy2(str(tmp_in), str(orig))
-        tmp_in.unlink(missing_ok=True)
-
-    filters = preset_chain(preset, intensity)
     cmd = [
         "ffmpeg", "-y",
         "-hide_banner",
-        "-i", str(orig),
+        "-i", str(in_path),
         "-vn",
         "-af", filters,
         "-ar", "44100",
         "-ac", "2",
         "-sample_fmt", "s16",
-        str(out)
+        str(out_path)
     ]
 
     try:
         run_ffmpeg(cmd)
     except Exception:
-        jobs[master_id]["status"] = "error"
-        out.unlink(missing_ok=True)
+        jobs[job_id]["status"] = "error"
+        cleanup_files(in_path, out_path)
         raise
 
-    if not out.exists() or out.stat().st_size < 1024:
-        jobs[master_id]["status"] = "error"
-        out.unlink(missing_ok=True)
+    if not out_path.exists() or out_path.stat().st_size < 1024:
+        jobs[job_id]["status"] = "error"
+        cleanup_files(in_path, out_path)
         raise HTTPException(status_code=500, detail="Master vacío.")
 
-    jobs[master_id]["status"] = "done"
-    jobs[master_id]["duration_sec"] = duration
-    jobs[master_id]["stream"] = f"/api/masters/{master_id}/stream"
-    jobs[master_id]["preview_download"] = f"/api/master/preview?master_id={master_id}"
-    jobs[master_id]["full_download"] = f"/api/masters/{master_id}/download"
+    jobs[job_id]["status"] = "done"
+    jobs[job_id]["download"] = f"/download/{job_id}"
+    jobs[job_id]["duration_sec"] = duration
 
-    # Respuesta: WAV para escuchar + header master_id
-    resp = FileResponse(
-        path=str(out),
+    headers = {"X-Master-Id": job_id}
+
+    # SOLO borramos el input para ahorrar espacio; el output queda para descarga/preview
+    return FileResponse(
+        path=str(out_path),
         media_type="audio/wav",
         filename="warmaster_master.wav",
+        headers=headers,
+        background=BackgroundTask(cleanup_files, in_path),
     )
-    resp.headers["X-Master-Id"] = master_id
-    return resp
 
 
-# -------------------------
-# PREVIEW 20s (FREE download)
-# -------------------------
 @app.get("/api/master/preview")
-def preview_20s(master_id: str):
-    out = master_path(master_id)
-    if not out.exists():
-        raise HTTPException(status_code=404, detail="Master no encontrado.")
+def master_preview(
+    master_id: str = Query(...),
+    seconds: int = Query(30, ge=5, le=60)
+):
+    purge_old_jobs()
 
-    prev = preview_path(master_id)
-    if (not prev.exists()) or (prev.stat().st_mtime < out.stat().st_mtime):
-        cmd = [
-            "ffmpeg", "-y",
-            "-hide_banner",
-            "-i", str(out),
-            "-t", "20",
-            "-vn",
-            "-codec:a", "libmp3lame",
-            "-q:a", "4",
-            str(prev)
-        ]
-        run_ffmpeg(cmd)
+    job = jobs.get(master_id)
+    if not job or job.get("status") != "done":
+        raise HTTPException(status_code=404, detail="Master no disponible.")
+
+    src_path = TMP_DIR / job.get("out_file", f"master_{master_id}.wav")
+    if not src_path.exists():
+        raise HTTPException(status_code=404, detail="Archivo no encontrado.")
+
+    prev_path = TMP_DIR / f"preview_{master_id}.wav"
+
+    cmd = [
+        "ffmpeg", "-y",
+        "-hide_banner",
+        "-i", str(src_path),
+        "-t", str(seconds),
+        "-ar", "44100",
+        "-ac", "2",
+        "-sample_fmt", "s16",
+        str(prev_path)
+    ]
+    run_ffmpeg(cmd)
 
     return FileResponse(
-        path=str(prev),
-        media_type="audio/mpeg",
-        filename="warmaster_preview_20s.mp3"
+        path=str(prev_path),
+        media_type="audio/wav",
+        filename=f"warmaster_preview_{seconds}s.wav",
+        background=BackgroundTask(cleanup_files, prev_path),
     )
 
 
-# -------------------------
-# UNLOCK por canción (PLUS/PRO)
-# (sin pasarela aún: marca pagado para test)
-# -------------------------
-@app.post("/api/unlock")
-async def unlock(req: Request):
-    body = await req.json()
-    master_id = (body.get("master_id") or "").strip()
-    quality = (body.get("quality") or "").strip().upper()
+@app.get("/download/{job_id}")
+def download_job(job_id: str):
+    purge_old_jobs()
 
-    if not master_id:
-        raise HTTPException(status_code=400, detail="master_id requerido.")
-    if quality not in ("PLUS", "PRO"):
-        raise HTTPException(status_code=400, detail="quality debe ser PLUS o PRO.")
+    job = jobs.get(job_id)
+    if not job or job.get("status") != "done":
+        raise HTTPException(status_code=404, detail="Archivo no disponible.")
 
-    out = master_path(master_id)
-    if not out.exists():
-        raise HTTPException(status_code=404, detail="Master no encontrado.")
+    out_path = TMP_DIR / job.get("out_file", f"master_{job_id}.wav")
+    if not out_path.exists():
+        raise HTTPException(status_code=404, detail="Archivo no encontrado.")
 
-    purchases[master_id] = {
-        "paid": True,
-        "quality": quality,
-        "paid_at": datetime.utcnow().isoformat()
-    }
-
-    return {"ok": True, "master_id": master_id, "quality": quality}
-
-
-# -------------------------
-# Upgrade PLUS -> PRO (marca estado)
-# -------------------------
-@app.post("/api/upgrade")
-async def upgrade(req: Request):
-    body = await req.json()
-    master_id = (body.get("master_id") or "").strip()
-    to_q = (body.get("to") or "PRO").strip().upper()
-
-    if not master_id:
-        raise HTTPException(status_code=400, detail="master_id requerido.")
-    if to_q != "PRO":
-        raise HTTPException(status_code=400, detail="Solo upgrade a PRO permitido.")
-
-    if not is_paid(master_id):
-        raise HTTPException(status_code=402, detail="Primero debes desbloquear (PLUS) o pagar.")
-
-    purchases[master_id]["quality"] = "PRO"
-    purchases[master_id]["upgraded_at"] = datetime.utcnow().isoformat()
-
-    return {"ok": True, "master_id": master_id, "quality": "PRO"}
-
-
-# -------------------------
-# Dashboard list (masters pagados)
-# -------------------------
-@app.get("/api/masters")
-def list_masters():
-    items = []
-    for mid, meta in jobs.items():
-        if meta.get("status") != "done":
-            continue
-        if not is_paid(mid):
-            continue
-        items.append({
-            "id": mid,
-            "title": meta.get("filename") or "Master",
-            "preset": meta.get("preset") or "clean",
-            "intensity": meta.get("intensity") or 55,
-            "quality": get_paid_quality(mid) or "PLUS",
-            "paid": True,
-            "created_at": meta.get("created_at"),
-        })
-    items.sort(key=lambda x: x.get("created_at") or "", reverse=True)
-    return items
-
-
-# -------------------------
-# Stream (escuchar completo siempre)
-# -------------------------
-@app.get("/api/masters/{master_id}/stream")
-def stream_master(master_id: str):
-    out = master_path(master_id)
-    if not out.exists():
-        raise HTTPException(status_code=404, detail="Master no encontrado.")
     return FileResponse(
-        path=str(out),
+        path=str(out_path),
         media_type="audio/wav",
         filename="warmaster_master.wav"
     )
-
-
-# -------------------------
-# Download FULL (solo si pagado)
-# -------------------------
-@app.get("/api/masters/{master_id}/download")
-def download_master(master_id: str):
-    out = master_path(master_id)
-    if not out.exists():
-        raise HTTPException(status_code=404, detail="Master no encontrado.")
-
-    if not is_paid(master_id):
-        # FREE: no descarga completo
-        raise HTTPException(status_code=402, detail="Debes desbloquear (PLUS/PRO) para descargar completo.")
-
-    q = get_paid_quality(master_id) or "PLUS"
-    return FileResponse(
-        path=str(out),
-        media_type="audio/wav",
-        filename=f"warmaster_master_{q.lower()}.wav"
-    )
-
-
-# -------------------------
-# Compatibilidad con tu ruta antigua
-# -------------------------
-@app.get("/download/{job_id}")
-def download_job(job_id: str):
-    return download_master(job_id)
 
 
 @app.get("/")
