@@ -35,14 +35,18 @@ app = FastAPI()
 masters: Dict[str, Dict[str, Any]] = {}  # master_id -> metadata
 
 # =========================
-# CORS
+# CORS  ✅ FIX "Failed to fetch"
 # =========================
+# Problema típico: allow_credentials=True + allow_origins=["*"] => browsers bloquean.
+# Solución: no usamos cookies/sesión ahora, así que dejamos credentials en False,
+# y exponemos X-Master-Id para que el frontend lo pueda leer en cross-origin.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-Master-Id"],
 )
 
 # =========================
