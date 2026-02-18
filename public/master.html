@@ -20,429 +20,452 @@
 
       /* Plan colors (official) */
       --free:#ffffff;   /* FREE blanco */
-      --plus:#f5c542;   /* PLUS amarillo */
-      --pro:#4ea8ff;    /* PRO azul */
+      --plus:#f5c542;   /* PLUS dorado */
+      --pro:#38bdf8;    /* PRO celeste */
 
-      --warn:#f59e0b;
-      --bad:#ef4444;
-      --ok:#22c55e;
-
-      --shadow: 0 10px 30px rgba(0,0,0,.45);
-      --radius: 16px;
+      --radius:22px;
+      --radius2:16px;
+      --shadow: 0 24px 80px rgba(0,0,0,.55);
     }
 
-    *{box-sizing:border-box}
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background:
-        radial-gradient(1200px 600px at 15% 0%, rgba(109,94,252,.25), transparent 55%),
-        radial-gradient(900px 600px at 90% 10%, rgba(45,212,191,.18), transparent 55%),
-        linear-gradient(180deg, var(--bg), #06070a 70%);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--text);
-      min-height:100vh;
-      padding:18px;
+      background:
+        radial-gradient(900px 520px at 10% 10%, rgba(109,94,252,.22), transparent 55%),
+        radial-gradient(820px 520px at 90% 15%, rgba(45,212,191,.17), transparent 55%),
+        radial-gradient(900px 520px at 35% 95%, rgba(245,197,66,.10), transparent 60%),
+        linear-gradient(180deg, #07080c, #0b0c10);
     }
 
-    .wrap{width:min(1120px,100%); margin:0 auto}
-    a{color:inherit}
+    a{ color:inherit; text-decoration:none; }
+    button, input, select{ font:inherit; }
+    .wrap{
+      width:min(1220px, 94vw);
+      margin: 26px auto 44px;
+    }
 
+    /* Header */
     .top{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:12px; margin-bottom:14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:18px;
     }
     .brand{
-      display:flex; align-items:center; gap:10px;
-      font-weight:900; letter-spacing:.3px;
+      display:flex;
+      align-items:center;
+      gap:12px;
     }
-    .dot{
-      width:12px;height:12px;border-radius:999px;
-      background: linear-gradient(135deg, var(--brand), var(--brand2));
-      box-shadow: 0 0 0 6px rgba(109,94,252,.12);
+    .logo{
+      width:46px;height:46px;border-radius:14px;
+      background:
+        radial-gradient(18px 18px at 30% 30%, rgba(255,255,255,.35), transparent 60%),
+        linear-gradient(135deg, rgba(109,94,252,.95), rgba(45,212,191,.85));
+      box-shadow: 0 12px 36px rgba(109,94,252,.18);
+      border:1px solid rgba(255,255,255,.10);
     }
-    .nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
-
-    .pill{
+    .titleblock{ line-height:1.05; }
+    .titleblock h1{
+      margin:0;
+      font-size:18px;
+      letter-spacing:.2px;
+    }
+    .titleblock .sub{
+      margin-top:4px;
+      color:rgba(233,236,243,.68);
       font-size:12px;
-      padding:8px 10px;
-      border:1px solid var(--line);
+    }
+
+    .nav{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:10px 12px;
       border-radius:999px;
-      background: rgba(255,255,255,.03);
-      color:var(--muted);
-      white-space:nowrap;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow: 0 10px 30px rgba(0,0,0,.22);
+      backdrop-filter: blur(10px);
+      font-size:12px;
+      color:rgba(233,236,243,.86);
+      user-select:none;
     }
+    .pill .dot{
+      width:8px;height:8px;border-radius:50%;
+      background: rgba(255,255,255,.35);
+    }
+    .pill .dot.ok{ background: rgba(45,212,191,.9); box-shadow: 0 0 0 5px rgba(45,212,191,.12); }
+    .pill .dot.warn{ background: rgba(245,197,66,.95); box-shadow: 0 0 0 5px rgba(245,197,66,.12); }
+    .pill .dot.bad{ background: rgba(244,63,94,.95); box-shadow: 0 0 0 5px rgba(244,63,94,.12); }
 
-    /* Plan pill */
-    .planPill{
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:10px;
+      padding:10px 14px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: rgba(233,236,243,.92);
+      cursor:pointer;
+      user-select:none;
+      transition: transform .08s ease, background .2s ease, border-color .2s ease;
+    }
+    .btn:hover{ background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.18); }
+    .btn:active{ transform: translateY(1px); }
+    .btn.primary{
+      background: linear-gradient(135deg, rgba(109,94,252,.95), rgba(45,212,191,.85));
       border-color: rgba(255,255,255,.18);
-      background: rgba(255,255,255,.03);
-      font-weight:900;
+      color:white;
+      box-shadow: 0 14px 44px rgba(109,94,252,.18);
     }
-    .planPill.plus{ color: var(--plus); border-color: rgba(245,197,66,.35); background: rgba(245,197,66,.08); }
-    .planPill.pro{  color: var(--pro);  border-color: rgba(78,168,255,.35); background: rgba(78,168,255,.08); }
-    .planPill.free{ color: var(--free); border-color: rgba(255,255,255,.20); background: rgba(255,255,255,.03); }
+    .btn.primary:hover{
+      filter: brightness(1.04);
+    }
+    .btn.ghost{
+      background: transparent;
+      border-color: rgba(255,255,255,.14);
+    }
 
-    /* Card + optional plan glow */
+    /* Layout */
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:18px;
+    }
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
     .card{
-      background: rgba(18,20,27,.92);
-      border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid rgba(255,255,255,.10);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow:hidden;
+      backdrop-filter: blur(14px);
     }
-    .cardGlowPlus{ box-shadow: 0 10px 30px rgba(0,0,0,.45), 0 0 0 1px rgba(245,197,66,.18), 0 0 24px rgba(245,197,66,.10); }
-    .cardGlowPro{  box-shadow: 0 10px 30px rgba(0,0,0,.45), 0 0 0 1px rgba(78,168,255,.18), 0 0 24px rgba(78,168,255,.10); }
-
-    .head{
+    .cardHeader{
       padding:16px 18px;
-      border-bottom:1px solid var(--line);
-      background: rgba(255,255,255,.02);
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
     }
-    .head h2{margin:0; font-size:16px}
-
-    .body{padding:16px 18px}
-    .muted{color:var(--muted)}
-    label{font-size:12px; color:var(--muted); display:block; margin-bottom:6px}
-
-    .btn{
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.03);
-      color:var(--text);
-      padding:10px 12px;
-      border-radius: 12px;
-      cursor:pointer;
-      font-weight:900;
-      transition: transform .06s ease, background .15s ease, border-color .15s ease;
-      display:inline-flex; align-items:center; gap:8px;
-      user-select:none;
+    .cardHeader h2{
+      margin:0;
+      font-size:14px;
+      letter-spacing:.2px;
+      color: rgba(233,236,243,.92);
     }
-    .btn:hover{background: rgba(255,255,255,.06)}
-    .btn:active{transform: translateY(1px)}
-    .btn:disabled{opacity:.5; cursor:not-allowed}
-
-    /* Plan buttons accents */
-    .btnPlus{
-      border-color: rgba(245,197,66,.45);
-      background: rgba(245,197,66,.10);
-      color: var(--plus);
+    .cardHeader .hint{
+      font-size:12px;
+      color: rgba(233,236,243,.58);
     }
-    .btnPro{
-      border-color: rgba(78,168,255,.45);
-      background: rgba(78,168,255,.10);
-      color: var(--pro);
+    .cardBody{ padding:18px; }
+
+    /* Upload area */
+    .uploader{
+      padding:18px;
+      border-radius: 18px;
+      border:1px dashed rgba(255,255,255,.16);
+      background: rgba(0,0,0,.16);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
     }
-
-    .btnPrimary{
-      border-color: transparent;
-      background: linear-gradient(135deg, rgba(109,94,252,.95), rgba(45,212,191,.55));
-      color: #fff;
+    .uploader .left{
+      display:flex; align-items:center; gap:12px;
     }
-    .btnPrimary:hover{filter:brightness(1.06)}
+    .fileIcon{
+      width:42px;height:42px;border-radius:14px;
+      background: rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.10);
+      display:grid; place-items:center;
+      color: rgba(233,236,243,.85);
+      font-size:18px;
+    }
+    .uploader .meta{
+      line-height:1.2;
+    }
+    .uploader .meta .name{
+      font-size:13px;
+      color: rgba(233,236,243,.92);
+      margin-bottom:3px;
+    }
+    .uploader .meta .small{
+      font-size:12px;
+      color: rgba(233,236,243,.55);
+    }
+    .uploader input[type="file"]{ display:none; }
 
-    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
-
-    .grid{
+    .row{
+      margin-top:14px;
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap:14px;
-    }
-    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
-
-    .selectGrid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px}
-    @media (max-width: 520px){ .selectGrid{grid-template-columns:1fr} }
-
-    .opt{
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.02);
-      border-radius: 14px;
-      padding:12px;
-      cursor:pointer;
-      user-select:none;
-      transition: background .15s ease, transform .06s ease, border-color .15s ease;
-      position:relative;
-    }
-    .opt:hover{background: rgba(255,255,255,.05)}
-    .opt:active{transform: translateY(1px)}
-    .opt b{display:block; margin-bottom:6px}
-    .opt small{color:var(--muted)}
-    .opt.active{
-      border-color: rgba(109,94,252,.65);
-      background: rgba(109,94,252,.10);
-    }
-
-    /* Lock badge (no emojis) */
-    .lock{
-      position:absolute; top:10px; right:10px;
-      font-size:12px;
-      border:1px solid rgba(245,197,66,.35);
-      padding:4px 8px;
-      border-radius:999px;
-      background: rgba(245,197,66,.08);
-      color: var(--plus);
-      font-weight:900;
-    }
-
-    .bar{
-      width:100%;
-      height:10px;
-      border:1px solid var(--line);
-      border-radius: 999px;
-      overflow:hidden;
-      background: rgba(255,255,255,.02);
-    }
-    .bar > div{
-      height:100%;
-      width:0%;
-      background: linear-gradient(90deg, var(--brand), var(--brand2));
-    }
-
-    .note{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:8px;
-      line-height:1.5;
-    }
-
-    .divider{border:none;border-top:1px solid var(--line); margin:14px 0}
-
-    .badge{
-      font-weight:900;
-      font-size:12px;
-      display:inline-block;
-      padding:4px 8px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.18);
-      background: rgba(255,255,255,.03);
-      margin-right:8px;
-    }
-    .badge.plus{ color: var(--plus); border-color: rgba(245,197,66,.35); background: rgba(245,197,66,.08); }
-    .badge.pro{  color: var(--pro);  border-color: rgba(78,168,255,.35); background: rgba(78,168,255,.08); }
-    .badge.free{ color: var(--free); border-color: rgba(255,255,255,.18); background: rgba(255,255,255,.03); }
-
-    /* ===== File picker corporativo ===== */
-    .fileRow{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.03);
-      border-radius: 14px;
-      padding:10px;
-    }
-    .fileInputHidden{
-      position:absolute;
-      width:1px;height:1px;
-      opacity:0;
-      pointer-events:none;
-    }
-    .fileBtn{
-      white-space:nowrap;
-      padding:10px 14px;
-      border-radius:12px;
-    }
-    .fileMeta{min-width:0; flex:1}
-    .fileName{
-      font-weight:900;
-      font-size:13px;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-    }
-    .fileHint{
-      margin-top:4px;
-      font-size:12px;
-      color:var(--muted);
-    }
-
-    /* ===== Player custom WarMaster ===== */
-    .player{
-      position:relative;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding:10px 12px;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.03);
-      border-radius: 14px;
-    }
-    .playerPro{
-      border-color: rgba(109,94,252,.20);
-      background:
-        radial-gradient(420px 120px at 0% 0%, rgba(109,94,252,.12), transparent 65%),
-        rgba(255,255,255,.03);
-    }
-
-    .pBtn{
-      width:40px;height:40px;
-      border-radius: 12px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.15);
-      color: var(--text);
-      font-weight:900;
-      cursor:pointer;
-    }
-    .pBtn:hover{background: rgba(255,255,255,.05)}
-
-    .pMid{flex:1; min-width:0}
-    .pTimeRow{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      margin-bottom:6px;
-      color: var(--muted);
-      font-size:12px;
-    }
-    .pSep{opacity:.6}
-
-    .pSeek{
-      width:100%;
-      accent-color: var(--brand);
-      height: 18px;
-    }
-    .pVol{
-      width:90px;
-      accent-color: var(--brand2);
-      height: 18px;
-    }
-    @media (max-width:520px){
-      .pVol{display:none;}
-    }
-
-    .player audio{display:none;} /* ocultamos control nativo */
-
-    /* Modal */
-    .modalBack{
-      position:fixed; inset:0;
-      background: rgba(0,0,0,.6);
-      display:none;
-      align-items:center; justify-content:center;
-      padding:18px;
-    }
-    .modal{
-      width:min(560px, 100%);
-      background: rgba(18,20,27,.98);
-      border:1px solid var(--line);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-    .modal .body{padding:16px 18px}
-    .priceBtn{ width:100%; justify-content:center; }
-
-    /* ===== EQ LIVE (Plugin panel) ===== */
-    .eqPanel{
-      margin-top:12px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(18,20,27,.65);
-      border-radius:18px;
-      overflow:hidden;
-    }
-    .eqTop{
-      padding:14px 14px 10px;
-      border-bottom:1px solid rgba(255,255,255,.08);
-      background:
-        radial-gradient(900px 260px at 10% 0%, rgba(109,94,252,.18), transparent 55%),
-        radial-gradient(900px 260px at 90% 0%, rgba(45,212,191,.12), transparent 55%),
-        rgba(255,255,255,.02);
-    }
-    .eqTitle{font-weight:900; letter-spacing:.3px}
-    .eqSub{color: rgba(255,255,255,.60); font-size:12px; margin-top:2px}
-    #eqViz{
-      width:100%;
-      height:220px;
-      display:block;
-      margin-top:10px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.06);
-      background: rgba(0,0,0,.18);
-    }
-
-    /* 8 knobs */
-    .eqBottom{
-      padding:14px;
-      display:grid;
-      grid-template-columns: repeat(8, 1fr);
       gap:12px;
-      background: rgba(255,255,255,.02);
     }
-    @media (max-width: 1100px){
-      .eqBottom{grid-template-columns: repeat(4, 1fr);}
+    @media (max-width: 520px){
+      .row{ grid-template-columns: 1fr; }
     }
-    @media (max-width: 620px){
-      .eqBottom{grid-template-columns: repeat(2, 1fr);}
+    .field{
+      background: rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: 16px;
+      padding:12px 12px;
     }
+    .field label{
+      display:block;
+      font-size:11px;
+      color: rgba(233,236,243,.55);
+      margin-bottom:6px;
+      letter-spacing:.2px;
+    }
+    .field select, .field input{
+      width:100%;
+      background: transparent;
+      border:none;
+      outline:none;
+      color: rgba(233,236,243,.95);
+      font-size:13px;
+    }
+    .field select option{ color:#0b0c10; }
 
-    .knobCol{
-      border:1px solid rgba(255,255,255,.06);
-      background: rgba(255,255,255,.02);
-      border-radius:16px;
+    /* Players */
+    .players{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:12px;
+      margin-top:14px;
+    }
+    .playerBox{
+      background: rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: 18px;
       padding:12px;
-      text-align:center;
     }
-    .kLabel{margin-top:10px; font-weight:900; font-size:12px; letter-spacing:.2px}
-    .kVal{margin-top:4px; color: rgba(255,255,255,.65); font-size:12px}
-
-    .knob{
-      width:74px; height:74px;
-      margin:0 auto;
-      border-radius:999px;
-      position:relative;
-      border:1px solid rgba(255,255,255,.12);
-      background:
-        radial-gradient(circle at 30% 30%, rgba(255,255,255,.10), transparent 45%),
-        radial-gradient(circle at 70% 70%, rgba(0,0,0,.25), transparent 55%),
-        linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.20));
-      box-shadow: 0 12px 22px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.06);
-      touch-action:none;
-      user-select:none;
+    .playerBox .ph{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px;
+      margin-bottom:8px;
     }
-    .knob::after{
-      content:"";
-      position:absolute;
-      left:50%; top:50%;
-      width:4px; height:28px;
-      background: linear-gradient(180deg, rgba(109,94,252,.95), rgba(45,212,191,.55));
-      transform-origin: 50% calc(100% - 2px);
-      transform: translate(-50%,-100%) rotate(var(--ang, -120deg));
-      border-radius:999px;
-      box-shadow: 0 0 10px rgba(109,94,252,.25);
-    }
-
-    /* ===== EQ visible, pero desactivado hasta "Procesar" ===== */
-    .eqPanel.eqDisabled{ opacity:.90; }
-    .eqPanel.eqDisabled .eqBottom{
-      filter: grayscale(.25);
-      pointer-events:none;
-      opacity:.55;
-    }
-    .eqPanel.eqDisabled #eqViz{ opacity:.55; }
-
-    .eqGateNote{
-      margin-top:10px;
+    .playerBox .ph .lab{
       font-size:12px;
-      color: rgba(255,255,255,.65);
-      line-height:1.5;
+      color: rgba(233,236,243,.78);
+      display:flex; align-items:center; gap:8px;
     }
-    .eqGateBadge{
-      display:inline-block;
+    .badge{
+      font-size:11px;
       padding:4px 8px;
       border-radius:999px;
       border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.03);
-      font-weight:900;
-      margin-right:8px;
-      white-space:nowrap;
+      background: rgba(255,255,255,.06);
+      color: rgba(233,236,243,.78);
+    }
+    audio{
+      width:100%;
+      height:38px;
+    }
+
+    /* Right card: EQ */
+    .eqWrap{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:14px;
+    }
+    .eqPanel{
+      padding:14px;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+    }
+
+    .eqTop{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+    .eqTop .lab{
+      display:flex; align-items:center; gap:10px;
+      font-size:12px;
+      color: rgba(233,236,243,.78);
+    }
+    .eqTop .lab strong{
+      color: rgba(233,236,243,.95);
+      font-weight:700;
+    }
+
+    .eqGate{
+      font-size:12px;
+      color: rgba(233,236,243,.72);
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .eqGateBadge{
+      font-size:11px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: rgba(233,236,243,.78);
+      user-select:none;
     }
     .eqGateBadge.on{
-      border-color: rgba(45,212,191,.25);
-      background: rgba(45,212,191,.08);
-      color: rgba(45,212,191,.95);
+      border-color: rgba(45,212,191,.35);
+      background: rgba(45,212,191,.10);
+      color: rgba(233,236,243,.90);
     }
     .eqGateBadge.off{
-      border-color: rgba(255,255,255,.14);
-      background: rgba(255,255,255,.03);
-      color: rgba(255,255,255,.80);
+      border-color: rgba(245,197,66,.35);
+      background: rgba(245,197,66,.10);
+      color: rgba(233,236,243,.88);
+    }
+
+    .eqDisabled{
+      opacity:.55;
+      pointer-events:none;
+      filter: saturate(.85);
+    }
+
+    /* Knobs */
+    .knobGrid{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:12px;
+    }
+    @media (max-width: 520px){
+      .knobGrid{ grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .knob{
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      padding:12px 10px;
+      text-align:center;
+      user-select:none;
+      position:relative;
+      overflow:hidden;
+    }
+    .knob .kname{
+      font-size:11px;
+      color: rgba(233,236,243,.70);
+      margin-top:4px;
+      letter-spacing:.2px;
+    }
+    .knob .kval{
+      margin-top:6px;
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:.2px;
+      color: rgba(233,236,243,.92);
+    }
+
+    .dial{
+      width:62px; height:62px;
+      border-radius:50%;
+      margin: 4px auto 0;
+      background:
+        radial-gradient(18px 18px at 35% 35%, rgba(255,255,255,.18), transparent 55%),
+        radial-gradient(42px 42px at 50% 55%, rgba(0,0,0,.38), rgba(0,0,0,.10)),
+        linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
+      border:1px solid rgba(255,255,255,.14);
+      box-shadow: 0 10px 24px rgba(0,0,0,.35);
+      position:relative;
+    }
+    .dial:after{
+      content:"";
+      position:absolute;
+      left:50%; top:50%;
+      width:6px;height:18px;
+      transform-origin: 50% 92%;
+      transform: translate(-50%,-92%) rotate(var(--deg, -135deg));
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.38));
+      box-shadow: 0 0 0 3px rgba(109,94,252,.10);
+    }
+
+    /* Spectrum */
+    .viz{
+      width:100%;
+      height:140px;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      overflow:hidden;
+      position:relative;
+    }
+    canvas{
+      width:100%;
+      height:100%;
+      display:block;
+    }
+
+    /* Footer actions */
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+      justify-content:flex-end;
+    }
+
+    .status{
+      margin-top:12px;
+      padding:12px 12px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      color: rgba(233,236,243,.76);
+      font-size:12px;
+      min-height:44px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .spinner{
+      width:16px;height:16px;border-radius:50%;
+      border:2px solid rgba(255,255,255,.18);
+      border-top-color: rgba(255,255,255,.72);
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin{ to{ transform:rotate(360deg);} }
+
+    .toast{
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.72);
+      border:1px solid rgba(255,255,255,.12);
+      color: rgba(233,236,243,.92);
+      padding: 10px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s ease;
+      box-shadow: 0 12px 40px rgba(0,0,0,.45);
+      backdrop-filter: blur(10px);
+    }
+    .toast.show{ opacity: 1; }
+
+    .mini{
+      font-size:11px;
+      color: rgba(233,236,243,.55);
     }
   </style>
 </head>
@@ -450,772 +473,311 @@
 <body>
   <div class="wrap">
     <div class="top">
-      <div class="brand"><span class="dot"></span> WarMaster</div>
+      <div class="brand">
+        <div class="logo"></div>
+        <div class="titleblock">
+          <h1>WarMaster</h1>
+          <div class="sub">Masterización online • beta 1.4</div>
+        </div>
+      </div>
       <div class="nav">
-        <span class="pill" id="apiPill">API: auto</span>
-        <span class="pill planPill free" id="planPill">■ FREE</span>
-        <button class="btn" id="goHome">Inicio</button>
-        <button class="btn" id="goDash">Dashboard</button>
+        <div class="pill"><span class="dot ok"></span><span id="apiBadge">API OK</span></div>
+        <a class="btn ghost" href="dashboard.html">Dashboard</a>
+        <a class="btn ghost" href="index.html">Inicio</a>
       </div>
     </div>
 
     <div class="grid">
       <!-- LEFT -->
-      <div class="card" id="cardLeft">
-        <div class="head">
+      <div class="card">
+        <div class="cardHeader">
           <h2>Nuevo Master</h2>
-          <span class="pill" id="statusPill">Listo</span>
+          <div class="hint">Sube tu canción y procesa</div>
         </div>
-        <div class="body">
-
-          <label>Archivo (mp3/wav)</label>
-          <div class="fileRow">
-            <input type="file" id="file" accept="audio/*" class="fileInputHidden"/>
-            <button class="btn btnPrimary fileBtn" id="btnPickFile">Elegir archivo</button>
-            <div class="fileMeta">
-              <div class="fileName" id="fileName">Sin archivo</div>
-              <div class="fileHint" id="fileHint">MAX 100MB · 6:00</div>
+        <div class="cardBody">
+          <div class="uploader">
+            <div class="left">
+              <div class="fileIcon">🎵</div>
+              <div class="meta">
+                <div class="name" id="fileName">Ningún archivo seleccionado</div>
+                <div class="small" id="fileInfo">WAV / MP3 • máx 100MB • máx 6min</div>
+              </div>
+            </div>
+            <div class="right">
+              <label class="btn" for="fileInput">Seleccionar</label>
+              <input id="fileInput" type="file" accept="audio/*" />
             </div>
           </div>
 
-          <div style="height:12px"></div>
-
-          <label>Destino / Preset</label>
-          <div class="selectGrid" id="targets"></div>
-
-          <div style="height:12px"></div>
-
-          <label>Intensidad</label>
-          <div class="selectGrid" id="intensity"></div>
-
-          <div class="note" id="planNote">
-            <span class="badge free">■ FREE</span>
-            Escucha el master completo. Descarga: 30s.
-          </div>
-
-          <hr class="divider"/>
-
           <div class="row">
-            <button class="btn btnPrimary" id="btnMaster">Procesar</button>
-            <button class="btn" id="btnReset">Limpiar</button>
+            <div class="field">
+              <label>Target</label>
+              <select id="target">
+                <option value="streaming">Streaming</option>
+                <option value="club">Club</option>
+                <option value="warm">Warm</option>
+                <option value="bright">Bright</option>
+                <option value="heavy">Heavy</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Intensity</label>
+              <select id="intensity">
+                <option value="soft">Soft</option>
+                <option value="balanced" selected>Balanced</option>
+                <option value="aggressive">Aggressive</option>
+              </select>
+            </div>
           </div>
 
-          <div style="height:12px"></div>
-          <div class="bar" aria-label="progreso"><div id="barFill"></div></div>
-          <div class="note" id="status">Listo.</div>
+          <div class="players">
+            <div class="playerBox">
+              <div class="ph">
+                <div class="lab">🎧 Original <span class="badge" id="badgeOrig">Listo</span></div>
+                <div class="mini" id="origLen"></div>
+              </div>
+              <audio id="audioOriginal" controls></audio>
+            </div>
+
+            <div class="playerBox">
+              <div class="ph">
+                <div class="lab">🔥 Master <span class="badge" id="badgeMaster">—</span></div>
+                <div class="mini" id="masterLen"></div>
+              </div>
+              <audio id="audioMaster" controls></audio>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn" id="btnReset" type="button">Reset</button>
+            <button class="btn primary" id="btnProcess" type="button">Procesar</button>
+            <a class="btn" id="btnDownload" href="#" download>Descargar</a>
+          </div>
+
+          <div class="status" id="statusBox">
+            <span class="dot warn" style="width:10px;height:10px;border-radius:50%;display:inline-block;"></span>
+            <span id="statusText">Selecciona un archivo para comenzar.</span>
+          </div>
         </div>
       </div>
 
       <!-- RIGHT -->
-      <div class="card" id="cardRight">
-        <div class="head">
-          <h2>Resultado</h2>
-          <span class="pill" id="resultPill">—</span>
+      <div class="card">
+        <div class="cardHeader">
+          <h2>EQ Live Preview</h2>
+          <div class="hint">Ajuste en tiempo real</div>
         </div>
-        <div class="body">
-          <div id="resultEmpty" class="muted">Sube un archivo y presiona “Procesar”.</div>
-
-          <div id="resultBox" style="display:none">
-
-            <label>Original</label>
-            <div class="player" id="playerOriginal">
-              <button class="pBtn" data-act="play" aria-label="play">▶</button>
-              <div class="pMid">
-                <div class="pTimeRow">
-                  <span class="pTime" data-k="cur">0:00</span>
-                  <span class="pSep">/</span>
-                  <span class="pTime" data-k="dur">0:00</span>
-                </div>
-                <input class="pSeek" type="range" min="0" max="1000" value="0" data-act="seek"/>
-              </div>
-              <input class="pVol" type="range" min="0" max="1" step="0.01" value="1" data-act="vol" aria-label="vol"/>
-              <audio id="audioOriginal"></audio>
+        <div class="cardBody">
+          <div class="eqWrap">
+            <div class="viz">
+              <canvas id="eqViz" width="900" height="240"></canvas>
             </div>
 
-            <div style="height:10px"></div>
-
-            <label>Master</label>
-            <div class="player playerPro" id="playerMaster">
-              <button class="pBtn" data-act="play" aria-label="play">▶</button>
-              <div class="pMid">
-                <div class="pTimeRow">
-                  <span class="pTime" data-k="cur">0:00</span>
-                  <span class="pSep">/</span>
-                  <span class="pTime" data-k="dur">0:00</span>
-                </div>
-                <input class="pSeek" type="range" min="0" max="1000" value="0" data-act="seek"/>
-              </div>
-              <input class="pVol" type="range" min="0" max="1" step="0.01" value="1" data-act="vol" aria-label="vol"/>
-              <audio id="audioMaster"></audio>
-            </div>
-
-            <!-- ===== PLUGIN PANEL (visible desde inicio, preview OFF hasta Procesar) ===== -->
             <div class="eqPanel eqDisabled" id="eqPanel">
               <div class="eqTop">
-                <div class="eqTitle">EQ Live</div>
-                <div class="eqSub">Vista pro (se activa al procesar)</div>
-                <canvas id="eqViz" width="900" height="220"></canvas>
-                <div class="eqGateNote" id="eqGateNote">
-                  <span class="eqGateBadge off" id="eqGateBadge">PREVIEW OFF</span>
+                <div class="lab">
+                  <strong>Perillas</strong>
+                  <span class="mini">Low • Mid • Presence • Air • Glue • Width • Sat • Output</span>
+                </div>
+                <div class="eqGate" id="eqGateNote">
+                  <span class="eqGateBadge off">PREVIEW OFF</span>
                   Activa el preview al presionar “Procesar”.
                 </div>
               </div>
 
-              <div class="eqBottom">
-                <div class="knobCol">
-                  <div class="knob" data-knob="low"></div>
-                  <div class="kLabel">LOW</div>
-                  <div class="kVal" id="vLow">0.0 dB</div>
-                </div>
-
-                <div class="knobCol">
-                  <div class="knob" data-knob="mid"></div>
-                  <div class="kLabel">MID</div>
-                  <div class="kVal" id="vMid">0.0 dB</div>
-                </div>
-
-                <div class="knobCol">
-                  <div class="knob" data-knob="pres"></div>
-                  <div class="kLabel">PRESENCE</div>
-                  <div class="kVal" id="vPres">0.0 dB</div>
-                </div>
-
-                <div class="knobCol">
-                  <div class="knob" data-knob="air"></div>
-                  <div class="kLabel">AIR</div>
-                  <div class="kVal" id="vAir">0.0 dB</div>
-                </div>
-
-                <div class="knobCol">
-                  <div class="knob" data-knob="glue"></div>
-                  <div class="kLabel">GLUE</div>
-                  <div class="kVal" id="vGlue">0%</div>
-                </div>
-
-                <div class="knobCol">
-                  <div class="knob" data-knob="width"></div>
-                  <div class="kLabel">WIDTH</div>
-                  <div class="kVal" id="vWidth">100%</div>
-                </div>
-
-                <div class="knobCol">
-                  <div class="knob" data-knob="sat"></div>
-                  <div class="kLabel">SAT</div>
-                  <div class="kVal" id="vSat">0%</div>
-                </div>
-
-                <div class="knobCol">
-                  <div class="knob" data-knob="out"></div>
-                  <div class="kLabel">OUTPUT</div>
-                  <div class="kVal" id="vOut">0.0 dB</div>
-                </div>
+              <div class="knobGrid" id="knobGrid">
+                <!-- Knobs inserted by JS -->
               </div>
             </div>
-            <!-- ===== /PLUGIN PANEL ===== -->
 
-            <div class="note" id="unlockHint"></div>
-
-            <div class="row" style="margin-top:12px">
-              <button class="btn" id="btnDownloadPreview">Descargar 30s</button>
-              <button class="btn btnPlus" id="btnUnlock">◇ Desbloquear</button>
-              <button class="btn btnPro" id="btnUpgradeToPro" style="display:none">◆ Upgrade PRO</button>
+            <div class="mini">
+              * Preview ON = escuchas cambios en vivo. El render final se genera al presionar “Procesar”.
             </div>
-
-            <div class="row" style="margin-top:10px">
-              <button class="btn btnPrimary" id="btnDownloadFull" style="display:none">Descargar completo</button>
-            </div>
-
-            <div class="note" id="backendNote"></div>
           </div>
         </div>
       </div>
     </div>
+
+    <div class="toast" id="toast">OK</div>
   </div>
 
-  <!-- Modal unlock -->
-  <div class="modalBack" id="modalBack">
-    <div class="modal">
-      <div class="head">
-        <h2>Desbloquear descarga</h2>
-        <button class="btn" id="closeModal">×</button>
-      </div>
-      <div class="body">
-        <div class="note" style="margin-top:0" id="modalTopNote">
-          Estás escuchando el master completo. Para descargar, elige:
-        </div>
+  <script>
+    // ======================
+    // CONFIG / API BASE
+    // ======================
+    const qp = new URLSearchParams(location.search);
+    const API_BASE = qp.get("api") || (location.origin.includes("localhost") ? "http://localhost:8000" : "");
+    window.API_BASE = API_BASE;
 
-        <div style="height:12px"></div>
+    // ======================
+    // UI refs
+    // ======================
+    const fileInput = document.getElementById("fileInput");
+    const fileName = document.getElementById("fileName");
+    const fileInfo = document.getElementById("fileInfo");
+    const targetSel = document.getElementById("target");
+    const intensitySel = document.getElementById("intensity");
 
-        <button class="btn btnPlus priceBtn" id="buyPlus">◇ Unlock PLUS (por canción)</button>
-        <div class="note muted">Desbloquea este master y queda en tu dashboard.</div>
+    const audioOriginal = document.getElementById("audioOriginal");
+    const audioMaster = document.getElementById("audioMaster");
 
-        <div style="height:10px"></div>
+    const badgeOrig = document.getElementById("badgeOrig");
+    const badgeMaster = document.getElementById("badgeMaster");
+    const origLen = document.getElementById("origLen");
+    const masterLen = document.getElementById("masterLen");
 
-        <button class="btn btnPro priceBtn" id="buyPro">◆ Unlock PRO (por canción)</button>
-        <div class="note muted">Versión PRO del master (según motor backend).</div>
+    const btnProcess = document.getElementById("btnProcess");
+    const btnReset = document.getElementById("btnReset");
+    const btnDownload = document.getElementById("btnDownload");
 
-        <hr class="divider"/>
+    const statusBox = document.getElementById("statusBox");
+    const statusText = document.getElementById("statusText");
+    const apiBadge = document.getElementById("apiBadge");
+    const toast = document.getElementById("toast");
 
-        <div class="note" id="payMsg"></div>
-      </div>
-    </div>
-  </div>
-
-  <script> 
-    // ========= API BASE =========
-    function getApiBase() {
-      // ✅ En Render, fuerza mismo dominio SIEMPRE (evita WM_API_BASE viejo rompiendo fetch)
-      const host = location.hostname.toLowerCase();
-      if (host.endsWith("onrender.com")) return "";
-
-      const qs = new URLSearchParams(location.search);
-      const fromQS = qs.get("api");
-      if (fromQS) return fromQS.replace(/\/+$/,'');
-
-      const stored = localStorage.getItem("WM_API_BASE");
-      if (stored) return stored.replace(/\/+$/,'');
-
-      return ""; // same origin
-    }
-    const API_BASE = getApiBase();
-    document.getElementById("apiPill").textContent = "API: " + (API_BASE || "mismo dominio");
-
-    function qsCarry(path){
-      const qs = new URLSearchParams(location.search);
-      const api = qs.get("api");
-      return api ? (path + "?api=" + encodeURIComponent(api)) : path;
-    }
-    document.getElementById("goHome").onclick = () => location.href = qsCarry("/index.html");
-    document.getElementById("goDash").onclick = () => location.href = qsCarry("/dashboard.html");
-
-    async function fetchWithTimeout(url, options={}, timeoutMs=180000) {
-      const ctrl = new AbortController();
-      const id = setTimeout(() => ctrl.abort(), timeoutMs);
-      try { return await fetch(url, { ...options, signal: ctrl.signal }); }
-      finally { clearTimeout(id); }
-    }
-
-    // ========= PLAN STATE (dynamic) =========
-    let currentPlan = "FREE"; // FREE / PLUS / PRO
-    function applyPlanUI(){
-      const pill = document.getElementById("planPill");
-      pill.classList.remove("free","plus","pro");
-      const left = document.getElementById("cardLeft");
-      const right = document.getElementById("cardRight");
-      left.classList.remove("cardGlowPlus","cardGlowPro");
-      right.classList.remove("cardGlowPlus","cardGlowPro");
-
-      if(currentPlan === "PLUS"){
-        pill.textContent = "◇ PLUS";
-        pill.classList.add("plus");
-        left.classList.add("cardGlowPlus");
-        right.classList.add("cardGlowPlus");
-        document.getElementById("planNote").innerHTML =
-          `<span class="badge plus">◇ PLUS</span> Descarga completa habilitada (plan).`;
-      } else if(currentPlan === "PRO"){
-        pill.textContent = "◆ PRO";
-        pill.classList.add("pro");
-        left.classList.add("cardGlowPro");
-        right.classList.add("cardGlowPro");
-        document.getElementById("planNote").innerHTML =
-          `<span class="badge pro">◆ PRO</span> Descarga completa habilitada (plan).`;
-      } else {
-        pill.textContent = "■ FREE";
-        pill.classList.add("free");
-        document.getElementById("planNote").innerHTML =
-          `<span class="badge free">■ FREE</span> Escucha el master completo. Descarga: 30s.`;
-      }
-    }
-
-    async function loadPlan(){
-      try{
-        const res = await fetchWithTimeout((API_BASE||"") + "/api/me", {}, 12000);
-        if(!res.ok) throw new Error("no /api/me");
-        const data = await res.json();
-        currentPlan = (data.plan || "FREE").toUpperCase();
-        if(!["FREE","PLUS","PRO"].includes(currentPlan)) currentPlan="FREE";
-      }catch(e){
-        currentPlan = "FREE";
-      }
-      applyPlanUI();
-    }
-    loadPlan();
-
-    // ========= UI DATA =========
-    const TARGETS = [
-      { id:"streaming",  name:"Streaming",  desc:"Balance general", pro:false },
-      { id:"warm",       name:"Warm",       desc:"Cuerpo / suavidad", pro:false },
-      { id:"bright",     name:"Bright",     desc:"Brillo / presencia", pro:false },
-      { id:"heavy",      name:"Heavy",      desc:"Grueso / denso", pro:false },
-      { id:"club",       name:"Club",       desc:"Impacto alto", pro:true }
-    ];
-    const INTENSITIES = [
-      { id:"soft",       name:"Suave",      desc:"Más dinámico", pro:true },
-      { id:"balanced",   name:"Balanceado", desc:"Default", pro:false },
-      { id:"aggressive", name:"Agresivo",   desc:"Más loud", pro:true }
-    ];
-
-    let selectedTarget = "streaming";
-    let selectedIntensity = "balanced";
-
-    function renderOptions(){
-      const tWrap = document.getElementById("targets");
-      const iWrap = document.getElementById("intensity");
-      tWrap.innerHTML = "";
-      iWrap.innerHTML = "";
-
-      TARGETS.forEach(t=>{
-        const el = document.createElement("div");
-        el.className = "opt" + (t.id===selectedTarget ? " active" : "");
-        el.innerHTML = `<b>${t.name}</b><small>${t.desc}</small>` + (t.pro ? `<span class="lock">PLUS / PRO</span>` : "");
-        el.onclick = ()=>{
-          if (t.pro && currentPlan==="FREE"){
-            document.getElementById("backendNote").textContent = "Disponible en PLUS / PRO.";
-            return;
-          }
-          selectedTarget = t.id;
-          renderOptions();
-        };
-        tWrap.appendChild(el);
-      });
-
-      INTENSITIES.forEach(i=>{
-        const el = document.createElement("div");
-        el.className = "opt" + (i.id===selectedIntensity ? " active" : "");
-        el.innerHTML = `<b>${i.name}</b><small>${i.desc}</small>` + (i.pro ? `<span class="lock">PLUS / PRO</span>` : "");
-        el.onclick = ()=>{
-          if (i.pro && currentPlan==="FREE"){
-            document.getElementById("backendNote").textContent = "Disponible en PLUS / PRO.";
-            return;
-          }
-          selectedIntensity = i.id;
-          renderOptions();
-        };
-        iWrap.appendChild(el);
-      });
-    }
-    renderOptions();
-
-    // ========= STATE =========
-    let lastMasterId = null;
-    let paidQuality = null; // null | "PLUS" | "PRO"
+    let originalFile = null;
     let originalUrl = null;
     let masterUrl = null;
-    let previewUrl = null;
+    let lastMasterId = null;
 
-    function revoke(u){
-      try{ if(u) URL.revokeObjectURL(u); }catch(e){}
+    function revoke(url){
+      try{ if(url && url.startsWith("blob:")) URL.revokeObjectURL(url); }catch(e){}
     }
-
-    function setStatus(text, pct){
-      document.getElementById("status").textContent = text || "";
-      document.getElementById("statusPill").textContent = (pct>=100) ? "Listo" : "Procesando";
-      document.getElementById("barFill").style.width = Math.max(0, Math.min(100, pct||0)) + "%";
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(()=> toast.classList.remove("show"), 1800);
     }
-
-    function resetResult(){
-      lastMasterId = null;
-      paidQuality = null;
-
-      document.getElementById("resultEmpty").style.display = "";
-      document.getElementById("resultBox").style.display = "none";
-      document.getElementById("resultPill").textContent = "—";
-      document.getElementById("unlockHint").textContent = "";
-      document.getElementById("backendNote").textContent = "";
-      document.getElementById("btnDownloadFull").style.display = "none";
-      document.getElementById("btnUpgradeToPro").style.display = "none";
-
-      const ao = document.getElementById("audioOriginal");
-      const am = document.getElementById("audioMaster");
-      ao.removeAttribute("src"); am.removeAttribute("src");
-      ao.load(); am.load();
-
-      revoke(originalUrl); revoke(masterUrl); revoke(previewUrl);
-      originalUrl = null; masterUrl = null; previewUrl = null;
-
-      // EQ vuelve a OFF visual
-      if (typeof window.WM_setEqEnabled === "function") window.WM_setEqEnabled(false);
-    }
-    // ========= PAY (demo) =========
-    function openModal(msg){
-      document.getElementById("payMsg").textContent = msg || "";
-      document.getElementById("modalBack").style.display = "flex";
-    }
-    function closeModal(){
-      document.getElementById("modalBack").style.display = "none";
-      document.getElementById("payMsg").textContent = "";
-    }
-    document.getElementById("closeModal").onclick = closeModal;
-    document.getElementById("modalBack").addEventListener("click", (e)=>{
-      if(e.target.id === "modalBack") closeModal();
-    });
-
-    document.getElementById("btnUnlock").onclick = () => openModal("");
-
-    function afterUnlockUI(){
-      const fullBtn = document.getElementById("btnDownloadFull");
-      const upBtn = document.getElementById("btnUpgradeToPro");
-
-      if (paidQuality === "PLUS") {
-        fullBtn.style.display = "";
-        upBtn.style.display = "";
-        document.getElementById("unlockHint").innerHTML =
-          `<span class="badge plus">◇ PLUS</span> Master desbloqueado. Disponible en dashboard para re-descarga.`;
-        return;
+    function setStatus(msg, spinning=false){
+      statusText.textContent = msg;
+      const sp = statusBox.querySelector(".spinner");
+      if(sp) sp.remove();
+      if(spinning){
+        const s = document.createElement("span");
+        s.className = "spinner";
+        statusBox.insertBefore(s, statusBox.firstChild);
       }
-      if (paidQuality === "PRO") {
-        fullBtn.style.display = "";
-        upBtn.style.display = "none";
-        document.getElementById("unlockHint").innerHTML =
-          `<span class="badge pro">◆ PRO</span> Master desbloqueado. Disponible en dashboard para re-descarga.`;
-        return;
-      }
-      if (currentPlan === "PLUS") {
-        fullBtn.style.display = "";
-        upBtn.style.display = "";
-        document.getElementById("unlockHint").innerHTML =
-          `<span class="badge plus">◇ PLUS</span> Descarga completa habilitada por plan.`;
-        return;
-      }
-      if (currentPlan === "PRO") {
-        fullBtn.style.display = "";
-        upBtn.style.display = "none";
-        document.getElementById("unlockHint").innerHTML =
-          `<span class="badge pro">◆ PRO</span> Descarga completa habilitada por plan.`;
-        return;
-      }
-
-      fullBtn.style.display = "none";
-      upBtn.style.display = "none";
-      document.getElementById("unlockHint").innerHTML =
-        `<span class="badge free">■ FREE</span> Descarga: preview 30s.`;
     }
 
-    function unlock(quality){
-      if(!lastMasterId){ alert("Primero procesa un master."); return; }
-      paidQuality = quality;
-      closeModal();
-      afterUnlockUI();
-      alert("Demo: unlock simulado. Luego conectamos pagos reales.");
-    }
-
-    async function fetchAndDownload(url, filename){
-      const r = await fetchWithTimeout(url, {}, 180000);
-      if(!r.ok) throw new Error("download fail");
-      const blob = await r.blob();
-      revoke(previewUrl);
-      previewUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = previewUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    }
-
-    document.getElementById("buyPlus").onclick = () => unlock("PLUS");
-    document.getElementById("buyPro").onclick  = () => unlock("PRO");
-
-    document.getElementById("btnDownloadPreview").onclick = async () => {
-      if(!lastMasterId){ alert("Primero procesa un master."); return; }
-
-      if (currentPlan === "PLUS" || currentPlan === "PRO" || paidQuality === "PLUS" || paidQuality === "PRO") {
-        window.open((API_BASE||"") + `/download/${encodeURIComponent(lastMasterId)}`, "_blank");
-        return;
-      }
-
+    async function fetchWithTimeout(url, opts={}, ms=180000){
+      const ctrl = new AbortController();
+      const t = setTimeout(()=> ctrl.abort("timeout"), ms);
       try{
-        setStatus("Generando preview...", 70);
-        const seconds = 30;
-        await fetchAndDownload(
-          (API_BASE||"") + `/api/master/preview?master_id=${encodeURIComponent(lastMasterId)}&seconds=${seconds}`,
-          "warmaster_preview_30s.wav"
-        );
-        setStatus("Listo.", 100);
+        const res = await fetch(url, { ...opts, signal: ctrl.signal });
+        return res;
+      } finally {
+        clearTimeout(t);
+      }
+    }
+
+    // ======================
+    // API health
+    // ======================
+    (async ()=>{
+      try{
+        const r = await fetchWithTimeout((API_BASE||"") + "/api/health", {}, 12000);
+        apiBadge.textContent = r.ok ? "API OK" : "API ?";
+        apiBadge.parentElement.querySelector(".dot").className = "dot " + (r.ok ? "ok":"warn");
       }catch(e){
-        alert("Preview requiere /api/master/preview con seconds (lo ajustamos en backend).");
-        setStatus("Listo.", 100);
+        apiBadge.textContent = "API OFF";
+        apiBadge.parentElement.querySelector(".dot").className = "dot bad";
       }
-    };
+    })();
 
-    document.getElementById("btnDownloadFull").onclick = async () => {
-      if(!lastMasterId){ alert("Primero procesa un master."); return; }
-      window.open((API_BASE||"") + `/download/${encodeURIComponent(lastMasterId)}`, "_blank");
-    };
+    // ======================
+    // file handling
+    // ======================
+    fileInput.addEventListener("change", ()=>{
+      const f = fileInput.files && fileInput.files[0];
+      if(!f) return;
+      originalFile = f;
 
-    // ========= FILE PICKER =========
-    const fileInput = document.getElementById("file");
-    const btnPick = document.getElementById("btnPickFile");
-    const fileNameEl = document.getElementById("fileName");
+      fileName.textContent = f.name;
+      fileInfo.textContent = `${Math.round(f.size/1024/1024*10)/10} MB • ${f.type || "audio"}`;
 
-    btnPick.onclick = () => fileInput.click();
+      revoke(originalUrl);
+      originalUrl = URL.createObjectURL(f);
+      audioOriginal.src = originalUrl;
+      audioOriginal.load();
 
-    fileInput.addEventListener("change", () => {
-      const f = fileInput.files?.[0];
-      fileNameEl.textContent = f ? f.name : "Sin archivo";
+      badgeOrig.textContent = "Cargado";
+      badgeMaster.textContent = "—";
+      masterLen.textContent = "";
+      lastMasterId = null;
 
-      // Limpia resultados cuando cambias archivo
-      resetResult();
-      setStatus("Listo.", 0);
+      // PREVIEW OFF hasta procesar
+      if(window.WM_setEqEnabled) window.WM_setEqEnabled(false);
 
-      // original preview (local)
-      if(f){
-        revoke(originalUrl);
-        originalUrl = URL.createObjectURL(f);
-        const ao = document.getElementById("audioOriginal");
-        ao.src = originalUrl;
-        ao.load();
-      }
+      setStatus("Archivo cargado. Presiona “Procesar” para generar el master.", false);
+      btnDownload.href = "#";
     });
 
-    // ========= PLAYER =========
-    function fmtTime(sec){
-      sec = Math.max(0, Math.floor(sec||0));
-      const m = Math.floor(sec/60);
-      const s = sec % 60;
-      return `${m}:${String(s).padStart(2,"0")}`;
-    }
+    // ======================
+    // Player interlock
+    // ======================
+    audioOriginal.addEventListener("play", ()=>{ try{ audioMaster.pause(); }catch(e){} });
+    audioMaster.addEventListener("play", ()=>{ try{ audioOriginal.pause(); }catch(e){} });
 
-    function bindPlayer(containerId, audioId){
-      const box = document.getElementById(containerId);
-      const audio = document.getElementById(audioId);
-      if(!box || !audio) return;
+    // ======================
+    // Reset
+    // ======================
+    btnReset.addEventListener("click", ()=>{
+      originalFile = null;
+      fileInput.value = "";
 
-      const btn = box.querySelector('[data-act="play"]');
-      const seek = box.querySelector('[data-act="seek"]');
-      const vol  = box.querySelector('[data-act="vol"]');
-      const cur  = box.querySelector('[data-k="cur"]');
-      const dur  = box.querySelector('[data-k="dur"]');
+      revoke(originalUrl); originalUrl=null;
+      revoke(masterUrl); masterUrl=null;
 
-      let dragging = false;
+      audioOriginal.removeAttribute("src");
+      audioMaster.removeAttribute("src");
+      audioOriginal.load();
+      audioMaster.load();
 
-      function syncBtn(){
-        btn.textContent = audio.paused ? "▶" : "❚❚";
+      fileName.textContent = "Ningún archivo seleccionado";
+      fileInfo.textContent = "WAV / MP3 • máx 100MB • máx 6min";
+
+      badgeOrig.textContent = "Listo";
+      badgeMaster.textContent = "—";
+      origLen.textContent = "";
+      masterLen.textContent = "";
+      lastMasterId = null;
+
+      if(window.WM_resetKnobs) window.WM_resetKnobs();
+      if(window.WM_setEqEnabled) window.WM_setEqEnabled(false);
+
+      btnDownload.href="#";
+      setStatus("Selecciona un archivo para comenzar.", false);
+      showToast("Reset");
+    });
+
+    // ======================
+    // PROCESS
+    // ======================
+    btnProcess.addEventListener("click", async ()=>{
+      if(!originalFile){
+        showToast("Selecciona un audio");
+        return;
       }
-
-      audio.addEventListener("loadedmetadata", () => {
-        dur.textContent = fmtTime(audio.duration);
-        cur.textContent = "0:00";
-        seek.value = "0";
-      });
-
-      audio.addEventListener("timeupdate", () => {
-        if(dragging) return;
-        cur.textContent = fmtTime(audio.currentTime);
-        const p = audio.duration ? (audio.currentTime / audio.duration) : 0;
-        seek.value = String(Math.round(p * 1000));
-      });
-
-      audio.addEventListener("play", syncBtn);
-      audio.addEventListener("pause", syncBtn);
-      audio.addEventListener("ended", () => { audio.currentTime = 0; audio.pause(); });
-
-      btn.addEventListener("click", () => {
-        document.querySelectorAll("audio").forEach(a => { if(a !== audio) a.pause(); });
-        if(audio.paused) audio.play(); else audio.pause();
-      });
-
-      seek.addEventListener("input", () => { dragging = true; });
-      seek.addEventListener("change", () => {
-        dragging = false;
-        const p = Number(seek.value) / 1000;
-        if(audio.duration) audio.currentTime = p * audio.duration;
-      });
-
-      vol.addEventListener("input", () => { audio.volume = Number(vol.value); });
-      audio.volume = Number(vol.value);
-      syncBtn();
-    }
-
-    bindPlayer("playerOriginal", "audioOriginal");
-    bindPlayer("playerMaster", "audioMaster");
-
-    // ========= EQ LIVE (visual gate) =========
-    const EQ = {
-      enabled:false,
-      low:0, mid:0, pres:0, air:0,
-      glue:0, width:100, sat:0, out:0
-    };
-
-    function drawEq(){
-      const c = document.getElementById("eqViz");
-      if(!c) return;
-      const ctx = c.getContext("2d");
-      const w = c.width, h = c.height;
-      ctx.clearRect(0,0,w,h);
-
-      // grid
-      ctx.globalAlpha = 0.25;
-      for(let i=1;i<10;i++){
-        const x = (w/10)*i;
-        ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke();
-      }
-      for(let i=1;i<6;i++){
-        const y = (h/6)*i;
-        ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke();
-      }
-      ctx.globalAlpha = 1;
-
-      // curve (simple)
-      const pts = [
-        {x:0.08, y:EQ.low},
-        {x:0.32, y:EQ.mid},
-        {x:0.62, y:EQ.pres},
-        {x:0.88, y:EQ.air}
-      ];
-      const mapY = (v)=> (h/2) - (v/12)*(h*0.38);
-
-      ctx.beginPath();
-      pts.forEach((p,idx)=>{
-        const x = p.x*w;
-        const y = mapY(p.y);
-        if(idx===0) ctx.moveTo(x,y);
-        else ctx.lineTo(x,y);
-      });
-      ctx.stroke();
-
-      pts.forEach(p=>{
-        const x = p.x*w, y = mapY(p.y);
-        ctx.beginPath();
-        ctx.arc(x,y,5,0,Math.PI*2);
-        ctx.fill();
-      });
-    }
-
-    function setEqGate(on){
-      EQ.enabled = !!on;
-      const panel = document.getElementById("eqPanel");
-      const badge = document.getElementById("eqGateBadge");
-      const note = document.getElementById("eqGateNote");
-      if(!panel || !badge || !note) return;
-
-      panel.classList.toggle("eqDisabled", !EQ.enabled);
-      badge.classList.toggle("on", EQ.enabled);
-      badge.classList.toggle("off", !EQ.enabled);
-      badge.textContent = EQ.enabled ? "PREVIEW ON" : "PREVIEW OFF";
-      note.lastChild.textContent = EQ.enabled ? " Preview activado." : " Activa el preview al presionar “Procesar”.";
-    }
-
-    // expone para otras funciones
-    window.WM_setEqEnabled = (on)=>{
-      setEqGate(on);
-      drawEq();
-    };
-    window.WM_setEqEnabled(false);
-
-    // Knob handling
-    const knobMap = {
-      low:  {min:-12,max:12, step:0.1, fmt:(v)=>`${v.toFixed(1)} dB`, out:"vLow"},
-      mid:  {min:-12,max:12, step:0.1, fmt:(v)=>`${v.toFixed(1)} dB`, out:"vMid"},
-      pres: {min:-12,max:12, step:0.1, fmt:(v)=>`${v.toFixed(1)} dB`, out:"vPres"},
-      air:  {min:-12,max:12, step:0.1, fmt:(v)=>`${v.toFixed(1)} dB`, out:"vAir"},
-      glue: {min:0,max:100, step:1,   fmt:(v)=>`${Math.round(v)}%`, out:"vGlue"},
-      width:{min:50,max:150, step:1,  fmt:(v)=>`${Math.round(v)}%`, out:"vWidth"},
-      sat:  {min:0,max:100, step:1,   fmt:(v)=>`${Math.round(v)}%`, out:"vSat"},
-      out:  {min:-12,max:6, step:0.1, fmt:(v)=>`${v.toFixed(1)} dB`, out:"vOut"},
-    };
-
-    function knobSetVisual(el, norm){
-      // norm: 0..1 map to -120..120 deg
-      const ang = -120 + norm*240;
-      el.style.setProperty("--ang", ang + "deg");
-    }
-
-    function setVal(key, val){
-      EQ[key] = val;
-      const meta = knobMap[key];
-      if(meta){
-        const out = document.getElementById(meta.out);
-        if(out) out.textContent = meta.fmt(val);
-      }
-      if(["low","mid","pres","air"].includes(key)) drawEq();
-    }
-
-    function initKnobs(){
-      document.querySelectorAll(".knob").forEach(knob=>{
-        const key = knob.getAttribute("data-knob");
-        const meta = knobMap[key];
-        if(!meta) return;
-
-        // init default values
-        const defaults = {
-          low:0, mid:0, pres:0, air:0,
-          glue:0, width:100, sat:0, out:0
-        };
-        setVal(key, defaults[key]);
-
-        const toNorm = (v)=> (v - meta.min) / (meta.max - meta.min);
-        knobSetVisual(knob, toNorm(EQ[key]));
-
-        let dragging=false;
-        let startY=0;
-        let startV=0;
-
-        const onDown = (e)=>{
-          if(!EQ.enabled) return;
-          dragging=true;
-          startY = (e.touches? e.touches[0].clientY : e.clientY);
-          startV = EQ[key];
-          knob.setPointerCapture?.(e.pointerId);
-          e.preventDefault();
-        };
-        const onMove = (e)=>{
-          if(!dragging) return;
-          const y = (e.touches? e.touches[0].clientY : e.clientY);
-          const dy = startY - y;
-          const range = meta.max - meta.min;
-          const delta = (dy / 160) * range; // sensitivity
-          let v = startV + delta;
-          v = Math.max(meta.min, Math.min(meta.max, v));
-          // snap to step
-          v = Math.round(v / meta.step) * meta.step;
-          setVal(key, v);
-          knobSetVisual(knob, toNorm(v));
-          e.preventDefault();
-        };
-        const onUp = (e)=>{
-          if(!dragging) return;
-          dragging=false;
-          e.preventDefault();
-        };
-
-        knob.addEventListener("pointerdown", onDown);
-        window.addEventListener("pointermove", onMove);
-        window.addEventListener("pointerup", onUp);
-
-        knob.addEventListener("touchstart", onDown, {passive:false});
-        window.addEventListener("touchmove", onMove, {passive:false});
-        window.addEventListener("touchend", onUp, {passive:false});
-      });
-
-      drawEq();
-    }
-    initKnobs();
-    // ========= PROCESS =========
-    document.getElementById("btnMaster").onclick = async () => {
-      const file = fileInput.files?.[0];
-      if(!file){ alert("Selecciona un archivo."); return; }
-
-      resetResult();
-      setStatus("Subiendo...", 10);
 
       try{
+        setStatus("Procesando…", true);
+        btnProcess.disabled = true;
+
         const fd = new FormData();
-        fd.append("file", file);
+        fd.append("file", originalFile);
+        fd.append("target", targetSel.value);
+        fd.append("intensity", intensitySel.value);
 
-        // backend expects: target/intensity or preset/intensity (se mantiene)
-        fd.append("target", selectedTarget);
-        fd.append("intensity", selectedIntensity);
-
-        // EQ knobs to backend (si backend los recibe)
-        fd.append("k_low",  String(EQ.low));
-        fd.append("k_mid",  String(EQ.mid));
-        fd.append("k_pres", String(EQ.pres));
-        fd.append("k_air",  String(EQ.air));
-        fd.append("k_glue", String(EQ.glue));
-        fd.append("k_width",String(EQ.width));
-        fd.append("k_sat",  String(EQ.sat));
-        fd.append("k_out",  String(EQ.out));
+        // knobs (se envían, aunque el preview sea local)
+        const k = window.WM_KNOBS || {};
+        fd.append("k_low", k.low ?? 0);
+        fd.append("k_mid", k.mid ?? 0);
+        fd.append("k_pres", k.pres ?? 0);
+        fd.append("k_air", k.air ?? 0);
+        fd.append("k_glue", k.glue ?? 0);
+        fd.append("k_width", k.width ?? 100);
+        fd.append("k_sat", k.sat ?? 0);
+        fd.append("k_out", k.out ?? 0);
 
         const res = await fetchWithTimeout((API_BASE||"") + "/api/master", {
           method:"POST",
@@ -1223,69 +785,597 @@
         }, 180000);
 
         if(!res.ok){
-          const t = await res.text().catch(()=> "");
-          throw new Error(t || "Error");
+          const err = await res.text().catch(()=> "");
+          throw new Error(err || ("HTTP " + res.status));
         }
 
-        // lee master id desde header (tu backend lo envía así)
-        const hdrId = res.headers.get("X-Master-Id") || res.headers.get("x-master-id");
-        if(hdrId) lastMasterId = hdrId;
+        const ctype = (res.headers.get("content-type") || "").toLowerCase();
 
-        // respuesta WAV (modo actual)
-       const ctype = (res.headers.get("content-type") || "").toLowerCase();
+        if (ctype.includes("application/json")) {
+          const data = await res.json().catch(()=> ({}));
+          const hdrId = res.headers.get("X-Master-Id") || res.headers.get("x-master-id");
+          lastMasterId = hdrId || data.master_id || data.id || null;
+          if(!lastMasterId) throw new Error("Falta master_id");
 
-// Si viene JSON => usamos /stream/{id}
-if (ctype.includes("application/json")) {
-  const data = await res.json().catch(()=> ({}));
-  const hdrId = res.headers.get("X-Master-Id") || res.headers.get("x-master-id");
-  lastMasterId = hdrId || data.master_id || data.id || null;
-  if(!lastMasterId) throw new Error("Falta master_id");
+          revoke(masterUrl);
+          masterUrl = (API_BASE||"") + `/stream/${encodeURIComponent(lastMasterId)}`;
+          audioMaster.src = masterUrl;
+          audioMaster.load();
 
-  revoke(masterUrl);
-  masterUrl = (API_BASE||"") + `/stream/${encodeURIComponent(lastMasterId)}`;
-  const am = document.getElementById("audioMaster");
-  am.src = masterUrl;
-  am.load();
-} else {
-  // Si por alguna razón aún llega WAV (return_blob=1)
-  const blob = await res.blob();
-  revoke(masterUrl);
-  masterUrl = URL.createObjectURL(blob);
-  const am = document.getElementById("audioMaster");
-  am.src = masterUrl;
-  am.load();
-}
+          btnDownload.href = (API_BASE||"") + `/download/${encodeURIComponent(lastMasterId)}`;
+        } else {
+          // fallback: si llega WAV (modo antiguo)
+          const blob = await res.blob();
+          revoke(masterUrl);
+          masterUrl = URL.createObjectURL(blob);
+          audioMaster.src = masterUrl;
+          audioMaster.load();
 
+          const hdrId = res.headers.get("X-Master-Id") || res.headers.get("x-master-id");
+          lastMasterId = hdrId || null;
+          if(lastMasterId){
+            btnDownload.href = (API_BASE||"") + `/download/${encodeURIComponent(lastMasterId)}`;
+          }else{
+            btnDownload.href = "#";
+          }
+        }
 
-        document.getElementById("resultEmpty").style.display = "none";
-        document.getElementById("resultBox").style.display = "";
-        document.getElementById("resultPill").textContent = "OK";
+        badgeMaster.textContent = "Listo";
+        setStatus("Master listo. Activa preview y ajusta perillas en tiempo real.", false);
+        showToast("Master listo");
 
-        afterUnlockUI();
-
-        setStatus("Listo.", 100);
-
-        // habilita EQ preview
-        window.WM_setEqEnabled(true);
+        // Activar preview automáticamente al terminar
+        if(window.WM_setEqEnabled) window.WM_setEqEnabled(true);
+        if (window.WM_enableEqGraph) window.WM_enableEqGraph();
 
       }catch(e){
-        alert("Error al masterizar. " + (e?.message || e));
-        setStatus("Listo.", 0);
-        window.WM_setEqEnabled(false);
+        console.error(e);
+        setStatus("Error al masterizar. " + (e?.message || e), false);
+        showToast("Error");
+      }finally{
+        btnProcess.disabled = false;
       }
-    };
+    });
 
-    document.getElementById("btnReset").onclick = () => {
-      resetResult();
-      fileInput.value = "";
-      fileNameEl.textContent = "Sin archivo";
-      setStatus("Listo.", 0);
-      window.WM_setEqEnabled(false);
-    };
+    // ======================
+    // KNOBS UI
+    // ======================
+    const KNOBS_DEF = [
+      { key:"low",  name:"LOW",  min:-12, max:12, step:0.1, unit:"dB" },
+      { key:"mid",  name:"MID",  min:-12, max:12, step:0.1, unit:"dB" },
+      { key:"pres", name:"PRES", min:-12, max:12, step:0.1, unit:"dB" },
+      { key:"air",  name:"AIR",  min:-12, max:12, step:0.1, unit:"dB" },
+      { key:"glue", name:"GLUE", min:0,   max:100, step:1,   unit:"%" },
+      { key:"width",name:"WIDTH",min:50,  max:150, step:1,   unit:"%" },
+      { key:"sat",  name:"SAT",  min:0,   max:100, step:1,   unit:"%" },
+      { key:"out",  name:"OUT",  min:-12, max:6,   step:0.1, unit:"dB" },
+    ];
 
-    // ===== Modal unlock =====
-    const modalBack = document.getElementById("modalBack");
-    const payMsg = document.getElementById("payMsg");
+    const knobGrid = document.getElementById("knobGrid");
+
+    function fmt(v, unit){
+      if(unit==="dB") return (Math.round(v*10)/10).toFixed(1) + " dB";
+      return Math.round(v) + unit;
+    }
+
+    function makeKnob(def){
+      const box = document.createElement("div");
+      box.className = "knob";
+      box.dataset.key = def.key;
+
+      const dial = document.createElement("div");
+      dial.className = "dial";
+      dial.style.setProperty("--deg", "-135deg");
+
+      const name = document.createElement("div");
+      name.className = "kname";
+      name.textContent = def.name;
+
+      const val = document.createElement("div");
+      val.className = "kval";
+      val.textContent = fmt(window.WM_KNOBS[def.key], def.unit);
+
+      box.appendChild(dial);
+      box.appendChild(name);
+      box.appendChild(val);
+
+      const min = def.min, max = def.max;
+      const range = max - min;
+
+      function setVal(newV, fromUser=false){
+        const v = Math.max(min, Math.min(max, newV));
+        window.WM_KNOBS[def.key] = v;
+        val.textContent = fmt(v, def.unit);
+
+        // dial angle (-135..135)
+        const t = (v - min) / range;
+        const deg = -135 + t * 270;
+        dial.style.setProperty("--deg", deg + "deg");
+
+        if(fromUser && window.WM_applyEqParams){
+          window.WM_applyEqParams(false);
+        }
+      }
+
+      // init
+      setVal(window.WM_KNOBS[def.key], false);
+
+      let dragging = false;
+      let lastY = 0;
+
+      const onMove = (clientY)=>{
+        if(!dragging) return;
+        const dy = lastY - clientY;
+        lastY = clientY;
+        const cur = window.WM_KNOBS[def.key];
+        const step = def.step;
+        const delta = dy * (step * 0.35);
+        setVal(cur + delta, true);
+      };
+
+      const onUp = ()=>{
+        dragging = false;
+        window.removeEventListener("mousemove", mm);
+        window.removeEventListener("mouseup", mu);
+        window.removeEventListener("touchmove", tm);
+        window.removeEventListener("touchend", tu);
+      };
+
+      const mm = (e)=> onMove(e.clientY);
+      const mu = ()=> onUp();
+      const tm = (e)=>{ if(e.touches && e.touches[0]) onMove(e.touches[0].clientY); };
+      const tu = ()=> onUp();
+
+      box.addEventListener("mousedown", (e)=>{
+        e.preventDefault();
+        dragging = true;
+        lastY = e.clientY;
+        window.addEventListener("mousemove", mm);
+        window.addEventListener("mouseup", mu);
+      });
+
+      box.addEventListener("touchstart", (e)=>{
+        e.preventDefault();
+        dragging = true;
+        lastY = e.touches[0].clientY;
+        window.addEventListener("touchmove", tm, {passive:false});
+        window.addEventListener("touchend", tu);
+      }, {passive:false});
+
+      // double click reset
+      box.addEventListener("dblclick", ()=>{
+        let reset = 0;
+        if(def.key === "width") reset = 100;
+        setVal(reset, true);
+        showToast(def.name + " reset");
+      });
+
+      return box;
+    }
+
+    // build knobs
+    KNOBS_DEF.forEach(k => knobGrid.appendChild(makeKnob(k)));
+
+    window.WM_resetKnobs = ()=>{
+      const defaults = { low:0, mid:0, pres:0, air:0, glue:0, width:100, sat:0, out:0 };
+      Object.assign(window.WM_KNOBS, defaults);
+      // refresh UI by rebuilding quick
+      knobGrid.innerHTML = "";
+      KNOBS_DEF.forEach(k => knobGrid.appendChild(makeKnob(k)));
+      if(window.WM_applyEqParams) window.WM_applyEqParams(false);
+    };
+  </script>
+  <script>
+    // ========= EQ LIVE (WebAudio real-time preview, activación al "Procesar") =========
+    (() => {
+      const masterAudio = document.getElementById("audioMaster");
+      const eqPanel = document.getElementById("eqPanel");
+      if (!masterAudio || !eqPanel) return;
+
+      const gateNote = document.getElementById("eqGateNote");
+
+      const state = { low:0, mid:0, pres:0, air:0, glue:0, width:100, sat:0, out:0 };
+      window.WM_KNOBS = state;
+
+      let eqEnabled = false;
+
+      function setEqEnabled(on){
+        eqEnabled = !!on;
+        if(eqEnabled){
+          eqPanel.classList.remove("eqDisabled");
+          if(gateNote){
+            gateNote.innerHTML = `<span class="eqGateBadge on">PREVIEW ON</span> Ajuste en tiempo real habilitado.`;
+          }
+        }else{
+          eqPanel.classList.add("eqDisabled");
+          if(gateNote){
+            gateNote.innerHTML = `<span class="eqGateBadge off">PREVIEW OFF</span> Activa el preview al presionar “Procesar”.`;
+          }
+        }
+      }
+
+      // Exponer para usarlo desde el flujo de "Procesar" y Reset
+      window.WM_setEqEnabled = setEqEnabled;
+
+      let ctx=null, src=null, analyser=null, rafId=0;
+
+      // --- FIX: al dar Play, asegurar WebAudio activo (graph + resume) ---
+      masterAudio.addEventListener("play", async () => {
+        if (!eqEnabled) return; // solo si PREVIEW ON
+        try { ensureAudioGraph(); } catch (e) {}
+        try {
+          if (ctx && ctx.state === "suspended") await ctx.resume();
+        } catch (e) {}
+      });
+
+      let lowShelf=null, midPeak=null, presPeak=null, highShelf=null;
+      let glueComp=null;
+
+      let satShaper=null, satDry=null, satWet=null, satMix=null;
+
+      let widthSplitter=null, widthMerger=null;
+      let midSum=null, sideSum=null, sideScale=null;
+      let leftOut=null, rightOut=null;
+
+      let outGain=null, limiter=null;
+
+      const canvas = document.getElementById("eqViz");
+      const g = canvas ? canvas.getContext("2d") : null;
+      const buf = new Uint8Array(1024);
+
+      function dbToGain(db){ return Math.pow(10, db/20); }
+      function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
+
+      function makeWaveshaperCurve(drive){
+        const n = 2048;
+        const curve = new Float32Array(n);
+        const k = 1 + drive * 40;
+        for(let i=0;i<n;i++){
+          const x = (i * 2 / (n-1)) - 1;
+          curve[i] = Math.tanh(k * x) / Math.tanh(k);
+        }
+        return curve;
+      }
+
+      function applyParams(smooth=true){
+        if(!ctx) return;
+
+        const now = ctx.currentTime;
+        const t = smooth ? 0.02 : 0.0;
+
+        const low = clamp(window.WM_KNOBS.low, -12, 12);
+        const mid = clamp(window.WM_KNOBS.mid, -12, 12);
+        const pres= clamp(window.WM_KNOBS.pres,-12, 12);
+        const air = clamp(window.WM_KNOBS.air, -12, 12);
+
+        const glue = clamp(window.WM_KNOBS.glue, 0, 100) / 100;
+        const width= clamp(window.WM_KNOBS.width, 50, 150) / 100;
+        const sat  = clamp(window.WM_KNOBS.sat, 0, 100) / 100;
+        const out  = clamp(window.WM_KNOBS.out, -12, 6);
+
+        if(lowShelf){
+          lowShelf.type="lowshelf"; lowShelf.frequency.value=120;
+          lowShelf.gain.cancelScheduledValues(now);
+          lowShelf.gain.setTargetAtTime(low, now, t);
+        }
+        if(midPeak){
+          midPeak.type="peaking"; midPeak.frequency.value=630; midPeak.Q.value=1;
+          midPeak.gain.cancelScheduledValues(now);
+          midPeak.gain.setTargetAtTime(mid, now, t);
+        }
+        if(presPeak){
+          presPeak.type="peaking"; presPeak.frequency.value=1760; presPeak.Q.value=1;
+          presPeak.gain.cancelScheduledValues(now);
+          presPeak.gain.setTargetAtTime(pres, now, t);
+        }
+        if(highShelf){
+          highShelf.type="highshelf"; highShelf.frequency.value=8500;
+          highShelf.gain.cancelScheduledValues(now);
+          highShelf.gain.setTargetAtTime(air, now, t);
+        }
+
+        // Glue comp: threshold y ratio (aprox)
+        if(glueComp){
+          const thr = -12 - glue*18;
+          const ratio = 1.2 + glue*3.8;
+          glueComp.threshold.cancelScheduledValues(now);
+          glueComp.threshold.setTargetAtTime(thr, now, t);
+          glueComp.ratio.cancelScheduledValues(now);
+          glueComp.ratio.setTargetAtTime(ratio, now, t);
+          glueComp.attack.cancelScheduledValues(now);
+          glueComp.attack.setTargetAtTime(0.012 - glue*0.007, now, t);
+          glueComp.release.cancelScheduledValues(now);
+          glueComp.release.setTargetAtTime(0.20 + glue*0.10, now, t);
+        }
+
+        // Width mid/side scaling
+        if(sideScale){
+          sideScale.gain.cancelScheduledValues(now);
+          sideScale.gain.setTargetAtTime(width, now, t);
+        }
+
+        // Saturation mix
+        if(satMix && satDry && satWet){
+          satDry.gain.cancelScheduledValues(now);
+          satWet.gain.cancelScheduledValues(now);
+          satDry.gain.setTargetAtTime(1 - sat, now, t);
+          satWet.gain.setTargetAtTime(sat, now, t);
+        }
+        if(satShaper){
+          satShaper.curve = makeWaveshaperCurve(sat);
+          satShaper.oversample = "2x";
+        }
+
+        // Output
+        if(outGain){
+          outGain.gain.cancelScheduledValues(now);
+          outGain.gain.setTargetAtTime(dbToGain(out), now, t);
+        }
+      }
+
+      window.WM_applyEqParams = applyParams;
+
+      function ensureAudioGraph(){
+        if(!eqEnabled) return;   // NO crear graph hasta que eqEnabled sea true
+        if (ctx) return;
+
+        ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === "suspended") ctx.resume().catch(()=>{});
+
+        src = ctx.createMediaElementSource(masterAudio);
+
+        lowShelf = ctx.createBiquadFilter();
+        midPeak  = ctx.createBiquadFilter();
+        presPeak = ctx.createBiquadFilter();
+        highShelf= ctx.createBiquadFilter();
+
+        glueComp = ctx.createDynamicsCompressor();
+
+        // Saturation
+        satShaper = ctx.createWaveShaper();
+        satDry = ctx.createGain();
+        satWet = ctx.createGain();
+        satMix = ctx.createGain();
+
+        // Mid/Side Width
+        widthSplitter = ctx.createChannelSplitter(2);
+        widthMerger   = ctx.createChannelMerger(2);
+
+        midSum = ctx.createGain();
+        sideSum = ctx.createGain();
+        sideScale = ctx.createGain();
+
+        leftOut = ctx.createGain();
+        rightOut = ctx.createGain();
+
+        outGain = ctx.createGain();
+
+        analyser = ctx.createAnalyser();
+        analyser.fftSize = 2048;
+        analyser.smoothingTimeConstant = 0.82;
+
+        // limiter simple
+        limiter = ctx.createDynamicsCompressor();
+        limiter.threshold.value = -1.0;
+        limiter.knee.value = 0;
+        limiter.ratio.value = 20;
+        limiter.attack.value = 0.003;
+        limiter.release.value = 0.05;
+
+        // Graph:
+        // src -> eq -> glue -> (dry + wet waveshaper) -> mid/side -> out -> limiter -> analyser -> destination
+
+        src.connect(lowShelf);
+        lowShelf.connect(midPeak);
+        midPeak.connect(presPeak);
+        presPeak.connect(highShelf);
+        highShelf.connect(glueComp);
+
+        // split dry/wet
+        glueComp.connect(satDry);
+        glueComp.connect(satShaper);
+        satShaper.connect(satWet);
+
+        // mix
+        satDry.connect(satMix);
+        satWet.connect(satMix);
+
+        // width (mid/side)
+        satMix.connect(widthSplitter);
+
+        const L = 0, R = 1;
+
+        // mid = (L+R)/2
+        widthSplitter.connect(midSum, L);
+        widthSplitter.connect(midSum, R);
+
+        // side = (L-R)/2
+        widthSplitter.connect(sideSum, L);
+        widthSplitter.connect(sideSum, R);
+        sideSum.gain.value = 1;
+
+        // scale side
+        sideSum.connect(sideScale);
+
+        // reconstruct L = mid + side, R = mid - side
+        midSum.connect(leftOut);
+        sideScale.connect(leftOut);
+
+        midSum.connect(rightOut);
+        // invert side for right
+        const inv = ctx.createGain();
+        inv.gain.value = -1;
+        sideScale.connect(inv);
+        inv.connect(rightOut);
+
+        leftOut.connect(widthMerger, 0, 0);
+        rightOut.connect(widthMerger, 0, 1);
+
+        widthMerger.connect(outGain);
+        outGain.connect(limiter);
+        limiter.connect(analyser);
+        analyser.connect(ctx.destination);
+
+        applyParams(false);
+        startViz();
+      }
+
+      function resizeCanvas(){
+        if(!canvas) return;
+        const r = canvas.getBoundingClientRect();
+        const dpr = Math.min(2, window.devicePixelRatio||1);
+        const w = Math.max(420, Math.floor(r.width * dpr));
+        const h = Math.max(180, Math.floor(r.height * dpr));
+        if(canvas.width !== w || canvas.height !== h){
+          canvas.width = w;
+          canvas.height = h;
+        }
+      }
+      window.addEventListener("resize", ()=>{ resizeCanvas(); }, {passive:true});
+      resizeCanvas();
+
+      function drawGrid(){
+        if (!g) return;
+        const w = canvas.width, h = canvas.height;
+        g.clearRect(0,0,w,h);
+
+        g.lineWidth = 1;
+        g.strokeStyle = "rgba(255,255,255,.06)";
+        for(let i=1;i<=5;i++){
+          const y = (i/6)*h;
+          g.beginPath(); g.moveTo(0,y); g.lineTo(w,y); g.stroke();
+        }
+        for(let i=1;i<=10;i++){
+          const x = (i/11)*w;
+          g.beginPath(); g.moveTo(x,0); g.lineTo(x,h); g.stroke();
+        }
+
+        // baseline
+        g.strokeStyle = "rgba(255,255,255,.08)";
+        g.beginPath(); g.moveTo(0, h*0.5); g.lineTo(w, h*0.5); g.stroke();
+      }
+
+      function drawSpectrum(){
+        if (!analyser || !g) return;
+
+        analyser.getByteFrequencyData(buf);
+        const w = canvas.width, h = canvas.height;
+
+        // Curva principal (más contraste)
+        g.beginPath();
+        for (let i = 0; i < buf.length; i++) {
+          const x = (i / (buf.length - 1)) * w;
+          const v = buf[i] / 255;
+          const y = h - Math.pow(v, 1.6) * h * 0.95;
+          if (i === 0) g.moveTo(x, y);
+          else g.lineTo(x, y);
+        }
+
+        g.strokeStyle = "rgba(255,255,255,.28)";
+        g.lineWidth = 2.0;
+        g.stroke();
+
+        // Relleno (más visible)
+        g.lineTo(w, h);
+        g.lineTo(0, h);
+        g.closePath();
+
+        const grad = g.createLinearGradient(0, 0, 0, h);
+        grad.addColorStop(0, "rgba(109,94,252,.28)");
+        grad.addColorStop(1, "rgba(45,212,191,.18)");
+        g.fillStyle = grad;
+        g.fill();
+
+        // Barras suaves para dar vida al espectro
+        const step = 10;
+        g.fillStyle = "rgba(255,255,255,.10)";
+        for (let i = 0; i < buf.length; i += step) {
+          const x = (i / (buf.length - 1)) * w;
+          const v = buf[i] / 255;
+          const barH = Math.pow(v, 1.4) * h * 0.75;
+          g.fillRect(x, h - barH, 2, barH);
+        }
+      }
+
+      function drawEQCurve(){
+        if (!g) return;
+        const w = canvas.width, h = canvas.height;
+
+        const low = clamp(window.WM_KNOBS.low, -12, 12);
+        const mid = clamp(window.WM_KNOBS.mid, -12, 12);
+        const pres= clamp(window.WM_KNOBS.pres,-12, 12);
+        const air = clamp(window.WM_KNOBS.air, -12, 12);
+
+        const points = [
+          { f: 120,  g: low },
+          { f: 630,  g: mid },
+          { f: 1760, g: pres },
+          { f: 8500, g: air },
+        ];
+
+        function xFromF(f){
+          const minF = 40, maxF = 16000;
+          const t = (Math.log10(f) - Math.log10(minF)) / (Math.log10(maxF) - Math.log10(minF));
+          return t * w;
+        }
+        function yFromDb(db){
+          const t = (db + 12) / 24; // -12..+12
+          return (1 - t) * h * 0.92 + h*0.04;
+        }
+
+        g.beginPath();
+        points.forEach((p,i)=>{
+          const x = xFromF(p.f);
+          const y = yFromDb(p.g);
+          if(i===0) g.moveTo(x,y);
+          else g.lineTo(x,y);
+        });
+        g.strokeStyle = "rgba(255,255,255,.55)";
+        g.lineWidth = 2.0;
+        g.stroke();
+
+        // points (DB)
+        g.fillStyle = "rgba(255,255,255,.90)";
+        points.forEach(p=>{
+          const x = xFromF(p.f);
+          const y = yFromDb(p.g);
+          g.beginPath(); g.arc(x,y,3.4,0,Math.PI*2); g.fill();
+
+          g.font = "12px system-ui, sans-serif";
+          g.fillStyle = "rgba(233,236,243,.72)";
+          g.fillText(Math.round(p.g*10)/10 + " dB", x+8, y-8);
+        });
+      }
+      function startViz(){
+        if (!g || !analyser) return;
+        cancelAnimationFrame(rafId);
+        const tick = () => {
+          drawGrid();
+          drawSpectrum();
+          drawEQCurve();
+          rafId = requestAnimationFrame(tick);
+        };
+        tick();
+      }
+
+      // Activación pública: se llama automáticamente cuando termina "Procesar"
+      window.WM_enableEqGraph = () => {
+        if(!eqEnabled) return;
+        ensureAudioGraph();
+        if(ctx && ctx.state === "suspended") ctx.resume().catch(()=>{});
+      };
+
+      // Si el usuario resetea knobs, aplicamos
+      const oldReset = window.WM_resetKnobs;
+      window.WM_resetKnobs = ()=>{
+        if(oldReset) oldReset();
+        try{
+          if(eqEnabled) ensureAudioGraph();
+          applyParams(false);
+        }catch(e){}
+      };
+
+    })();
   </script>
 </body>
 </html>
