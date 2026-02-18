@@ -663,16 +663,27 @@
 
   <script> 
     // ========= API BASE =========
-    function getApiBase() {
-      const qs = new URLSearchParams(location.search);
-      const fromQS = qs.get("api");
-      if (fromQS) return fromQS.replace(/\/+$/,'');
-      const stored = localStorage.getItem("WM_API_BASE");
-      if (stored) return stored.replace(/\/+$/,'');
-      return ""; // same origin
-    }
-    const API_BASE = getApiBase();
-    document.getElementById("apiPill").textContent = "API: " + (API_BASE || "mismo dominio");
+   function getApiBase() {
+
+  // ✅ Si estás en Render, fuerza mismo dominio SIEMPRE
+  const host = location.hostname.toLowerCase();
+  if (host.endsWith("onrender.com")) {
+    return "";
+  }
+
+  // Si NO estás en Render, permite override por querystring
+  const qs = new URLSearchParams(location.search);
+  const fromQS = qs.get("api");
+  if (fromQS) return fromQS.replace(/\/+$/,'');
+
+  // Luego localStorage
+  const stored = localStorage.getItem("WM_API_BASE");
+  if (stored) return stored.replace(/\/+$/,'');
+
+  return "";
+}
+const API_BASE = getApiBase();
+document.getElementById("apiPill").textContent = "API: " + (API_BASE || "mismo dominio");
 
     function qsCarry(path){
       const qs = new URLSearchParams(location.search);
