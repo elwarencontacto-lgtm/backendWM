@@ -407,6 +407,18 @@
     const qs = new URLSearchParams(location.search);
     const API_BASE = (qs.get("api") || "").trim() || location.origin;
 
+    // Plan (FREE/PLUS/PRO)
+    let USER_PLAN = "FREE";
+    (async ()=>{
+      try{
+        const r = await fetch(API_BASE + "/api/me");
+        if (r.ok){
+          const j = await r.json();
+          if (j && j.plan) USER_PLAN = String(j.plan).toUpperCase();
+        }
+      }catch(_){ /* ignore */ }
+    })();
+
     // =========
     // fetchWithTimeout
     // =========
@@ -462,7 +474,7 @@
       barFill.style.width = prog + "%";
       pctEl.textContent = String(prog);
     }
-    
+
     function setStatus(msg){
       statusText.textContent = msg;
     }
@@ -531,7 +543,8 @@
 
     function finishProgressFail(msg){
       stopProgressTimer();
-      setProgress(Math.min(prog, 95));
+      setProgress(0);
+      status.style.display = "block";
       setStatus(msg || "Error procesando el audio.");
     }
 
@@ -656,6 +669,7 @@
         masterPlayer.load();
 
         finishProgressOk();
+        if (USER_PLAN === "FREE") setStatus("¡Listo! Preview 30s (FREE).");
         enableKnobs(); // demo ON (en beta1.3 no afecta audio, solo UI)
         downloadBtn.disabled = false;
       }catch(err){
