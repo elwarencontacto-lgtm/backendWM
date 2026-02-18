@@ -286,6 +286,125 @@
     .knob.on{ opacity: 1; }
     .knob label{ margin:0 0 6px; font-size: 11px; }
     .knob input[type="range"]{ width:100%; }
+
+    /* ===== EQ LIVE (replica UI) ===== */
+    .eq-live{
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.10));
+      box-shadow: 0 18px 55px rgba(0,0,0,.45);
+    }
+    .eq-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; padding: 4px 4px 10px; }
+    .eq-head h3{ margin:0; font-size: 20px; letter-spacing:.2px; }
+    .eq-sub{ margin-top: 4px; color: rgba(233,237,247,.62); font-size: 13px; }
+
+    .eq-graph-wrap{
+      position: relative;
+      border-radius: 22px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.08);
+      background:
+        radial-gradient(550px 320px at 30% 15%, rgba(138,92,255,.12), transparent 65%),
+        radial-gradient(520px 320px at 70% 20%, rgba(0,215,255,.10), transparent 65%),
+        linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,.40));
+      aspect-ratio: 16/9;
+    }
+    .eq-graph-wrap svg{ width:100%; height:100%; display:block; opacity: .98; }
+    .eq-graph-wrap:before{
+      content:"";
+      position:absolute; inset:0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
+      background-size: 10% 20%;
+      opacity: .35;
+      pointer-events:none;
+    }
+    .eq-graph-wrap:after{
+      content:"";
+      position:absolute; inset:-2px;
+      border-radius: 22px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), inset 0 -40px 120px rgba(0,0,0,.55);
+      pointer-events:none;
+    }
+
+    /* Tiles */
+    .knobs-eq{
+      margin-top: 14px;
+      display:grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    @media (min-width: 720px){
+      .knobs-eq{ grid-template-columns: repeat(3, 1fr); }
+    }
+    .knob.tile{
+      position: relative;
+      padding: 14px 14px 12px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.10);
+      background:
+        radial-gradient(240px 180px at 30% 15%, rgba(255,255,255,.06), transparent 70%),
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.14));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+      opacity: .55;
+      min-height: 168px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap: 10px;
+    }
+    .knob.tile.on{ opacity: 1; }
+
+    .dial{
+      width: 92px;
+      height: 92px;
+      border-radius: 999px;
+      position: relative;
+      background:
+        radial-gradient(circle at 35% 30%, rgba(255,255,255,.10), rgba(255,255,255,0) 58%),
+        radial-gradient(circle at 50% 60%, rgba(0,0,0,.35), rgba(0,0,0,.65));
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.08),
+        inset 0 -16px 30px rgba(0,0,0,.35),
+        0 18px 40px rgba(0,0,0,.35);
+    }
+    .dial:after{
+      content:"";
+      position:absolute; inset: 10px;
+      border-radius: 999px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+      opacity: .9;
+    }
+    .needle{
+      position:absolute;
+      left:50%; top:50%;
+      width: 44px; height: 6px;
+      transform-origin: 0% 50%;
+      transform: translateY(-50%) rotate(-45deg);
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(0,215,255,.92), rgba(138,92,255,.92));
+      box-shadow: 0 0 18px rgba(138,92,255,.22);
+    }
+    .kmeta{ text-align:center; }
+    .kname{ font-weight: 800; letter-spacing: .8px; font-size: 14px; }
+    .kval{ margin-top: 6px; color: rgba(233,237,247,.85); font-size: 13px; }
+
+    /* Make range cover tile for touch */
+    .knob.tile input[type="range"]{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      opacity:0;
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .knob.tile input[type="range"]::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; width: 1px; height: 1px; }
   </style>
 </head>
 
@@ -356,24 +475,95 @@
           Nota: las perillas (demo) quedan bloqueadas hasta que termine el proceso. En beta1.3 la prioridad es estabilidad.
         </p>
 
-        <div class="knobs" id="knobs">
-          <div class="knob" data-k="low">
-            <label>Low</label>
-            <input type="range" min="-12" max="12" value="0" disabled />
+        
+        <section class="eq-live" id="eqLive">
+          <div class="eq-head">
+            <div>
+              <h3>EQ Live</h3>
+              <div class="eq-sub">Ajuste en tiempo real (preview)</div>
+            </div>
           </div>
-          <div class="knob" data-k="mid">
-            <label>Mid</label>
-            <input type="range" min="-12" max="12" value="0" disabled />
+
+          <div class="eq-graph-wrap">
+            <svg id="eqSvg" viewBox="0 0 1000 420" preserveAspectRatio="none" aria-label="EQ curve preview">
+              <defs>
+                <linearGradient id="eqGrad" x1="0" x2="1" y1="0" y2="0">
+                  <stop offset="0%" stop-color="rgba(0,215,255,.95)"/>
+                  <stop offset="55%" stop-color="rgba(138,92,255,.95)"/>
+                  <stop offset="100%" stop-color="rgba(0,255,154,.95)"/>
+                </linearGradient>
+                <filter id="eqGlow">
+                  <feGaussianBlur stdDeviation="2.2" result="blur"/>
+                  <feMerge>
+                    <feMergeNode in="blur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+
+              <path id="eqPathGlow" d="" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/>
+              <path id="eqPath" d="" fill="none" stroke="url(#eqGrad)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" filter="url(#eqGlow)"/>
+              <g id="eqPoints"></g>
+            </svg>
           </div>
-          <div class="knob" data-k="pres">
-            <label>Presence</label>
-            <input type="range" min="-12" max="12" value="0" disabled />
+
+          <div class="knobs knobs-eq" id="knobs">
+            <div class="knob tile" data-k="low" data-unit="dB" data-min="-12" data-max="12">
+              <div class="dial" aria-hidden="true"><div class="needle"></div></div>
+              <div class="kmeta">
+                <div class="kname">LOW</div>
+                <div class="kval" data-val>+0.0 dB</div>
+              </div>
+              <input type="range" min="-12" max="12" value="0" step="0.1" disabled />
+            </div>
+
+            <div class="knob tile" data-k="mid" data-unit="dB" data-min="-12" data-max="12">
+              <div class="dial" aria-hidden="true"><div class="needle"></div></div>
+              <div class="kmeta">
+                <div class="kname">MID</div>
+                <div class="kval" data-val>+0.0 dB</div>
+              </div>
+              <input type="range" min="-12" max="12" value="0" step="0.1" disabled />
+            </div>
+
+            <div class="knob tile" data-k="pres" data-unit="dB" data-min="-12" data-max="12">
+              <div class="dial" aria-hidden="true"><div class="needle"></div></div>
+              <div class="kmeta">
+                <div class="kname">PRESENCE</div>
+                <div class="kval" data-val>+0.0 dB</div>
+              </div>
+              <input type="range" min="-12" max="12" value="0" step="0.1" disabled />
+            </div>
+
+            <div class="knob tile" data-k="air" data-unit="dB" data-min="-12" data-max="12">
+              <div class="dial" aria-hidden="true"><div class="needle"></div></div>
+              <div class="kmeta">
+                <div class="kname">AIR</div>
+                <div class="kval" data-val>+0.0 dB</div>
+              </div>
+              <input type="range" min="-12" max="12" value="0" step="0.1" disabled />
+            </div>
+
+            <div class="knob tile" data-k="glue" data-unit="%" data-min="0" data-max="100">
+              <div class="dial" aria-hidden="true"><div class="needle"></div></div>
+              <div class="kmeta">
+                <div class="kname">GLUE</div>
+                <div class="kval" data-val>0 %</div>
+              </div>
+              <input type="range" min="0" max="100" value="0" step="1" disabled />
+            </div>
+
+            <div class="knob tile" data-k="width" data-unit="%" data-min="50" data-max="150">
+              <div class="dial" aria-hidden="true"><div class="needle"></div></div>
+              <div class="kmeta">
+                <div class="kname">WIDTH</div>
+                <div class="kval" data-val>100 %</div>
+              </div>
+              <input type="range" min="50" max="150" value="100" step="1" disabled />
+            </div>
           </div>
-          <div class="knob" data-k="air">
-            <label>Air</label>
-            <input type="range" min="-12" max="12" value="0" disabled />
-          </div>
-        </div>
+        </section>
+
 
         <div class="foot">© WarMaster — backend Render + FFmpeg</div>
       </section>
@@ -507,6 +697,113 @@
       origPlayer.load();
     }
 
+    // ===== EQ Live UI updates (needle + curve) =====
+    const eqSvg = document.getElementById("eqSvg");
+    const eqPath = document.getElementById("eqPath");
+    const eqPathGlow = document.getElementById("eqPathGlow");
+    const eqPoints = document.getElementById("eqPoints");
+
+    function fmtDb(v){
+      const n = Number(v || 0);
+      const sign = n > 0 ? "+" : "";
+      return `${sign}${n.toFixed(1)} dB`;
+    }
+    function fmtPct(v){ return `${Math.round(Number(v||0))} %`; }
+
+    function setNeedle(tile, norm){
+      // norm 0..1 -> angle -55..55 (similar a la imagen)
+      const ang = -55 + (norm * 110);
+      const needle = tile.querySelector(".needle");
+      if (needle) needle.style.transform = `translateY(-50%) rotate(${ang}deg)`;
+    }
+
+    function updateEqCurve(low, mid, pres, air){
+      if (!eqPath) return;
+
+      // map dB (-12..12) to y (320..90) (invert)
+      const mapY = (db)=>{
+        const v = Math.max(-12, Math.min(12, Number(db||0)));
+        const t = (v + 12) / 24; // 0..1
+        const y = 320 - t * 230;
+        return y;
+      };
+
+      const pts = [
+        {x: 0,    y: mapY(low)*0.92 + 18},
+        {x: 180,  y: mapY(low)},
+        {x: 430,  y: mapY(mid)},
+        {x: 600,  y: mapY(pres)},
+        {x: 760,  y: mapY(air)},
+        {x: 1000, y: mapY(air)*0.92 + 18},
+      ];
+
+      // smooth path
+      const d = `M ${pts[0].x} ${pts[0].y}
+                 C ${pts[0].x+90} ${pts[0].y}, ${pts[1].x-90} ${pts[1].y}, ${pts[1].x} ${pts[1].y}
+                 S ${pts[2].x-90} ${pts[2].y}, ${pts[2].x} ${pts[2].y}
+                 S ${pts[3].x-90} ${pts[3].y}, ${pts[3].x} ${pts[3].y}
+                 S ${pts[4].x-90} ${pts[4].y}, ${pts[4].x} ${pts[4].y}
+                 S ${pts[5].x-90} ${pts[5].y}, ${pts[5].x} ${pts[5].y}`;
+
+      eqPath.setAttribute("d", d);
+      if (eqPathGlow) eqPathGlow.setAttribute("d", d);
+
+      // points (4 visibles como en la captura)
+      if (eqPoints){
+        eqPoints.innerHTML = "";
+        const handlePts = [pts[1], pts[2], pts[3], pts[4]];
+        handlePts.forEach((p)=>{
+          const c = document.createElementNS("http://www.w3.org/2000/svg","circle");
+          c.setAttribute("cx", String(p.x));
+          c.setAttribute("cy", String(p.y));
+          c.setAttribute("r", "10");
+          c.setAttribute("fill", "rgba(255,255,255,.88)");
+          c.setAttribute("opacity", ".9");
+          const inner = document.createElementNS("http://www.w3.org/2000/svg","circle");
+          inner.setAttribute("cx", String(p.x));
+          inner.setAttribute("cy", String(p.y));
+          inner.setAttribute("r", "4.6");
+          inner.setAttribute("fill", "rgba(10,12,20,1)");
+          inner.setAttribute("opacity", ".85");
+          eqPoints.appendChild(c);
+          eqPoints.appendChild(inner);
+        });
+      }
+    }
+
+    function updateEqUI(){
+      const tiles = [...knobWrap.querySelectorAll(".knob.tile")];
+      const vals = {};
+      tiles.forEach(tile=>{
+        const key = tile.getAttribute("data-k");
+        const unit = tile.getAttribute("data-unit") || "";
+        const min = Number(tile.getAttribute("data-min") || 0);
+        const max = Number(tile.getAttribute("data-max") || 100);
+        const inp = tile.querySelector('input[type="range"]');
+        const out = tile.querySelector("[data-val]");
+        if (!key || !inp) return;
+        const v = Number(inp.value);
+        vals[key] = v;
+
+        // needle
+        const norm = (v - min) / (max - min || 1);
+        setNeedle(tile, Math.max(0, Math.min(1, norm)));
+
+        // label
+        if (out){
+          if (unit === "dB") out.textContent = fmtDb(v);
+          else out.textContent = fmtPct(v);
+        }
+      });
+
+      updateEqCurve(vals.low ?? 0, vals.mid ?? 0, vals.pres ?? 0, vals.air ?? 0);
+    }
+
+    knobWrap.addEventListener("input", (e)=>{
+      if (e.target && e.target.matches('input[type="range"]')) updateEqUI();
+    });
+    window.addEventListener("load", updateEqUI);
+
     function enableKnobs(){
       [...knobWrap.querySelectorAll(".knob")].forEach(k=>{
         k.classList.add("on");
@@ -623,17 +920,32 @@
       fd.append("preset", preset.value);
       fd.append("intensity", String(intensity.value));
 
-      // knobs (beta1.3 estable: valores neutros)
-      fd.append("k_low", "0");
-      fd.append("k_mid", "0");
-      fd.append("k_pres", "0");
-      fd.append("k_air", "0");
-      fd.append("k_glue", "0");
-      fd.append("k_width", "100");
+      // knobs (UI EQ Live)
+      const kMap = {
+        low: "k_low",
+        mid: "k_mid",
+        pres: "k_pres",
+        air: "k_air",
+        glue: "k_glue",
+        width: "k_width",
+      };
+      // Defaults
+      const vals = { low: 0, mid: 0, pres: 0, air: 0, glue: 0, width: 100, sat: 0, out: 0 };
+      [...knobWrap.querySelectorAll(".knob")].forEach(k=>{
+        const key = k.getAttribute("data-k");
+        const inp = k.querySelector("input");
+        if (key && inp) vals[key] = inp.value;
+      });
+      fd.append("k_low", String(vals.low ?? 0));
+      fd.append("k_mid", String(vals.mid ?? 0));
+      fd.append("k_pres", String(vals.pres ?? 0));
+      fd.append("k_air", String(vals.air ?? 0));
+      fd.append("k_glue", String(vals.glue ?? 0));
+      fd.append("k_width", String(vals.width ?? 100));
       fd.append("k_sat", "0");
       fd.append("k_out", "0");
 
-      try{
+try{
         const res = await fetchWithTimeout(API_BASE + "/api/master", {
           method: "POST",
           body: fd
