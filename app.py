@@ -16,9 +16,12 @@ from fastapi.staticfiles import StaticFiles
 # =========================
 MAX_FILE_SIZE_MB = 100
 MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
-MAX_DURATION_SECONDS = 6 * 60  # 6 minutos
 
-FREE_PREVIEW_SECONDS = 30  # FREE descarga 30s
+# ✅ A) Para evitar timeout en Render
+MAX_DURATION_SECONDS = 3 * 60  # 3 minutos
+
+# ✅ B) FREE: solo 30s procesados (rápido y estable)
+FREE_PREVIEW_SECONDS = 30
 
 BASE_DIR = Path(__file__).parent
 TMP_DIR = BASE_DIR / "tmp"
@@ -241,13 +244,15 @@ def resolve_download_path(master_id: str) -> Path:
     if not m:
         raise HTTPException(status_code=404, detail="Master no encontrado.")
 
-    quality = normalize_quality(m.get("quality"))
-    if quality == "FREE":
-        return build_preview_wav(master_id, FREE_PREVIEW_SECONDS)
-
     out_path = TMP_DIR / f"master_{master_id}.wav"
     if not out_path.exists():
         raise HTTPException(status_code=404, detail="Archivo no encontrado.")
+
+    quality = normalize_quality(m.get("quality"))
+    if quality == "FREE":
+        # ✅ B) En FREE ya generamos 30s directamente, así que devolvemos el archivo tal cual
+        return out_path
+
     return out_path
 
 
@@ -332,6 +337,7 @@ def preview_master(
     if not m:
         raise HTTPException(status_code=404, detail="Master no encontrado.")
 
+    # En FREE normalmente no hace falta, pero lo dejamos por compat
     prev_path = build_preview_wav(master_id, seconds)
 
     return FileResponse(
@@ -347,6 +353,7 @@ async def master(
     preset: str = Form("clean"),
     intensity: int = Form(55),
 
+    # knobs
     k_low: float = Form(0.0),
     k_mid: float = Form(0.0),
     k_pres: float = Form(0.0),
@@ -383,6 +390,7 @@ async def master(
         }
     }
 
+    # Guardar archivo
     try:
         with in_path.open("wb") as f:
             shutil.copyfileobj(file.file, f)
@@ -392,15 +400,18 @@ async def master(
         except Exception:
             pass
 
+    # Validar tamaño
     if in_path.stat().st_size > MAX_FILE_SIZE_BYTES:
         cleanup_files(in_path)
         raise HTTPException(status_code=400, detail="Supera 100MB.")
 
+    # Validar duración (✅ A)
     duration = get_audio_duration_seconds(in_path)
     if duration > MAX_DURATION_SECONDS:
         cleanup_files(in_path)
-        raise HTTPException(status_code=400, detail="Supera 6 minutos.")
+        raise HTTPException(status_code=400, detail="Supera 3 minutos (límite por estabilidad en Render).")
 
+    # Clamp knobs
     k_low = clamp_float(k_low, -12, 12, 0.0)
     k_mid = clamp_float(k_mid, -12, 12, 0.0)
     k_pres = clamp_float(k_pres, -12, 12, 0.0)
@@ -417,10 +428,18 @@ async def master(
         k_glue=k_glue, k_width=k_width, k_sat=k_sat, k_out=k_out
     )
 
+    # ✅ B) Si es FREE, procesar solo 30s para evitar timeout
+    clip_seconds: Optional[int] = FREE_PREVIEW_SECONDS if rq == "FREE" else None
+
     cmd = [
         "ffmpeg", "-y",
         "-hide_banner",
         "-i", str(in_path),
+    ]
+    if clip_seconds:
+        cmd += ["-t", str(int(clip_seconds))]
+
+    cmd += [
         "-vn",
         "-af", filters,
         "-ar", "44100",
@@ -457,5 +476,4 @@ def root():
 # =========================
 # STATIC FILES
 # =========================
-# Monta /public en la raíz para servir index.html, master.html, dashboard.html, etc.
 app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="public")
