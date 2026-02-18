@@ -1232,15 +1232,30 @@
         if(hdrId) lastMasterId = hdrId;
 
         // respuesta WAV (modo actual)
-        const blob = await res.blob();
-        setStatus("Finalizando...", 85);
+       const ctype = (res.headers.get("content-type") || "").toLowerCase();
 
-        revoke(masterUrl);
-        masterUrl = URL.createObjectURL(blob);
+// Si viene JSON => usamos /stream/{id}
+if (ctype.includes("application/json")) {
+  const data = await res.json().catch(()=> ({}));
+  const hdrId = res.headers.get("X-Master-Id") || res.headers.get("x-master-id");
+  lastMasterId = hdrId || data.master_id || data.id || null;
+  if(!lastMasterId) throw new Error("Falta master_id");
 
-        const am = document.getElementById("audioMaster");
-        am.src = masterUrl;
-        am.load();
+  revoke(masterUrl);
+  masterUrl = (API_BASE||"") + `/stream/${encodeURIComponent(lastMasterId)}`;
+  const am = document.getElementById("audioMaster");
+  am.src = masterUrl;
+  am.load();
+} else {
+  // Si por alguna razón aún llega WAV (return_blob=1)
+  const blob = await res.blob();
+  revoke(masterUrl);
+  masterUrl = URL.createObjectURL(blob);
+  const am = document.getElementById("audioMaster");
+  am.src = masterUrl;
+  am.load();
+}
+
 
         document.getElementById("resultEmpty").style.display = "none";
         document.getElementById("resultBox").style.display = "";
