@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 
-# =========================
+# ========================
 # CONFIG
 # =========================
 MAX_FILE_SIZE_MB = 100
