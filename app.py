@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import uuid
 import shutil
 import subprocess
@@ -6,7 +8,7 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Query
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -22,6 +24,9 @@ FREE_PREVIEW_SECONDS = 30
 
 # PLUS/PRO: límite por estabilidad
 MAX_DURATION_SECONDS_PAID = 6 * 60  # 6 minutos
+
+# Seguridad: si FFmpeg se cuelga, cortamos
+FFMPEG_TIMEOUT_SECONDS = 240  # 4 min (ajústalo si quieres)
 
 BASE_DIR = Path(__file__).parent
 TMP_DIR = BASE_DIR / "tmp"
@@ -60,13 +65,18 @@ def cleanup_files(*paths: Path) -> None:
             pass
 
 
-def run_cmd(cmd: list[str]) -> None:
-    proc = subprocess.run(
-        cmd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
+def run_cmd(cmd: list[str], timeout_s: int = FFMPEG_TIMEOUT_SECONDS) -> None:
+    try:
+        proc = subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=timeout_s
+        )
+    except subprocess.TimeoutExpired:
+        raise HTTPException(status_code=504, detail="FFmpeg timeout (Render cortó / proceso muy largo).")
+
     if proc.returncode != 0:
         raise HTTPException(
             status_code=500,
@@ -137,15 +147,6 @@ def preset_chain(
     k_sat: float,
     k_out: float,
 ) -> str:
-    """
-    Devuelve cadena FFmpeg -af
-
-    - Decimales con punto (.) ✅
-    - Sin variables con acento ✅
-    - Width con pan compatible ✅
-    - Sat sin asoftclip (más compatible) ✅
-    """
-
     intensity_i = clamp_int(intensity, 0, 100, 55)
 
     thr = -18.0 - (intensity_i * 0.10)
@@ -158,7 +159,6 @@ def preset_chain(
 
     preset = (preset or "clean").lower()
 
-    # EQ base por preset
     if preset == "club":
         eq_base = "bass=g=4:f=90,treble=g=2:f=9000"
     elif preset == "warm":
@@ -170,8 +170,6 @@ def preset_chain(
     else:
         eq_base = "bass=g=2:f=120,treble=g=1:f=8000"
 
-    # ===== KNOBS =====
-    # EQ Live: 4 bandas
     eq_live = (
         f"equalizer=f=120:width_type=h:width=1:g={k_low},"
         f"equalizer=f=630:width_type=h:width=1:g={k_mid},"
@@ -179,7 +177,6 @@ def preset_chain(
         f"equalizer=f=8500:width_type=h:width=1:g={k_air}"
     )
 
-    # Glue 0..100 (compresión suave adicional)
     glue_p = max(0.0, min(100.0, k_glue)) / 100.0
     glue_thr = -12.0 - glue_p * 18.0
     glue_ratio = 1.2 + glue_p * 3.8
@@ -190,13 +187,11 @@ def preset_chain(
         f"ratio={glue_ratio}:attack={glue_attack}:release={glue_release}:makeup=1"
     )
 
-    # WIDTH 50..150 via pan
     k = max(50.0, min(150.0, k_width)) / 100.0
     a = (1.0 + k) / 2.0
     b = (1.0 - k) / 2.0
     width_fx = f"pan=stereo|c0={a:.6f}*c0+{b:.6f}*c1|c1={b:.6f}*c0+{a:.6f}*c1"
 
-    # SAT 0..100: drive + comp suave + back
     sat_p = max(0.0, min(100.0, k_sat)) / 100.0
     drive_db = sat_p * 6.0
     back_db = -sat_p * 4.0
@@ -208,10 +203,7 @@ def preset_chain(
         f"volume={back_db}dB"
     )
 
-    # Output
     out_fx = f"volume={k_out}dB"
-
-    # Limiter final
     limiter = "alimiter=limit=-1.0dB"
 
     return (
@@ -274,7 +266,6 @@ def health():
 
 @app.get("/api/me")
 def me():
-    # beta: fijo. luego lo haces real
     return {"plan": "FREE"}
 
 
@@ -304,7 +295,6 @@ def api_download_master(master_id: str):
     return download_master(master_id)
 
 
-# Legacy
 @app.get("/stream/{master_id}")
 def stream_master(master_id: str):
     if master_id not in masters:
@@ -322,7 +312,6 @@ def stream_master(master_id: str):
     )
 
 
-# Legacy
 @app.get("/download/{master_id}")
 def download_master(master_id: str):
     dl_path = resolve_download_path(master_id)
@@ -359,7 +348,6 @@ async def master(
     preset: str = Form("clean"),
     intensity: int = Form(55),
 
-    # knobs
     k_low: float = Form(0.0),
     k_mid: float = Form(0.0),
     k_pres: float = Form(0.0),
@@ -369,7 +357,6 @@ async def master(
     k_sat: float = Form(0.0),
     k_out: float = Form(0.0),
 
-    # compat
     requested_quality: Optional[str] = Form(None),
     target: Optional[str] = Form(None),
 ):
@@ -397,7 +384,6 @@ async def master(
         }
     }
 
-    # Guardar archivo
     try:
         with in_path.open("wb") as f:
             shutil.copyfileobj(file.file, f)
@@ -407,20 +393,15 @@ async def master(
         except Exception:
             pass
 
-    # Validar tamaño
     if in_path.stat().st_size > MAX_FILE_SIZE_BYTES:
         cleanup_files(in_path)
         raise HTTPException(status_code=400, detail="Supera 100MB.")
 
-    # Duración:
-    # - FREE: NO se rechaza (se recorta a 30s)
-    # - PLUS/PRO: límite 6 min
     duration = get_audio_duration_seconds(in_path)
     if rq in ("PLUS", "PRO") and duration > MAX_DURATION_SECONDS_PAID:
         cleanup_files(in_path)
         raise HTTPException(status_code=400, detail="Supera 6 minutos (límite por estabilidad).")
 
-    # Clamp knobs
     k_low = clamp_float(k_low, -12.0, 12.0, 0.0)
     k_mid = clamp_float(k_mid, -12.0, 12.0, 0.0)
     k_pres = clamp_float(k_pres, -12.0, 12.0, 0.0)
@@ -437,14 +418,9 @@ async def master(
         k_glue=k_glue, k_width=k_width, k_sat=k_sat, k_out=k_out
     )
 
-    # FREE: recorta a 30s
     clip_seconds: Optional[int] = FREE_PREVIEW_SECONDS if rq == "FREE" else None
 
-    cmd = [
-        "ffmpeg", "-y",
-        "-hide_banner",
-        "-i", str(in_path),
-    ]
+    cmd = ["ffmpeg", "-y", "-hide_banner", "-i", str(in_path)]
     if clip_seconds:
         cmd += ["-t", str(int(clip_seconds))]
 
@@ -469,6 +445,7 @@ async def master(
 
     cleanup_files(in_path)
 
+    # Mantengo FileResponse (como tu front lo espera) + header master id
     return FileResponse(
         path=str(out_path),
         media_type="audio/wav",
@@ -482,7 +459,4 @@ def root():
     return RedirectResponse(url="/index.html")
 
 
-# =========================
-# STATIC FILES
-# =========================
 app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="public")
