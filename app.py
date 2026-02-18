@@ -31,18 +31,20 @@ app = FastAPI()
 # =========================
 # STORAGE (MEMORIA)
 # =========================
-masters: Dict[str, Dict[str, Any]] = {}
+masters: Dict[str, Dict[str, Any]] = {}  # master_id -> metadata
 
 # =========================
-# CORS (evita bloqueos en navegador)
+# CORS
 # =========================
+# ✅ allow_credentials=False + "*" evita bloqueos del browser
+# ✅ expose_headers permite leer X-Master-Id desde el frontend (si fuese cross-origin)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=False,   # ✅ importante si usas "*"
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["X-Master-Id"],  # ✅ para leer el header en frontend
+    expose_headers=["X-Master-Id"],
 )
 
 # =========================
@@ -58,9 +60,17 @@ def cleanup_files(*paths: Path) -> None:
 
 
 def run_cmd(cmd: list[str]) -> None:
-    proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    proc = subprocess.run(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True
+    )
     if proc.returncode != 0:
-        raise HTTPException(status_code=500, detail=f"FFmpeg error:\n{proc.stderr[-8000:]}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"FFmpeg error:\n{proc.stderr[-8000:]}"
+        )
 
 
 def safe_filename(name: str) -> str:
@@ -89,7 +99,7 @@ def get_audio_duration_seconds(path: Path) -> float:
 def clamp_float(x: Any, lo: float, hi: float, default: float) -> float:
     try:
         v = float(x)
-        if v != v:
+        if v != v:  # NaN
             return default
         return max(lo, min(hi, v))
     except Exception:
@@ -113,11 +123,22 @@ def normalize_quality(q: Optional[str]) -> str:
 
 def preset_chain(
     preset: str,
-    intensity: Any,
-    k_low: float, k_mid: float, k_pres: float, k_air: float,
-    k_glue: float, k_width: float, k_sat: float, k_out: float,
+    intensity_val: int,
+    k_low: float,
+    k_mid: float,
+    k_pres: float,
+    k_air: float,
+    k_glue: float,
+    k_width: float,
+    k_sat: float,
+    k_out: float,
 ) -> str:
-    intensity_i = clamp_int(intensity, 0, 100, 55)
+    """
+    Cadena de filtros FFmpeg para -af
+    - robusto para mono: fuerza stereo antes del pan
+    """
+
+    intensity_i = clamp_int(intensity_val, 0, 100, 55)
 
     thr = -18.0 - (intensity_i * 0.10)
     ratio = 2.0 + (intensity_i * 0.04)
@@ -129,6 +150,7 @@ def preset_chain(
 
     preset = (preset or "clean").lower()
 
+    # EQ base por preset
     if preset == "club":
         eq_base = "bass=g=4:f=90,treble=g=2:f=9000"
     elif preset == "warm":
@@ -140,6 +162,7 @@ def preset_chain(
     else:
         eq_base = "bass=g=2:f=120,treble=g=1:f=8000"
 
+    # EQ Live 4 bandas
     eq_live = (
         f"equalizer=f=120:width_type=h:width=1:g={k_low},"
         f"equalizer=f=630:width_type=h:width=1:g={k_mid},"
@@ -147,6 +170,7 @@ def preset_chain(
         f"equalizer=f=8500:width_type=h:width=1:g={k_air}"
     )
 
+    # Glue 0..100 (comp suave)
     glue_p = max(0.0, min(100.0, k_glue)) / 100.0
     glue_thr = -12.0 - glue_p * 18.0
     glue_ratio = 1.2 + glue_p * 3.8
@@ -157,14 +181,16 @@ def preset_chain(
         f"ratio={glue_ratio}:attack={glue_attack}:release={glue_release}:makeup=1"
     )
 
+    # WIDTH (50..150) PAN compatible
     k = max(50.0, min(150.0, k_width)) / 100.0
     a = (1.0 + k) / 2.0
     b = (1.0 - k) / 2.0
 
-    # ✅ robusto: si el input es mono, forzamos stereo antes del pan
+    # ✅ Si input es mono, esto evita crash del pan=stereo
     force_stereo = "aformat=channel_layouts=stereo"
     width_fx = f"pan=stereo|c0={a:.6f}*c0+{b:.6f}*c1|c1={b:.6f}*c0+{a:.6f}*c1"
 
+    # SAT 0..100 (seguro)
     sat_p = max(0.0, min(100.0, k_sat)) / 100.0
     drive_db = sat_p * 6.0
     back_db = -sat_p * 4.0
@@ -235,7 +261,7 @@ def resolve_download_path(master_id: str) -> Path:
 
 
 # =========================
-# API ENDPOINTS
+# API
 # =========================
 @app.get("/api/health")
 def health():
@@ -284,9 +310,11 @@ def stream_master(master_id: str):
 @app.get("/download/{master_id}")
 def download_master(master_id: str):
     dl_path = resolve_download_path(master_id)
+
     m = masters.get(master_id) or {}
     q = normalize_quality(m.get("quality"))
     fname = "warmaster_master.wav" if q in ("PLUS", "PRO") else f"warmaster_preview_{FREE_PREVIEW_SECONDS}s.wav"
+
     return FileResponse(path=str(dl_path), media_type="audio/wav", filename=fname)
 
 
@@ -298,16 +326,25 @@ def preview_master(
     m = masters.get(master_id)
     if not m:
         raise HTTPException(status_code=404, detail="Master no encontrado.")
+
     prev_path = build_preview_wav(master_id, seconds)
-    return FileResponse(path=str(prev_path), media_type="audio/wav", filename=f"warmaster_preview_{seconds}s.wav")
+
+    return FileResponse(
+        path=str(prev_path),
+        media_type="audio/wav",
+        filename=f"warmaster_preview_{seconds}s.wav",
+    )
 
 
 @app.post("/api/master")
 async def master(
     file: UploadFile = File(...),
-    preset: str = Form("clean"),
-    intensity: int = Form(55),
 
+    # el front manda "target" (streaming/warm/bright/...) y "intensity" (soft/balanced/aggressive)
+    target: str = Form("streaming"),
+    intensity: str = Form("balanced"),  # ✅ ahora string (arregla el parsing)
+
+    # knobs
     k_low: float = Form(0.0),
     k_mid: float = Form(0.0),
     k_pres: float = Form(0.0),
@@ -317,11 +354,29 @@ async def master(
     k_sat: float = Form(0.0),
     k_out: float = Form(0.0),
 
+    # compat (si algún front manda esto)
     requested_quality: Optional[str] = Form(None),
-    target: Optional[str] = Form(None),
+    preset: Optional[str] = Form(None),
 ):
     if not file or not file.filename:
         raise HTTPException(status_code=400, detail="Archivo inválido.")
+
+    # ✅ intensity mapping (soft/balanced/aggressive -> 0..100)
+    intensity_map = {
+        "soft": 35,
+        "balanced": 55,
+        "aggressive": 80,
+    }
+    intensity_str = (intensity or "balanced").strip().lower()
+    intensity_val = intensity_map.get(intensity_str)
+
+    # si vino "55" como string, también sirve
+    if intensity_val is None:
+        try:
+            intensity_val = int(float(intensity_str))
+        except Exception:
+            intensity_val = 55
+    intensity_val = max(0, min(100, intensity_val))
 
     master_id = uuid.uuid4().hex[:8]
     name = safe_filename(file.filename)
@@ -331,15 +386,23 @@ async def master(
 
     rq = normalize_quality(requested_quality)
 
+    # preset real: usamos target si preset no vino
+    preset_use = (preset or target or "streaming").strip().lower()
+
     masters[master_id] = {
         "id": master_id,
         "title": name,
-        "preset": preset,
-        "intensity": int(clamp_int(intensity, 0, 100, 55)),
+        "preset": preset_use,
+        "intensity": int(intensity_val),
         "quality": rq,
         "created_at": datetime.utcnow().isoformat(),
+        "knobs": {
+            "low": k_low, "mid": k_mid, "pres": k_pres, "air": k_air,
+            "glue": k_glue, "width": k_width, "sat": k_sat, "out": k_out
+        }
     }
 
+    # Guardar archivo
     try:
         with in_path.open("wb") as f:
             shutil.copyfileobj(file.file, f)
@@ -349,15 +412,18 @@ async def master(
         except Exception:
             pass
 
+    # Validar tamaño
     if in_path.stat().st_size > MAX_FILE_SIZE_BYTES:
         cleanup_files(in_path)
         raise HTTPException(status_code=400, detail="Supera 100MB.")
 
+    # Validar duración
     duration = get_audio_duration_seconds(in_path)
     if duration > MAX_DURATION_SECONDS:
         cleanup_files(in_path)
         raise HTTPException(status_code=400, detail="Supera 6 minutos.")
 
+    # Clamp knobs
     k_low = clamp_float(k_low, -12, 12, 0.0)
     k_mid = clamp_float(k_mid, -12, 12, 0.0)
     k_pres = clamp_float(k_pres, -12, 12, 0.0)
@@ -368,10 +434,10 @@ async def master(
     k_out = clamp_float(k_out, -12, 6, 0.0)
 
     filters = preset_chain(
-        preset=preset,
-        intensity=intensity,
+        preset=preset_use,
+        intensity_val=intensity_val,
         k_low=k_low, k_mid=k_mid, k_pres=k_pres, k_air=k_air,
-        k_glue=k_glue, k_width=k_width, k_sat=k_sat, k_out=k_out,
+        k_glue=k_glue, k_width=k_width, k_sat=k_sat, k_out=k_out
     )
 
     cmd = [
@@ -398,6 +464,7 @@ async def master(
 
     cleanup_files(in_path)
 
+    # ✅ mantiene tu flujo: devuelve WAV + X-Master-Id
     return FileResponse(
         path=str(out_path),
         media_type="audio/wav",
@@ -409,7 +476,7 @@ async def master(
 # =========================
 # FRONTEND (NO pisa /api)
 # =========================
-# Montamos el frontend en /public, NO en "/"
+# ⚠️ Importante: montamos public en /public para que no bloquee /api/*
 app.mount("/public", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="public")
 
 @app.get("/")
@@ -425,5 +492,5 @@ def master_html():
     return RedirectResponse(url="/public/master.html")
 
 @app.get("/dashboard.html")
-def dash_html():
+def dashboard_html():
     return RedirectResponse(url="/public/dashboard.html")
