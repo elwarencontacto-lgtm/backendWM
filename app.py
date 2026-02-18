@@ -10,7 +10,6 @@ from fastapi.responses import FileResponse, RedirectResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-
 # =========================
 # CONFIG
 # =========================
@@ -117,12 +116,22 @@ def normalize_quality(q: Optional[str]) -> str:
     if q not in ("FREE", "PLUS", "PRO"):
         return "FREE"
     return q
-    def preset_chain(
+def preset_chain(
     preset: str,
     intensity_val: int,
-    k_low: float, k_mid: float, k_pres: float, k_air: float,
-    k_glue: float, k_width: float, k_sat: float, k_out: float,
+    k_low: float,
+    k_mid: float,
+    k_pres: float,
+    k_air: float,
+    k_glue: float,
+    k_width: float,
+    k_sat: float,
+    k_out: float,
 ) -> str:
+    """
+    Cadena de filtros FFmpeg para -af
+    ✅ robusto para mono: fuerza stereo antes del pan
+    """
     intensity_i = clamp_int(intensity_val, 0, 100, 55)
 
     thr = -18.0 - (intensity_i * 0.10)
@@ -135,6 +144,7 @@ def normalize_quality(q: Optional[str]) -> str:
 
     preset = (preset or "streaming").lower()
 
+    # EQ base por preset
     if preset == "club":
         eq_base = "bass=g=4:f=90,treble=g=2:f=9000"
     elif preset == "warm":
@@ -146,6 +156,7 @@ def normalize_quality(q: Optional[str]) -> str:
     else:
         eq_base = "bass=g=2:f=120,treble=g=1:f=8000"
 
+    # EQ Live 4 bandas
     eq_live = (
         f"equalizer=f=120:width_type=h:width=1:g={k_low},"
         f"equalizer=f=630:width_type=h:width=1:g={k_mid},"
@@ -153,6 +164,7 @@ def normalize_quality(q: Optional[str]) -> str:
         f"equalizer=f=8500:width_type=h:width=1:g={k_air}"
     )
 
+    # Glue 0..100
     glue_p = max(0.0, min(100.0, k_glue)) / 100.0
     glue_thr = -12.0 - glue_p * 18.0
     glue_ratio = 1.2 + glue_p * 3.8
@@ -170,6 +182,7 @@ def normalize_quality(q: Optional[str]) -> str:
     force_stereo = "aformat=channel_layouts=stereo"
     width_fx = f"pan=stereo|c0={a:.6f}*c0+{b:.6f}*c1|c1={b:.6f}*c0+{a:.6f}*c1"
 
+    # SAT 0..100 (seguro)
     sat_p = max(0.0, min(100.0, k_sat)) / 100.0
     drive_db = sat_p * 6.0
     back_db = -sat_p * 4.0
@@ -294,7 +307,10 @@ def download_master(master_id: str):
 
 
 @app.get("/api/master/preview")
-def preview_master(master_id: str = Query(...), seconds: int = Query(30, ge=5, le=60)):
+def preview_master(
+    master_id: str = Query(...),
+    seconds: int = Query(30, ge=5, le=60),
+):
     m = masters.get(master_id)
     if not m:
         raise HTTPException(status_code=404, detail="Master no encontrado.")
@@ -324,7 +340,7 @@ async def master(
     requested_quality: Optional[str] = Form(None),
     preset: Optional[str] = Form(None),
 
-    # ✅ si pones ?return_blob=1, devuelve WAV (modo antiguo)
+    # ✅ default JSON (evita "Failed to fetch" en WAV largos)
     return_blob: int = Query(0, ge=0, le=1),
 ):
     if not file or not file.filename:
@@ -397,8 +413,14 @@ async def master(
     filters = preset_chain(
         preset=preset_use,
         intensity_val=intensity_val,
-        k_low=k_low, k_mid=k_mid, k_pres=k_pres, k_air=k_air,
-        k_glue=k_glue, k_width=k_width, k_sat=k_sat, k_out=k_out
+        k_low=k_low,
+        k_mid=k_mid,
+        k_pres=k_pres,
+        k_air=k_air,
+        k_glue=k_glue,
+        k_width=k_width,
+        k_sat=k_sat,
+        k_out=k_out,
     )
 
     cmd = [
@@ -425,7 +447,7 @@ async def master(
 
     cleanup_files(in_path)
 
-    # ✅ Por defecto: JSON rápido (no se cae con audios largos)
+    # ✅ por defecto: JSON rápido (no se cae en audios largos)
     if return_blob == 1:
         return FileResponse(
             path=str(out_path),
@@ -460,4 +482,3 @@ def master_html():
 @app.get("/dashboard.html")
 def dashboard_html():
     return RedirectResponse(url="/public/dashboard.html")
-
