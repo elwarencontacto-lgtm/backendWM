@@ -35,11 +35,10 @@ app = FastAPI()
 masters: Dict[str, Dict[str, Any]] = {}  # master_id -> metadata
 
 # =========================
-# CORS  ✅ FIX "Failed to fetch"
+# CORS
 # =========================
-# Problema típico: allow_credentials=True + allow_origins=["*"] => browsers bloquean.
-# Solución: no usamos cookies/sesión ahora, así que dejamos credentials en False,
-# y exponemos X-Master-Id para que el frontend lo pueda leer en cross-origin.
+# ✅ allow_credentials=False para poder usar "*" sin problemas
+# ✅ expose_headers para que el frontend pueda leer X-Master-Id si usas ?api=...
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -139,8 +138,9 @@ def preset_chain(
     Devuelve cadena de filtros FFmpeg -af
 
     ✅ FIX makeup: siempre en rango [1..64]
-    ✅ FIX width: sin stereowiden (pan compatible)
-    ✅ FIX sat: sin asoftclip (evita incompatibilidades)
+    ✅ FIX width: pan compatible
+    ✅ FIX sat: sin asoftclip
+    ✅ FIX CRÍTICO: forzar stereo antes del pan para audios mono (evita "error al masterizar")
     """
 
     intensity_i = clamp_int(intensity, 0, 100, 55)
@@ -168,8 +168,7 @@ def preset_chain(
     else:
         eq_base = "bass=g=2:f=120,treble=g=1:f=8000"
 
-    # ===== KNOBS (aplican al audio final) =====
-    # EQ Live: 4 bandas
+    # ===== KNOBS =====
     eq_live = (
         f"equalizer=f=120:width_type=h:width=1:g={k_low},"
         f"equalizer=f=630:width_type=h:width=1:g={k_mid},"
@@ -177,7 +176,7 @@ def preset_chain(
         f"equalizer=f=8500:width_type=h:width=1:g={k_air}"
     )
 
-    # Glue 0..100 (compresión suave adicional)
+    # Glue 0..100
     glue_p = max(0.0, min(100.0, k_glue)) / 100.0
     glue_thr = -12.0 - glue_p * 18.0
     glue_ratio = 1.2 + glue_p * 3.8
@@ -189,15 +188,15 @@ def preset_chain(
     )
 
     # ✅ WIDTH (50..150) PAN compatible
-    # L = a*L + b*R ; R = b*L + a*R
-    # k = width/100
     k = max(50.0, min(150.0, k_width)) / 100.0
     a = (1.0 + k) / 2.0
     b = (1.0 - k) / 2.0
+
+    # ✅ CRÍTICO: forzar stereo antes del pan (si el input es mono, evita crash)
+    force_stereo = "aformat=channel_layouts=stereo"
     width_fx = f"pan=stereo|c0={a:.6f}*c0+{b:.6f}*c1|c1={b:.6f}*c0+{a:.6f}*c1"
 
-    # ✅ SAT (0..100): “densidad” segura sin asoftclip
-    # Drive -> comp suave -> back
+    # ✅ SAT 0..100 (seguro)
     sat_p = max(0.0, min(100.0, k_sat)) / 100.0
     drive_db = sat_p * 6.0
     back_db = -sat_p * 4.0
@@ -209,10 +208,7 @@ def preset_chain(
         f"volume={back_db}dB"
     )
 
-    # Output
     out_fx = f"volume={k_out}dB"
-
-    # Limiter final
     limiter = "alimiter=limit=-1.0dB"
 
     return (
@@ -220,6 +216,7 @@ def preset_chain(
         f"{eq_live},"
         f"acompressor=threshold={thr}dB:ratio={ratio}:attack=12:release=120:makeup={makeup},"
         f"{glue_comp},"
+        f"{force_stereo},"
         f"{width_fx},"
         f"{sat_fx},"
         f"{out_fx},"
@@ -336,7 +333,6 @@ def stream_master(master_id: str):
 def download_master(master_id: str):
     dl_path = resolve_download_path(master_id)
 
-    # nombre según plan
     m = masters.get(master_id) or {}
     q = normalize_quality(m.get("quality"))
     fname = "warmaster_master.wav" if q in ("PLUS", "PRO") else f"warmaster_preview_{FREE_PREVIEW_SECONDS}s.wav"
