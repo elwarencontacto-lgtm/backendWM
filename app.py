@@ -1,461 +1,461 @@
-import uuid
-import shutil
-import subprocess
-from pathlib import Path
-from datetime import datetime
-from typing import Dict, Any, Optional
+importar uuid
+importar shutil
+subproceso de importación
+desde pathlib importar Path
+desde datetime importar datetime
+desde escribir importar Dict, Cualquiera, Opcional
 
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Query
-from fastapi.responses import FileResponse, RedirectResponse
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
+desde fastapi importar FastAPI, UploadFile, Archivo, Formulario, HTTPException, Consulta
+desde fastapi.responses importar FileResponse, RedirectResponse
+desde fastapi.middleware.cors importar CORSMiddleware
+desde fastapi.staticfiles importar StaticFiles
 
 
 # ========================
 # CONFIG
 # =========================
-MAX_FILE_SIZE_MB = 100
-MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
+TAMAÑO MÁXIMO DE ARCHIVO MB = 100
+TAMAÑO MÁXIMO DE ARCHIVO EN BYTES = TAMAÑO MÁXIMO DE ARCHIVO EN MB * 1024 * 1024
 
-# FREE: se procesa solo un preview rápido para evitar timeout en Render
-FREE_PREVIEW_SECONDS = 30
+# GRATIS: se procesa solo una vista previa rápida para evitar el tiempo de espera en Render
+SEGUNDOS DE VISTA PREVIA GRATUITA = 30
 
-# PLUS/PRO: límite por estabilidad (Render)
-MAX_DURATION_SECONDS_PAID = 6 * 60  # 6 minutos
+# PLUS/PRO: límite de estabilidad (Render)
+DURACIÓN MÁXIMA EN SEGUNDOS PAGADOS = 6 * 60 # 6 minutos
 
-BASE_DIR = Path(__file__).parent
+BASE_DIR = Ruta(__archivo__).padre
 TMP_DIR = BASE_DIR / "tmp"
-TMP_DIR.mkdir(exist_ok=True)
+TMP_DIR.mkdir(exist_ok=Verdadero)
 
-PUBLIC_DIR = BASE_DIR / "public"
-PUBLIC_DIR.mkdir(exist_ok=True)
+PÚBLICO_DIR = BASE_DIR / "público"
+PUBLIC_DIR.mkdir(exist_ok=Verdadero)
 
-app = FastAPI()
+aplicación = FastAPI()
 
 # =========================
-# STORAGE (MEMORIA)
+# ALMACENAMIENTO (MEMORIA)
 # =========================
-masters: Dict[str, Dict[str, Any]] = {}  # master_id -> metadata
+maestros: Dict[str, Dict[str, Any]] = {} # master_id -> metadatos
 
 # =========================
 # CORS
 # =========================
-app.add_middleware(
+aplicación.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    permitir_orígenes=["*"],
+    allow_credentials=Verdadero,
+    permitir_métodos=["*"],
+    permitir_encabezados=["*"],
 )
 
 # =========================
-# UTILS
+# UTILES
 # =========================
-def cleanup_files(*paths: Path) -> None:
-    for p in paths:
-        try:
-            if p and p.exists():
-                p.unlink()
-        except Exception:
-            pass
+def cleanup_files(*paths: Ruta) -> Ninguno:
+    para p en rutas:
+        intentar:
+            si p y p.existen():
+                p.desvincular()
+        excepto Excepción:
+            aprobar
 
 
-def run_cmd(cmd: list[str]) -> None:
-    proc = subprocess.run(
-        cmd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
+def run_cmd(cmd: lista[str]) -> Ninguno:
+    proc = subproceso.run(
+        comando,
+        stdout=subproceso.PIPE,
+        stderr=subproceso.PIPE,
+        texto=Verdadero
     )
-    if proc.returncode != 0:
-        raise HTTPException(
-            status_code=500,
-            detail=f"FFmpeg error:\n{proc.stderr[-8000:]}"
+    si proc.returncode != 0:
+        generar HTTPException(
+            código de estado=500,
+            detalle=f"Error de FFmpeg:\n{proc.stderr[-8000:]}"
         )
 
 
-def safe_filename(name: str) -> str:
-    clean = "".join(c for c in (name or "") if c.isalnum() or c in "._- ").strip().strip("._-")
-    clean = clean.replace(" ", "_")
-    return clean or "audio"
+def safe_filename(nombre: str) -> str:
+    clean = "".join(c para c en (nombre o "") si c.isalnum() o c en "._- ").strip().strip("._-")
+    limpiar = limpiar.reemplazar(" ", "_")
+    devolver limpio o "audio"
 
 
-def get_audio_duration_seconds(path: Path) -> float:
-    cmd = [
+def get_audio_duration_seconds(ruta: Ruta) -> float:
+    comando = [
         "ffprobe",
         "-v", "error",
-        "-show_entries", "format=duration",
-        "-of", "default=noprint_wrappers=1:nokey=1",
-        str(path)
+        "-show_entries", "formato=duración",
+        "-de", "predeterminado=noprint_wrappers=1:nokey=1",
+        str(ruta)
     ]
-    proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    if proc.returncode != 0:
-        raise HTTPException(status_code=400, detail="No se pudo analizar duración.")
-    try:
-        return float(proc.stdout.strip())
-    except Exception:
-        raise HTTPException(status_code=400, detail="Duración inválida.")
+    proc = subproceso.run(cmd, stdout=subproceso.PIPE, stderr=subproceso.PIPE, texto=True)
+    si proc.returncode != 0:
+        rise HTTPException(status_code=400, Detail="No se pudo analizar la duración.")
+    intentar:
+        devolver float(proc.stdout.strip())
+    excepto Excepción:
+        levantar HTTPException(status_code=400, detalle="Duración inválida.")
 
 
-def clamp_float(x: Any, lo: float, hi: float, default: float) -> float:
-    try:
-        v = float(x)
-        if v != v:  # NaN
-            return default
-        return max(lo, min(hi, v))
-    except Exception:
-        return default
+def clamp_float(x: Cualquiera, lo: flotante, hi: flotante, predeterminado: flotante) -> flotante:
+    intentar:
+        v = flotante(x)
+        si v != v: # NaN
+            devolver el valor predeterminado
+        devuelve max(lo, min(hi, v))
+    excepto Excepción:
+        devolver el valor predeterminado
 
 
-def clamp_int(x: Any, lo: int, hi: int, default: int) -> int:
-    try:
-        v = int(float(x))
-        return max(lo, min(hi, v))
-    except Exception:
-        return default
+def clamp_int(x: Cualquiera, lo: int, hi: int, predeterminado: int) -> int:
+    intentar:
+        v = int(flotante(x))
+        devuelve max(lo, min(hi, v))
+    excepto Excepción:
+        devolver el valor predeterminado
 
 
-def normalize_quality(q: Optional[str]) -> str:
-    q = (q or "FREE").strip().upper()
-    if q not in ("FREE", "PLUS", "PRO"):
-        return "FREE"
-    return q
+def normalizar_calidad(q: Opcional[str]) -> str:
+    q = (q o "GRATIS").strip().upper()
+    si q no está en ("GRATIS", "PLUS", "PRO"):
+        devolver "GRATIS"
+    devolver q
 
 
-def preset_chain(
-    preset: str,
-    intensity: Any,
-    k_low: float,
-    k_mid: float,
-    k_pres: float,
-    k_air: float,
-    k_glue: float,
-    k_width: float,
-    k_sat: float,
-    k_out: float,
-) -> str:
-    intensity_i = clamp_int(intensity, 0, 100, 55)
+def cadena_predeterminada(
+    preajuste: str,
+    intensidad: Cualquiera,
+    k_low: flotador,
+    k_mid: flotante,
+    k_pres: flotador,
+    k_air: flotador,
+    k_glue: flotador,
+    k_width: flotante,
+    k_sat: flotador,
+    k_out: flotador,
+) -> cadena:
+    intensidad_i = abrazadera_int(intensidad, 0, 100, 55)
 
-    thr = -18.0 - (intensity_i * 0.10)
-    ratio = 2.0 + (intensity_i * 0.04)
+    thr = -18.0 - (intensidad_i * 0.10)
+    relación = 2,0 + (intensidad_i * 0,04)
 
-    makeup = 2.0 + (intensity_i * 0.06)
-    if makeup != makeup:
-        makeup = 2.0
-    makeup = max(1.0, min(64.0, makeup))
+    maquillaje = 2.0 + (intensidad_i * 0.06)
+    si maquillaje != maquillaje:
+        maquillaje = 2.0
+    maquillaje = máx(1.0, mín(64.0, maquillaje))
 
-    preset = (preset or "clean").lower()
+    preset = (preset o "limpio").lower()
 
-    if preset == "club":
-        eq_base = "bass=g=4:f=90,treble=g=2:f=9000"
-    elif preset == "warm":
-        eq_base = "bass=g=3:f=160,treble=g=-2:f=4500"
-    elif preset == "bright":
-        eq_base = "bass=g=-1:f=120,treble=g=4:f=8500"
-    elif preset == "heavy":
-        eq_base = "bass=g=5:f=90,treble=g=2:f=3500"
-    else:
-        eq_base = "bass=g=2:f=120,treble=g=1:f=8000"
+    si el valor preestablecido == "club":
+        base_ecual = "graves=sol=4:fa=90,agudos=sol=2:fa=9000"
+    elif preset == "cálido":
+        base_ecual = "graves=sol=3:fa=160,agudos=sol=-2:fa=4500"
+    elif preestablecido == "brillante":
+        base_ecual = "graves=sol=-1:fa=120,agudos=sol=4:fa=8500"
+    elif preset == "pesado":
+        base_ecual = "graves=sol=5:fa=90,agudos=sol=2:fa=3500"
+    demás:
+        base_ecual = "graves=sol=2:fa=120,agudos=sol=1:fa=8000"
 
     eq_live = (
-        f"equalizer=f=120:width_type=h:width=1:g={k_low},"
-        f"equalizer=f=630:width_type=h:width=1:g={k_mid},"
-        f"equalizer=f=1760:width_type=h:width=1:g={k_pres},"
-        f"equalizer=f=8500:width_type=h:width=1:g={k_air}"
+        f"ecualizador=f=120:tipo_de_ancho=h:ancho=1:g={k_bajo},"
+        f"ecualizador=f=630:tipo_de_ancho=h:ancho=1:g={k_mid},"
+        f"ecualizador=f=1760:tipo_de_ancho=h:ancho=1:g={k_pres},"
+        f"ecualizador=f=8500:tipo_de_ancho=h:ancho=1:g={k_aire}"
     )
 
-    glue_p = max(0.0, min(100.0, k_glue)) / 100.0
-    glue_thr = -12.0 - glue_p * 18.0
-    glue_ratio = 1.2 + glue_p * 3.8
-    glue_attack = max(0.001, 0.012 - glue_p * 0.007)
-    glue_release = 0.20 + glue_p * 0.10
-    glue_comp = (
-        f"acompressor=threshold={glue_thr}dB:"
-        f"ratio={glue_ratio}:attack={glue_attack}:release={glue_release}:makeup=1"
+    pegamento_p = máx(0.0, mín(100.0, k_pegamento)) / 100.0
+    pegamento_thr = -12.0 - pegamento_p * 18.0
+    proporción de pegamento = 1,2 + pegamento_p * 3,8
+    ataque_de_pegamento = máx.(0,001, 0,012 - pegamento_p * 0,007)
+    liberación_de_pegamento = 0,20 + pegamento_p * 0,10
+    pegamento_comp = (
+        f"acompresor=umbral={glue_thr}dB:"
+        f"ratio={proporción_de_pegamento}:ataque={ataque_de_pegamento}:liberación={liberación_de_pegamento}:maquillaje=1"
     )
 
-    k = max(50.0, min(150.0, k_width)) / 100.0
+    k = máx(50.0, mín(150.0, k_ancho)) / 100.0
     a = (1.0 + k) / 2.0
-    b = (1.0 - k) / 2.0
-    width_fx = f"pan=stereo|c0={a:.6f}*c0+{b:.6f}*c1|c1={b:.6f}*c0+{a:.6f}*c1"
+    b = (1,0 - k) / 2,0
+    ancho_fx = f"pan=estéreo|c0={a:.6f}*c0+{b:.6f}*c1|c1={b:.6f}*c0+{a:.6f}*c1"
 
-    sat_p = max(0.0, min(100.0, k_sat)) / 100.0
-    drive_db = sat_p * 6.0
+    sat_p = máx(0.0, mín(100.0, k_sat)) / 100.0
+    unidad_db = sat_p * 6.0
     back_db = -sat_p * 4.0
     sat_comp_thr = -14.0 + sat_p * 6.0
-    sat_comp_ratio = 1.2 + sat_p * 2.8
+    relación sat_comp = 1,2 + sat_p * 2,8
     sat_fx = (
-        f"volume={drive_db}dB,"
-        f"acompressor=threshold={sat_comp_thr}dB:ratio={sat_comp_ratio}:attack=2:release=80:makeup=1,"
-        f"volume={back_db}dB"
+        f"volumen={unidad_db}dB,"
+        f"acompresor=umbral={sat_comp_thr}dB:ratio={sat_comp_ratio}:ataque=2:liberación=80:recuperación=1,"
+        f"volumen={back_db}dB"
     )
 
-    out_fx = f"volume={k_out}dB"
-    limiter = "alimiter=limit=-1.0dB"
+    salida_fx = f"volumen={k_salida}dB"
+    limitador = "alimiter=limit=-1.0dB"
 
-    return (
-        f"{eq_base},"
+    devolver (
+        f"{base_eq},"
         f"{eq_live},"
-        f"acompressor=threshold={thr}dB:ratio={ratio}:attack=12:release=120:makeup={makeup},"
-        f"{glue_comp},"
-        f"{width_fx},"
+        f"acompressor=umbral={thr}dB:ratio={ratio}:ataque=12:liberación=120:recuperación={recuperación},"
+        f"{pegamento_comp},"
+        f"{ancho_fx},"
         f"{sat_fx},"
         f"{out_fx},"
-        f"{limiter}"
+        f"{limitador}"
     )
 
 
-def build_preview_wav(master_id: str, seconds: int) -> Path:
-    in_path = TMP_DIR / f"master_{master_id}.wav"
-    if not in_path.exists():
+def build_preview_wav(master_id: str, segundos: int) -> Ruta:
+    ruta_de_entrada = TMP_DIR / f"master_{master_id}.wav"
+    si no in_path.exists():
         raise HTTPException(status_code=404, detail="Archivo no encontrado.")
 
-    seconds = int(max(5, min(60, seconds)))
-    prev_path = TMP_DIR / f"preview_{master_id}_{seconds}.wav"
+    segundos = int(max(5, min(60, segundos)))
+    ruta_anterior = TMP_DIR / f"vista_previa_{id_maestro}_{segundos}.wav"
 
-    cmd = [
+    comando = [
         "ffmpeg", "-y",
-        "-hide_banner",
-        "-i", str(in_path),
-        "-t", str(seconds),
+        "-ocultar_banner",
+        "-i", str(en_ruta),
+        "-t", str(segundos),
         "-vn",
         "-ar", "44100",
         "-ac", "2",
         "-sample_fmt", "s16",
-        str(prev_path)
+        str(ruta_anterior)
     ]
-    run_cmd(cmd)
+    ejecutar_cmd(cmd)
 
-    if not prev_path.exists() or prev_path.stat().st_size < 1024:
-        cleanup_files(prev_path)
-        raise HTTPException(status_code=500, detail="Preview vacío.")
-    return prev_path
+    si no prev_path.exists() o prev_path.stat().st_size < 1024:
+        archivos_de_limpieza(ruta_anterior)
+        generar HTTPException(código_de_estado=500, detalle="Vista previa vacía.")
+    devolver ruta_anterior
 
 
-def resolve_download_path(master_id: str) -> Path:
-    m = masters.get(master_id)
-    if not m:
+def resolve_download_path(master_id: str) -> Ruta:
+    m = maestros.get(master_id)
+    si no m:
         raise HTTPException(status_code=404, detail="Master no encontrado.")
 
-    out_path = TMP_DIR / f"master_{master_id}.wav"
-    if not out_path.exists():
+    ruta_de_salida = TMP_DIR / f"master_{master_id}.wav"
+    si no out_path.exists():
         raise HTTPException(status_code=404, detail="Archivo no encontrado.")
-    return out_path
+    devolver ruta_de_salida
 
 
-@app.get("/api/health")
-def health():
-    return {"ok": True}
+@app.get("/api/salud")
+def salud():
+    devuelve {"ok": Verdadero}
 
 
 @app.get("/api/me")
-def me():
-    return {"plan": "FREE"}
+defiéndeme():
+    devolver {"plan": "GRATIS"}
 
 
 @app.get("/api/masters")
-def list_masters():
-    items = []
-    for mid, m in masters.items():
-        items.append({
-            "id": mid,
-            "title": m.get("title") or f"Master {mid}",
-            "quality": normalize_quality(m.get("quality", "FREE")),
-            "preset": m.get("preset", "clean"),
-            "intensity": m.get("intensity", 55),
-            "created_at": m.get("created_at"),
+definición lista_maestros():
+    artículos = []
+    para mid, m en masters.items():
+        elementos.append({
+            "id": medio,
+            "título": m.get("título") o f"Master {mid}",
+            "calidad": normalizar_calidad(m.get("calidad", "GRATIS")),
+            "preestablecido": m.get("preestablecido", "limpio"),
+            "intensidad": m.get("intensidad", 55),
+            "creado_en": m.get("creado_en"),
         })
-    items.sort(key=lambda x: str(x.get("created_at") or ""), reverse=True)
-    return items
+    items.sort(key=lambda x: str(x.get("created_at") o ""), reverse=True)
+    artículos devueltos
 
 
 @app.get("/api/masters/{master_id}/stream")
-def api_stream_master(master_id: str):
-    return stream_master(master_id)
+def api_stream_master(id_maestro: str):
+    devolver stream_master(master_id)
 
 
-@app.get("/api/masters/{master_id}/download")
-def api_download_master(master_id: str):
-    return download_master(master_id)
+@app.get("/api/masters/{master_id}/descargar")
+def api_download_master(id_maestro: str):
+    devolver download_master(master_id)
 
 
 @app.get("/stream/{master_id}")
-def stream_master(master_id: str):
-    m = masters.get(master_id)
-    if not m:
+def stream_master(id_maestro: str):
+    m = maestros.get(master_id)
+    si no m:
         raise HTTPException(status_code=404, detail="Master no encontrado.")
 
-    out_path = TMP_DIR / f"master_{master_id}.wav"
-    if not out_path.exists():
+    ruta_de_salida = TMP_DIR / f"master_{master_id}.wav"
+    si no out_path.exists():
         raise HTTPException(status_code=404, detail="Archivo no encontrado.")
 
-    return FileResponse(
-        path=str(out_path),
-        media_type="audio/wav",
-        filename="warmaster_master.wav",
-        headers={"Content-Disposition": 'inline; filename="warmaster_master.wav"'}
+    devolver FileResponse(
+        ruta=str(ruta_de_salida),
+        tipo_de_medio="audio/wav",
+        nombre de archivo="warmaster_master.wav",
+        encabezados={"Disposición del contenido": 'en línea; nombre de archivo="warmaster_master.wav"'}
     )
 
 
-@app.get("/download/{master_id}")
+@app.get("/descargar/{master_id}")
 def download_master(master_id: str):
-    dl_path = resolve_download_path(master_id)
+    dl_path = resolver_ruta_descarga(id_maestro)
 
-    m = masters.get(master_id) or {}
-    q = normalize_quality(m.get("quality"))
-    fname = "warmaster_master.wav" if q in ("PLUS", "PRO") else f"warmaster_preview_{FREE_PREVIEW_SECONDS}s.wav"
+    m = masters.get(master_id) o {}
+    q = normalizar_calidad(m.get("calidad"))
+    fname = "warmaster_master.wav" si q está en ("PLUS", "PRO") de lo contrario f"warmaster_preview_{SEGUNDOS DE PREVISIÓN GRATUITA}s.wav"
 
-    return FileResponse(
-        path=str(dl_path),
-        media_type="audio/wav",
-        filename=fname
+    devolver FileResponse(
+        ruta=str(dl_path),
+        tipo_de_medio="audio/wav",
+        nombre de archivo=fname
     )
 
 
-@app.get("/api/master/preview")
-def preview_master(
-    master_id: str = Query(...),
-    seconds: int = Query(30, ge=5, le=60),
+@app.get("/api/master/vista previa")
+def vista previa_master(
+    master_id: str = Consulta(...),
+    segundos: int = Consulta(30, ge=5, le=60),
 ):
-    m = masters.get(master_id)
-    if not m:
+    m = maestros.get(master_id)
+    si no m:
         raise HTTPException(status_code=404, detail="Master no encontrado.")
 
-    prev_path = build_preview_wav(master_id, seconds)
+    prev_path = build_preview_wav(master_id, segundos)
 
-    return FileResponse(
-        path=str(prev_path),
-        media_type="audio/wav",
-        filename=f"warmaster_preview_{seconds}s.wav",
+    devolver FileResponse(
+        ruta=str(ruta_anterior),
+        tipo_de_medio="audio/wav",
+        nombre de archivo=f"warmaster_preview_{segundos}s.wav",
     )
 
 
 @app.post("/api/master")
-async def master(
-    file: UploadFile = File(...),
-    preset: str = Form("clean"),
-    intensity: int = Form(55),
+asíncrono def master(
+    archivo: UploadFile = Archivo(...),
+    preajuste: str = Form("clean"),
+    intensidad: int = Form(55),
 
-    # knobs
-    k_low: float = Form(0.0),
-    k_mid: float = Form(0.0),
-    k_pres: float = Form(0.0),
-    k_air: float = Form(0.0),
-    k_glue: float = Form(0.0),
-    k_width: float = Form(100.0),
-    k_sat: float = Form(0.0),
-    k_out: float = Form(0.0),
+    # perillas
+    k_low: float = Formulario(0.0),
+    k_mid: float = Formulario(0.0),
+    k_pres: float = Formulario(0.0),
+    k_air: float = Formulario(0.0),
+    k_glue: float = Formulario(0.0),
+    k_width: float = Formulario(100.0),
+    k_sat: float = Formulario(0.0),
+    k_out: float = Formulario(0.0),
 
-    requested_quality: Optional[str] = Form(None),
-    target: Optional[str] = Form(None),
+    calidad_solicitada: Opcional[str] = Formulario(Ninguno),
+    objetivo: Opcional[str] = Formulario(Ninguno),
 ):
-    if not file or not file.filename:
-        raise HTTPException(status_code=400, detail="Archivo inválido.")
+    si no es archivo o no es archivo.nombre_archivo:
+        elevar HTTPException(status_code=400, detalle="Archivo inválido.")
 
-    master_id = uuid.uuid4().hex[:8]
-    name = safe_filename(file.filename)
+    id_maestro = uuid.uuid4().hex[:8]
+    nombre = nombre_de_archivo_seguro(archivo.nombre_de_archivo)
 
     in_path = TMP_DIR / f"in_{master_id}_{name}"
-    out_path = TMP_DIR / f"master_{master_id}.wav"
+    ruta_de_salida = TMP_DIR / f"master_{master_id}.wav"
 
-    rq = normalize_quality(requested_quality)
+    rq = normalizar_calidad(calidad_solicitada)
 
-    masters[master_id] = {
-        "id": master_id,
-        "title": name,
-        "preset": preset,
-        "intensity": int(clamp_int(intensity, 0, 100, 55)),
-        "quality": rq,
-        "created_at": datetime.utcnow().isoformat(),
-        "knobs": {
-            "low": k_low, "mid": k_mid, "pres": k_pres, "air": k_air,
-            "glue": k_glue, "width": k_width, "sat": k_sat, "out": k_out
+    maestros[master_id] = {
+        "id": id_maestro,
+        "título": nombre,
+        "preestablecido": preestablecido,
+        "intensidad": int(clamp_int(intensidad, 0, 100, 55)),
+        "calidad": rq,
+        "creado_en": datetime.utcnow().isoformat(),
+        "perillas": {
+            "bajo": k_bajo, "medio": k_medio, "pres": k_pres, "aire": k_aire,
+            "pegamento": k_pegamento, "ancho": k_ancho, "sat": k_sat, "fuera": k_fuera
         }
     }
 
     # Guardar archivo
-    try:
-        with in_path.open("wb") as f:
-            shutil.copyfileobj(file.file, f)
-    finally:
-        try:
-            file.file.close()
-        except Exception:
-            pass
+    intentar:
+        con in_path.open("wb") como f:
+            Shutil.copyfileobj(archivo.archivo, f)
+    finalmente:
+        intentar:
+            archivo.archivo.close()
+        excepto Excepción:
+            aprobar
 
     # Validar tamaño
-    if in_path.stat().st_size > MAX_FILE_SIZE_BYTES:
-        cleanup_files(in_path)
-        raise HTTPException(status_code=400, detail="Supera 100MB.")
+    si in_path.stat().st_size > TAMAÑO_MÁXIMO_DE_ARCHIVO_BYTES:
+        archivos_de_limpieza(en_ruta)
+        generar HTTPException(código_de_estado=400, detalle="Supera 100MB.")
 
     # Duración:
-    # - FREE: NO se rechaza (se procesan solo 30s)
-    # - PLUS/PRO: límite por estabilidad
-    duration = get_audio_duration_seconds(in_path)
-    if rq in ("PLUS", "PRO") and duration > MAX_DURATION_SECONDS_PAID:
-        cleanup_files(in_path)
-        raise HTTPException(status_code=400, detail="Supera 6 minutos (límite por estabilidad).")
+    # - GRATIS: NO se rechaza (se procesan solo 30s)
+    # - PLUS/PRO: límite de estabilidad
+    duración = obtener_duración_de_audio_segundos(en_ruta)
+    si rq en ("PLUS", "PRO") y duración > MAX_DURATION_SECONDS_PAID:
+        archivos_de_limpieza(en_ruta)
+        rise HTTPException(status_code=400, Detail="Supera 6 minutos (límite por estabilidad).")
 
-    # Clamp knobs
-    k_low = clamp_float(k_low, -12, 12, 0.0)
-    k_mid = clamp_float(k_mid, -12, 12, 0.0)
-    k_pres = clamp_float(k_pres, -12, 12, 0.0)
-    k_air = clamp_float(k_air, -12, 12, 0.0)
-    k_glue = clamp_float(k_glue, 0, 100, 0.0)
-    k_width = clamp_float(k_width, 50, 150, 100.0)
-    k_sat = clamp_float(k_sat, 0, 100, 0.0)
-    k_out = clamp_float(k_out, -12, 6, 0.0)
+    # Perillas de sujeción
+    k_bajo = abrazadera_flotante(k_bajo, -12, 12, 0.0)
+    k_mid = abrazadera_flotante(k_mid, -12, 12, 0.0)
+    k_pres = abrazadera_flotante(k_pres, -12, 12, 0.0)
+    k_aire = abrazadera_flotante(k_aire, -12, 12, 0.0)
+    k_pegamento = abrazadera_flotante(k_pegamento, 0, 100, 0.0)
+    k_ancho = abrazadera_flotante(k_ancho, 50, 150, 100.0)
+    k_sat = abrazadera_flotante(k_sat, 0, 100, 0.0)
+    k_out = abrazadera_flotante(k_out, -12, 6, 0.0)
 
-    filters = preset_chain(
-        preset=preset,
-        intensity=intensity,
-        k_low=k_low, k_mid=k_mid, k_pres=k_pres, k_air=k_air,
-        k_glue=k_glue, k_width=k_width, k_sat=k_sat, k_out=k_out
+    filtros = cadena_predeterminada(
+        preset=preestablecido,
+        intensidad=intensidad,
+        k_bajo=k_bajo, k_medio=k_medio, k_pres=k_pres, k_aire=k_aire,
+        k_pegamento=k_pegamento, k_ancho=k_ancho, k_sat=k_sat, k_salida=k_salida
     )
 
-    # FREE: recorta a 30s para evitar timeout
-    clip_seconds: Optional[int] = FREE_PREVIEW_SECONDS if rq == "FREE" else None
+    # GRATIS: recorta a 30s para evitar el tiempo de espera
+    clip_seconds: Opcional[int] = FREE_PREVIEW_SECONDS si rq == "FREE" de lo contrario Ninguno
 
-    cmd = [
+    comando = [
         "ffmpeg", "-y",
-        "-hide_banner",
-        "-i", str(in_path),
+        "-ocultar_banner",
+        "-i", str(en_ruta),
     ]
-    if clip_seconds:
+    si clip_segundos:
         cmd += ["-t", str(int(clip_seconds))]
 
-    cmd += [
+    comando += [
         "-vn",
-        "-af", filters,
+        "-af", filtros,
         "-ar", "44100",
         "-ac", "2",
         "-sample_fmt", "s16",
-        str(out_path)
+        str(ruta_de_salida)
     ]
 
-    try:
-        run_cmd(cmd)
-    except Exception:
-        cleanup_files(in_path, out_path)
-        raise
+    intentar:
+        ejecutar_cmd(cmd)
+    excepto Excepción:
+        limpieza_archivos(ruta_de_entrada, ruta_de_salida)
+        aumentar
 
-    if not out_path.exists() or out_path.stat().st_size < 1024:
-        cleanup_files(in_path, out_path)
-        raise HTTPException(status_code=500, detail="Master vacío.")
+    si no out_path.exists() o out_path.stat().st_size < 1024:
+        limpieza_archivos(ruta_de_entrada, ruta_de_salida)
+        generar HTTPException(código_de_estado=500, detalle="Master vacío.")
 
-    cleanup_files(in_path)
+    archivos_de_limpieza(en_ruta)
 
-    return FileResponse(
-        path=str(out_path),
-        media_type="audio/wav",
-        filename="warmaster_master.wav",
-        headers={"X-Master-Id": master_id}
+    devolver FileResponse(
+        ruta=str(ruta_de_salida),
+        tipo_de_medio="audio/wav",
+        nombre de archivo="warmaster_master.wav",
+        encabezados={"X-Master-Id": master_id}
     )
 
 
 @app.get("/")
-def root():
-    return RedirectResponse(url="/index.html")
+definición raíz():
+    devolver RedirectResponse(url="/index.html")
 
 
-app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="public")
+app.mount("/", StaticFiles(directorio=str(PUBLIC_DIR), html=True), nombre="público")
