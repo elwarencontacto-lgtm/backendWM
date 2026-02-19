@@ -31,45 +31,19 @@
         linear-gradient(180deg, var(--bg0), var(--bg1));
     }
 
-    .wrap{
-      max-width: var(--max);
-      margin: 0 auto;
-      padding: 28px 18px 40px;
-    }
+    .wrap{ max-width: var(--max); margin: 0 auto; padding: 28px 18px 40px; }
+    header{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom: 18px; }
 
-    header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-      margin-bottom: 18px;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      user-select:none;
-    }
+    .brand{ display:flex; align-items:center; gap:12px; user-select:none; }
     .logo{
-      width:44px; height:44px;
-      border-radius: 14px;
+      width:44px; height:44px; border-radius: 14px;
       background:
         radial-gradient(circle at 30% 30%, rgba(255,255,255,.20), transparent 40%),
         linear-gradient(135deg, rgba(138,92,255,1), rgba(0,215,255,1));
       box-shadow: 0 18px 40px rgba(0,0,0,.45);
     }
-    .brand h1{
-      margin:0;
-      font-size: 18px;
-      letter-spacing:.2px;
-    }
-    .brand small{
-      display:block;
-      color: var(--muted);
-      margin-top: 2px;
-      font-size: 12px;
-    }
+    .brand h1{ margin:0; font-size: 18px; letter-spacing:.2px; }
+    .brand small{ display:block; color: var(--muted); margin-top: 2px; font-size: 12px; }
 
     .nav a{
       color: var(--text);
@@ -83,14 +57,8 @@
     }
     .nav a:hover{ border-color: rgba(255,255,255,.22); }
 
-    .grid{
-      display:grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap: 16px;
-    }
-    @media (max-width: 900px){
-      .grid{ grid-template-columns: 1fr; }
-    }
+    .grid{ display:grid; grid-template-columns: 1.1fr .9fr; gap: 16px; }
+    @media (max-width: 900px){ .grid{ grid-template-columns: 1fr; } }
 
     .card{
       background: rgba(15,17,24,.78);
@@ -100,16 +68,8 @@
       padding: 18px;
       backdrop-filter: blur(12px);
     }
-    .card h2{
-      margin:0 0 10px;
-      font-size: 16px;
-    }
-    .sub{
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.35;
-      margin: 0 0 14px;
-    }
+    .card h2{ margin:0 0 10px; font-size: 16px; }
+    .sub{ color: var(--muted); font-size: 13px; line-height: 1.35; margin: 0 0 14px; }
 
     .drop{
       border: 1.6px dashed rgba(255,255,255,.22);
@@ -123,29 +83,13 @@
     }
     .drop strong{ font-size: 13px; }
     .drop span{ color: var(--muted); font-size: 12px; display:block; margin-top:4px; }
-    .drop .btn{
-      white-space:nowrap;
-    }
+    .drop .btn{ white-space:nowrap; }
 
-    .row{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 12px;
-    }
-    @media (max-width: 520px){
-      .row{ grid-template-columns:1fr; }
-    }
+    .row{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    @media (max-width: 520px){ .row{ grid-template-columns:1fr; } }
 
-    label{
-      font-size: 12px;
-      color: var(--muted);
-      display:block;
-      margin-bottom: 8px;
-    }
-    select, input[type="range"]{
-      width:100%;
-    }
+    label{ font-size: 12px; color: var(--muted); display:block; margin-bottom: 8px; }
+    select, input[type="range"]{ width:100%; }
     select{
       background: rgba(0,0,0,.28);
       color: var(--text);
@@ -179,12 +123,7 @@
       color: rgba(233,237,247,.92);
     }
 
-    .actions{
-      display:flex;
-      gap: 10px;
-      margin-top: 14px;
-      flex-wrap: wrap;
-    }
+    .actions{ display:flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
     .btn{
       appearance:none;
       border:0;
@@ -204,17 +143,9 @@
       box-shadow: none;
       font-weight: 600;
     }
-    .btn:disabled{
-      opacity: .55;
-      cursor:not-allowed;
-      filter: grayscale(.2);
-    }
+    .btn:disabled{ opacity: .55; cursor:not-allowed; filter: grayscale(.2); }
 
-    .status{
-      margin-top: 14px;
-      display:grid;
-      gap: 10px;
-    }
+    .status{ margin-top: 14px; display:grid; gap: 10px; }
     .bar{
       height: 12px;
       border-radius: 999px;
@@ -241,10 +172,7 @@
     }
     .statusLine b{ color: rgba(233,237,247,.92); font-weight:700; }
 
-    .player{
-      display:grid;
-      gap: 12px;
-    }
+    .player{ display:grid; gap: 12px; }
     .player .box{
       padding: 12px;
       border-radius: 16px;
@@ -253,19 +181,8 @@
     }
     audio{ width: 100%; }
 
-    .hint{
-      margin-top: 12px;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.35;
-    }
-
-    .foot{
-      margin-top: 14px;
-      color: rgba(233,237,247,.55);
-      font-size: 11px;
-      text-align:center;
-    }
+    .hint{ margin-top: 12px; color: var(--muted); font-size: 12px; line-height: 1.35; }
+    .foot{ margin-top: 14px; color: rgba(233,237,247,.55); font-size: 11px; text-align:center; }
 
     /* ===== EQ LIVE (replica UI) ===== */
     .eq-live{
@@ -316,9 +233,8 @@
       grid-template-columns: repeat(2, 1fr);
       gap: 12px;
     }
-    @media (min-width: 720px){
-      .knobs-eq{ grid-template-columns: repeat(3, 1fr); }
-    }
+    @media (min-width: 720px){ .knobs-eq{ grid-template-columns: repeat(3, 1fr); } }
+
     .knob.tile{
       position: relative;
       padding: 14px 14px 12px;
@@ -404,7 +320,7 @@
     <div class="grid">
       <section class="card">
         <h2>Nuevo master</h2>
-        <p class="sub">Sube tu track, elige un preset y presiona <b>Procesar</b>. Te mostramos el avance en % y te dejamos descargar tu master.</p>
+        <p class="sub">Sube tu track, elige un preset y presiona <b>Procesar</b>. Luego mueve perillas: el preview del <b>master procesado</b> se re-renderiza y cambia de verdad.</p>
 
         <div class="drop" id="drop">
           <div>
@@ -449,7 +365,7 @@
         </div>
 
         <p class="hint">
-          Nota: las perillas (demo) quedan bloqueadas hasta que termine el proceso. En beta1.3 la prioridad es estabilidad.
+          Nota: al terminar, las perillas re-renderizan el <b>master</b> (desde la base “clean”). En FREE se aplica sobre preview de 30s para que no haya timeout.
         </p>
 
         <section class="eq-live" id="eqLive">
@@ -581,8 +497,7 @@
       const ctrl = new AbortController();
       const id = setTimeout(() => ctrl.abort(), timeoutMs);
       try{
-        const res = await fetch(url, { ...options, signal: ctrl.signal });
-        return res;
+        return await fetch(url, { ...options, signal: ctrl.signal });
       } finally {
         clearTimeout(id);
       }
@@ -607,13 +522,16 @@
 
     const origPlayer = document.getElementById("origPlayer");
     const masterPlayer = document.getElementById("masterPlayer");
-
     const knobWrap = document.getElementById("knobs");
 
     let selectedFile = null;
     let masterBlob = null;
     let masterUrl = null;
     let origUrl = null;
+
+    let masterId = null;            // ✅ NUEVO: id del master procesado
+    let applyTimer = null;          // ✅ debounce apply
+    let applyInFlight = false;
 
     let progTimer = null;
     let prog = 0;
@@ -623,14 +541,12 @@
       barFill.style.width = prog + "%";
       pctEl.textContent = String(prog);
     }
-
-    function setStatus(msg){
-      statusText.textContent = msg;
-    }
+    function setStatus(msg){ statusText.textContent = msg; }
 
     function resetMaster(){
       masterBlob = null;
       downloadBtn.disabled = true;
+      masterId = null;
 
       if (masterUrl){
         URL.revokeObjectURL(masterUrl);
@@ -655,7 +571,7 @@
       origPlayer.load();
     }
 
-    // EQ Live UI
+    // EQ UI
     const eqPath = document.getElementById("eqPath");
     const eqPathGlow = document.getElementById("eqPathGlow");
     const eqPoints = document.getElementById("eqPoints");
@@ -675,12 +591,10 @@
 
     function updateEqCurve(low, mid, pres, air){
       if (!eqPath) return;
-
       const mapY = (db)=>{
         const v = Math.max(-12, Math.min(12, Number(db||0)));
         const t = (v + 12) / 24;
-        const y = 320 - t * 230;
-        return y;
+        return 320 - t * 230;
       };
 
       const pts = [
@@ -712,12 +626,14 @@
           c.setAttribute("r", "10");
           c.setAttribute("fill", "rgba(255,255,255,.88)");
           c.setAttribute("opacity", ".9");
+
           const inner = document.createElementNS("http://www.w3.org/2000/svg","circle");
           inner.setAttribute("cx", String(p.x));
           inner.setAttribute("cy", String(p.y));
           inner.setAttribute("r", "4.6");
           inner.setAttribute("fill", "rgba(10,12,20,1)");
           inner.setAttribute("opacity", ".85");
+
           eqPoints.appendChild(c);
           eqPoints.appendChild(inner);
         });
@@ -735,6 +651,7 @@
         const inp = tile.querySelector('input[type="range"]');
         const out = tile.querySelector("[data-val]");
         if (!key || !inp) return;
+
         const v = Number(inp.value);
         vals[key] = v;
 
@@ -746,13 +663,9 @@
           else out.textContent = fmtPct(v);
         }
       });
-
       updateEqCurve(vals.low ?? 0, vals.mid ?? 0, vals.pres ?? 0, vals.air ?? 0);
     }
 
-    knobWrap.addEventListener("input", (e)=>{
-      if (e.target && e.target.matches('input[type="range"]')) updateEqUI();
-    });
     window.addEventListener("load", updateEqUI);
 
     function enableKnobs(){
@@ -763,10 +676,7 @@
     }
 
     function stopProgressTimer(){
-      if (progTimer){
-        clearInterval(progTimer);
-        progTimer = null;
-      }
+      if (progTimer){ clearInterval(progTimer); progTimer = null; }
     }
 
     function startFakeProgress(){
@@ -799,9 +709,7 @@
       processBtn.disabled = !selectedFile;
     }
 
-    intensity.addEventListener("input", ()=> {
-      intVal.textContent = intensity.value;
-    });
+    intensity.addEventListener("input", ()=>{ intVal.textContent = intensity.value; });
 
     pickBtn.addEventListener("click", ()=> fileInput.click());
 
@@ -817,15 +725,13 @@
 
     ["dragenter","dragover"].forEach(ev=>{
       drop.addEventListener(ev, (e)=>{
-        e.preventDefault();
-        e.stopPropagation();
+        e.preventDefault(); e.stopPropagation();
         drop.style.borderColor = "rgba(0,215,255,.45)";
       });
     });
     ["dragleave","drop"].forEach(ev=>{
       drop.addEventListener(ev, (e)=>{
-        e.preventDefault();
-        e.stopPropagation();
+        e.preventDefault(); e.stopPropagation();
         drop.style.borderColor = "rgba(255,255,255,.22)";
       });
     });
@@ -852,6 +758,91 @@
       a.remove();
     });
 
+    function getKnobValues(){
+      const vals = { low: 0, mid: 0, pres: 0, air: 0, glue: 0, width: 100 };
+      [...knobWrap.querySelectorAll(".knob")].forEach(k=>{
+        const key = k.getAttribute("data-k");
+        const inp = k.querySelector("input");
+        if (key && inp) vals[key] = inp.value;
+      });
+      return vals;
+    }
+
+    async function applyKnobsDebounced(){
+      if (!masterId) return;
+      if (applyTimer) clearTimeout(applyTimer);
+
+      applyTimer = setTimeout(async ()=>{
+        if (applyInFlight) return; // evita spam si Render está lento
+        applyInFlight = true;
+
+        const vals = getKnobValues();
+        updateEqUI();
+
+        try{
+          setStatus("Actualizando preview...");
+          const fd = new FormData();
+          fd.append("master_id", masterId);
+          fd.append("preset", preset.value);
+          fd.append("intensity", String(intensity.value));
+
+          fd.append("k_low", String(vals.low ?? 0));
+          fd.append("k_mid", String(vals.mid ?? 0));
+          fd.append("k_pres", String(vals.pres ?? 0));
+          fd.append("k_air", String(vals.air ?? 0));
+          fd.append("k_glue", String(vals.glue ?? 0));
+          fd.append("k_width", String(vals.width ?? 100));
+          fd.append("k_sat", "0");
+          fd.append("k_out", "0");
+
+          const res = await fetchWithTimeout(API_BASE + "/api/master/apply", {
+            method: "POST",
+            body: fd
+          }, 120000);
+
+          if (!res.ok){
+            let msg = "Error aplicando perillas.";
+            try{
+              const j = await res.json();
+              if (j && j.detail) msg = String(j.detail);
+            }catch(_){}
+            setStatus(msg);
+            return;
+          }
+
+          const blob = await res.blob();
+          if (!blob || blob.size < 1024){
+            setStatus("Preview vacío (apply).");
+            return;
+          }
+
+          masterBlob = blob;
+
+          if (masterUrl){
+            URL.revokeObjectURL(masterUrl);
+            masterUrl = null;
+          }
+          masterUrl = URL.createObjectURL(blob);
+          masterPlayer.src = masterUrl;
+          masterPlayer.load();
+
+          setStatus("Preview actualizado ✅");
+        }catch(err){
+          const msg = (err && err.name === "AbortError") ? "Timeout aplicando perillas." : "Error de red aplicando perillas.";
+          setStatus(msg);
+        }finally{
+          applyInFlight = false;
+        }
+      }, 350);
+    }
+
+    // cuando mueves perillas, aplica sobre el master procesado
+    knobWrap.addEventListener("input", (e)=>{
+      if (e.target && e.target.matches('input[type="range"]')){
+        applyKnobsDebounced();
+      }
+    });
+
     processBtn.addEventListener("click", async ()=>{
       if (!selectedFile) return;
 
@@ -868,13 +859,7 @@
       fd.append("preset", preset.value);
       fd.append("intensity", String(intensity.value));
 
-      const vals = { low: 0, mid: 0, pres: 0, air: 0, glue: 0, width: 100 };
-      [...knobWrap.querySelectorAll(".knob")].forEach(k=>{
-        const key = k.getAttribute("data-k");
-        const inp = k.querySelector("input");
-        if (key && inp) vals[key] = inp.value;
-      });
-
+      const vals = getKnobValues();
       fd.append("k_low", String(vals.low ?? 0));
       fd.append("k_mid", String(vals.mid ?? 0));
       fd.append("k_pres", String(vals.pres ?? 0));
@@ -900,6 +885,9 @@
           return;
         }
 
+        // ✅ leer id para aplicar perillas después
+        masterId = res.headers.get("X-Master-Id") || null;
+
         const blob = await res.blob();
         if (!blob || blob.size < 1024){
           finishProgressFail("Master vacío.");
@@ -918,7 +906,7 @@
 
         finishProgressOk();
         if (USER_PLAN === "FREE") setStatus("¡Listo! Preview 30s (FREE).");
-        enableKnobs(); // demo ON (en beta1.3 no afecta audio, solo UI)
+        enableKnobs();                // ✅ ahora SÍ afecta (porque hace apply)
         downloadBtn.disabled = false;
 
       }catch(err){
@@ -929,6 +917,8 @@
       }
     });
 
+    // inicial
+    updateEqUI();
     updateProcessEnabled();
   </script>
 </body>
