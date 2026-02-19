@@ -267,26 +267,6 @@
       text-align:center;
     }
 
-    .knobs{
-      display:grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-top: 10px;
-    }
-    @media (max-width: 520px){
-      .knobs{ grid-template-columns: repeat(2, 1fr); }
-    }
-    .knob{
-      padding: 12px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.16);
-      opacity: .55;
-    }
-    .knob.on{ opacity: 1; }
-    .knob label{ margin:0 0 6px; font-size: 11px; }
-    .knob input[type="range"]{ width:100%; }
-
     /* ===== EQ LIVE (replica UI) ===== */
     .eq-live{
       margin-top: 14px;
@@ -330,7 +310,6 @@
       pointer-events:none;
     }
 
-    /* Tiles */
     .knobs-eq{
       margin-top: 14px;
       display:grid;
@@ -393,7 +372,6 @@
     .kname{ font-weight: 800; letter-spacing: .8px; font-size: 14px; }
     .kval{ margin-top: 6px; color: rgba(233,237,247,.85); font-size: 13px; }
 
-    /* Make range cover tile for touch */
     .knob.tile input[type="range"]{
       position:absolute;
       inset:0;
@@ -424,7 +402,6 @@
     </header>
 
     <div class="grid">
-      <!-- Left -->
       <section class="card">
         <h2>Nuevo master</h2>
         <p class="sub">Sube tu track, elige un preset y presiona <b>Procesar</b>. Te mostramos el avance en % y te dejamos descargar tu master.</p>
@@ -475,7 +452,6 @@
           Nota: las perillas (demo) quedan bloqueadas hasta que termine el proceso. En beta1.3 la prioridad es estabilidad.
         </p>
 
-        
         <section class="eq-live" id="eqLive">
           <div class="eq-head">
             <div>
@@ -564,11 +540,9 @@
           </div>
         </section>
 
-
         <div class="foot">© WarMaster — backend Render + FFmpeg</div>
       </section>
 
-      <!-- Right -->
       <aside class="card">
         <h2>Reproductores</h2>
         <p class="sub">Compara el audio original vs el master generado.</p>
@@ -589,15 +563,9 @@
   </div>
 
   <script>
-    // =========
-    // API_BASE:
-    // - si existe ?api=https://backendwm.onrender.com -> usa eso
-    // - si no, usa el mismo dominio (Render/host actual)
-    // =========
     const qs = new URLSearchParams(location.search);
     const API_BASE = (qs.get("api") || "").trim() || location.origin;
 
-    // Plan (FREE/PLUS/PRO)
     let USER_PLAN = "FREE";
     (async ()=>{
       try{
@@ -606,12 +574,9 @@
           const j = await r.json();
           if (j && j.plan) USER_PLAN = String(j.plan).toUpperCase();
         }
-      }catch(_){ /* ignore */ }
+      }catch(_){}
     })();
 
-    // =========
-    // fetchWithTimeout
-    // =========
     async function fetchWithTimeout(url, options={}, timeoutMs=180000){
       const ctrl = new AbortController();
       const id = setTimeout(() => ctrl.abort(), timeoutMs);
@@ -623,9 +588,6 @@
       }
     }
 
-    // =========
-    // UI refs
-    // =========
     const fileInput = document.getElementById("file");
     const pickBtn = document.getElementById("pickBtn");
     const drop = document.getElementById("drop");
@@ -648,9 +610,6 @@
 
     const knobWrap = document.getElementById("knobs");
 
-    // =========
-    // State
-    // =========
     let selectedFile = null;
     let masterBlob = null;
     let masterUrl = null;
@@ -680,7 +639,6 @@
       masterPlayer.removeAttribute("src");
       masterPlayer.load();
 
-      // bloquear perillas
       [...knobWrap.querySelectorAll(".knob")].forEach(k=>{
         k.classList.remove("on");
         k.querySelector("input").disabled = true;
@@ -697,8 +655,7 @@
       origPlayer.load();
     }
 
-    // ===== EQ Live UI updates (needle + curve) =====
-    const eqSvg = document.getElementById("eqSvg");
+    // EQ Live UI
     const eqPath = document.getElementById("eqPath");
     const eqPathGlow = document.getElementById("eqPathGlow");
     const eqPoints = document.getElementById("eqPoints");
@@ -711,7 +668,6 @@
     function fmtPct(v){ return `${Math.round(Number(v||0))} %`; }
 
     function setNeedle(tile, norm){
-      // norm 0..1 -> angle -55..55 (similar a la imagen)
       const ang = -55 + (norm * 110);
       const needle = tile.querySelector(".needle");
       if (needle) needle.style.transform = `translateY(-50%) rotate(${ang}deg)`;
@@ -720,10 +676,9 @@
     function updateEqCurve(low, mid, pres, air){
       if (!eqPath) return;
 
-      // map dB (-12..12) to y (320..90) (invert)
       const mapY = (db)=>{
         const v = Math.max(-12, Math.min(12, Number(db||0)));
-        const t = (v + 12) / 24; // 0..1
+        const t = (v + 12) / 24;
         const y = 320 - t * 230;
         return y;
       };
@@ -737,7 +692,6 @@
         {x: 1000, y: mapY(air)*0.92 + 18},
       ];
 
-      // smooth path
       const d = `M ${pts[0].x} ${pts[0].y}
                  C ${pts[0].x+90} ${pts[0].y}, ${pts[1].x-90} ${pts[1].y}, ${pts[1].x} ${pts[1].y}
                  S ${pts[2].x-90} ${pts[2].y}, ${pts[2].x} ${pts[2].y}
@@ -748,7 +702,6 @@
       eqPath.setAttribute("d", d);
       if (eqPathGlow) eqPathGlow.setAttribute("d", d);
 
-      // points (4 visibles como en la captura)
       if (eqPoints){
         eqPoints.innerHTML = "";
         const handlePts = [pts[1], pts[2], pts[3], pts[4]];
@@ -785,11 +738,9 @@
         const v = Number(inp.value);
         vals[key] = v;
 
-        // needle
         const norm = (v - min) / (max - min || 1);
         setNeedle(tile, Math.max(0, Math.min(1, norm)));
 
-        // label
         if (out){
           if (unit === "dB") out.textContent = fmtDb(v);
           else out.textContent = fmtPct(v);
@@ -824,7 +775,6 @@
       status.style.display = "block";
       setStatus("Procesando...");
       progTimer = setInterval(()=>{
-        // sube rápido al inicio y luego se acerca asintóticamente a 92%
         const target = 92;
         const step = Math.max(1, Math.round((target - prog) * 0.08));
         setProgress(prog + step);
@@ -865,7 +815,6 @@
       updateProcessEnabled();
     });
 
-    // Drag & drop (estable)
     ["dragenter","dragover"].forEach(ev=>{
       drop.addEventListener(ev, (e)=>{
         e.preventDefault();
@@ -910,7 +859,6 @@
       downloadBtn.disabled = true;
       resetMaster();
 
-      // bloquear perillas mientras corre
       [...knobWrap.querySelectorAll(".knob input")].forEach(i=> i.disabled = true);
 
       startFakeProgress();
@@ -920,22 +868,13 @@
       fd.append("preset", preset.value);
       fd.append("intensity", String(intensity.value));
 
-      // knobs (UI EQ Live)
-      const kMap = {
-        low: "k_low",
-        mid: "k_mid",
-        pres: "k_pres",
-        air: "k_air",
-        glue: "k_glue",
-        width: "k_width",
-      };
-      // Defaults
-      const vals = { low: 0, mid: 0, pres: 0, air: 0, glue: 0, width: 100, sat: 0, out: 0 };
+      const vals = { low: 0, mid: 0, pres: 0, air: 0, glue: 0, width: 100 };
       [...knobWrap.querySelectorAll(".knob")].forEach(k=>{
         const key = k.getAttribute("data-k");
         const inp = k.querySelector("input");
         if (key && inp) vals[key] = inp.value;
       });
+
       fd.append("k_low", String(vals.low ?? 0));
       fd.append("k_mid", String(vals.mid ?? 0));
       fd.append("k_pres", String(vals.pres ?? 0));
@@ -945,7 +884,7 @@
       fd.append("k_sat", "0");
       fd.append("k_out", "0");
 
-try{
+      try{
         const res = await fetchWithTimeout(API_BASE + "/api/master", {
           method: "POST",
           body: fd
@@ -958,20 +897,17 @@ try{
             if (j && j.detail) msg = String(j.detail);
           }catch(_){}
           finishProgressFail(msg);
-          processBtn.disabled = false;
           return;
         }
 
         const blob = await res.blob();
         if (!blob || blob.size < 1024){
           finishProgressFail("Master vacío.");
-          processBtn.disabled = false;
           return;
         }
 
         masterBlob = blob;
 
-        // set master preview
         if (masterUrl){
           URL.revokeObjectURL(masterUrl);
           masterUrl = null;
@@ -984,6 +920,7 @@ try{
         if (USER_PLAN === "FREE") setStatus("¡Listo! Preview 30s (FREE).");
         enableKnobs(); // demo ON (en beta1.3 no afecta audio, solo UI)
         downloadBtn.disabled = false;
+
       }catch(err){
         const msg = (err && err.name === "AbortError") ? "Timeout (180s). Intenta de nuevo." : "Error de red.";
         finishProgressFail(msg);
@@ -992,7 +929,6 @@ try{
       }
     });
 
-    // inicial
     updateProcessEnabled();
   </script>
 </body>
