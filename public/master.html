@@ -45,6 +45,7 @@
     .brand h1{ margin:0; font-size: 18px; letter-spacing:.2px; }
     .brand small{ display:block; color: var(--muted); margin-top: 2px; font-size: 12px; }
 
+    .nav{ display:flex; gap:10px; align-items:center; }
     .nav a{
       color: var(--text);
       text-decoration:none;
@@ -130,7 +131,7 @@
       cursor:pointer;
       border-radius: 16px;
       padding: 12px 14px;
-      font-weight: 700;
+      font-weight: 800;
       font-size: 13px;
       color: #0a0b10;
       background: linear-gradient(135deg, var(--c), var(--b));
@@ -141,7 +142,7 @@
       background: rgba(0,0,0,.22);
       border: 1px solid rgba(255,255,255,.14);
       box-shadow: none;
-      font-weight: 600;
+      font-weight: 700;
     }
     .btn:disabled{ opacity: .55; cursor:not-allowed; filter: grayscale(.2); }
 
@@ -170,7 +171,7 @@
       color: var(--muted);
       font-size: 12px;
     }
-    .statusLine b{ color: rgba(233,237,247,.92); font-weight:700; }
+    .statusLine b{ color: rgba(233,237,247,.92); font-weight:800; }
 
     .player{ display:grid; gap: 12px; }
     .player .box{
@@ -184,7 +185,7 @@
     .hint{ margin-top: 12px; color: var(--muted); font-size: 12px; line-height: 1.35; }
     .foot{ margin-top: 14px; color: rgba(233,237,247,.55); font-size: 11px; text-align:center; }
 
-    /* ===== EQ LIVE (replica UI) ===== */
+    /* ===== EQ LIVE ===== */
     .eq-live{
       margin-top: 14px;
       padding: 14px;
@@ -196,6 +197,28 @@
     .eq-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; padding: 4px 4px 10px; }
     .eq-head h3{ margin:0; font-size: 20px; letter-spacing:.2px; }
     .eq-sub{ margin-top: 4px; color: rgba(233,237,247,.62); font-size: 13px; }
+
+    .toggles{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-end;
+      margin-top:2px;
+    }
+    .toggle{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      font-size:12px;
+      color: rgba(233,237,247,.88);
+      user-select:none;
+    }
+    .toggle input{ transform: translateY(1px); }
 
     .eq-graph-wrap{
       position: relative;
@@ -244,7 +267,7 @@
         radial-gradient(240px 180px at 30% 15%, rgba(255,255,255,.06), transparent 70%),
         linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.14));
       box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
-      opacity: .55;
+      opacity: 1;
       min-height: 168px;
       display:flex;
       flex-direction:column;
@@ -252,7 +275,6 @@
       justify-content:center;
       gap: 10px;
     }
-    .knob.tile.on{ opacity: 1; }
 
     .dial{
       width: 92px;
@@ -279,13 +301,13 @@
       left:50%; top:50%;
       width: 44px; height: 6px;
       transform-origin: 0% 50%;
-      transform: translateY(-50%) rotate(-45deg);
+      transform: translateY(-50%) rotate(-55deg);
       border-radius: 999px;
       background: linear-gradient(90deg, rgba(0,215,255,.92), rgba(138,92,255,.92));
       box-shadow: 0 0 18px rgba(138,92,255,.22);
     }
     .kmeta{ text-align:center; }
-    .kname{ font-weight: 800; letter-spacing: .8px; font-size: 14px; }
+    .kname{ font-weight: 900; letter-spacing: .8px; font-size: 14px; }
     .kval{ margin-top: 6px; color: rgba(233,237,247,.85); font-size: 13px; }
 
     .knob.tile input[type="range"]{
@@ -313,19 +335,21 @@
         </div>
       </div>
       <div class="nav">
+        <a href="index.html">Inicio</a>
         <a href="dashboard.html">Dashboard</a>
       </div>
     </header>
 
     <div class="grid">
+      <!-- Left -->
       <section class="card">
         <h2>Nuevo master</h2>
-        <p class="sub">Sube tu track, elige un preset y presiona <b>Procesar</b>. Luego mueve perillas: el preview del <b>master procesado</b> se re-renderiza y cambia de verdad.</p>
+        <p class="sub">Sube tu track, ajusta perillas en tiempo real (preview) y si quieres presiona <b>Procesar</b> para render final en el backend.</p>
 
         <div class="drop" id="drop">
           <div>
             <strong id="fileName">Ningún archivo seleccionado</strong>
-            <span>WAV / MP3 • Máx 100MB • Máx 6 minutos</span>
+            <span>WAV / MP3 • Máx 100MB • (PLUS/PRO) máx 6 minutos</span>
           </div>
           <button class="btn secondary" id="pickBtn" type="button">Elegir archivo</button>
           <input id="file" type="file" accept="audio/*" hidden />
@@ -333,7 +357,7 @@
 
         <div class="row">
           <div>
-            <label>Preset</label>
+            <label>Preset (backend)</label>
             <select id="preset">
               <option value="clean">Clean</option>
               <option value="warm">Warm</option>
@@ -344,7 +368,7 @@
 
           <div class="rangeWrap">
             <div class="rangeTop">
-              <span>Intensidad</span>
+              <span>Intensidad (backend)</span>
               <span class="pill"><span id="intVal">55</span>%</span>
             </div>
             <input id="intensity" type="range" min="0" max="100" value="55" />
@@ -359,20 +383,31 @@
         <div class="status" id="status" style="display:none;">
           <div class="bar"><i id="barFill"></i></div>
           <div class="statusLine">
-            <span id="statusText">Listo para procesar</span>
+            <span id="statusText">Listo</span>
             <span><b id="pct">0</b>%</span>
           </div>
         </div>
-
-        <p class="hint">
-          Nota: al terminar, las perillas re-renderizan el <b>master</b> (desde la base “clean”). En FREE se aplica sobre preview de 30s para que no haya timeout.
-        </p>
 
         <section class="eq-live" id="eqLive">
           <div class="eq-head">
             <div>
               <h3>EQ Live</h3>
-              <div class="eq-sub">Ajuste en tiempo real (preview)</div>
+              <div class="eq-sub">Preview real en tiempo real (Original y Master)</div>
+            </div>
+
+            <div class="toggles">
+              <label class="toggle" title="Aplica perillas sobre el reproductor Original">
+                <input id="applyOrig" type="checkbox" checked />
+                Original
+              </label>
+              <label class="toggle" title="Aplica perillas sobre el reproductor Master (si existe)">
+                <input id="applyMaster" type="checkbox" checked />
+                Master
+              </label>
+              <label class="toggle" title="Modo PRO tipo LANDR: auto output + glue/sat sutil + compensaciones">
+                <input id="proMode" type="checkbox" checked />
+                Modo PRO (LANDR)
+              </label>
             </div>
           </div>
 
@@ -406,7 +441,7 @@
                 <div class="kname">LOW</div>
                 <div class="kval" data-val>+0.0 dB</div>
               </div>
-              <input type="range" min="-12" max="12" value="0" step="0.1" disabled />
+              <input type="range" min="-12" max="12" value="0" step="0.1" />
             </div>
 
             <div class="knob tile" data-k="mid" data-unit="dB" data-min="-12" data-max="12">
@@ -415,7 +450,7 @@
                 <div class="kname">MID</div>
                 <div class="kval" data-val>+0.0 dB</div>
               </div>
-              <input type="range" min="-12" max="12" value="0" step="0.1" disabled />
+              <input type="range" min="-12" max="12" value="0" step="0.1" />
             </div>
 
             <div class="knob tile" data-k="pres" data-unit="dB" data-min="-12" data-max="12">
@@ -424,7 +459,7 @@
                 <div class="kname">PRESENCE</div>
                 <div class="kval" data-val>+0.0 dB</div>
               </div>
-              <input type="range" min="-12" max="12" value="0" step="0.1" disabled />
+              <input type="range" min="-12" max="12" value="0" step="0.1" />
             </div>
 
             <div class="knob tile" data-k="air" data-unit="dB" data-min="-12" data-max="12">
@@ -433,7 +468,7 @@
                 <div class="kname">AIR</div>
                 <div class="kval" data-val>+0.0 dB</div>
               </div>
-              <input type="range" min="-12" max="12" value="0" step="0.1" disabled />
+              <input type="range" min="-12" max="12" value="0" step="0.1" />
             </div>
 
             <div class="knob tile" data-k="glue" data-unit="%" data-min="0" data-max="100">
@@ -442,7 +477,7 @@
                 <div class="kname">GLUE</div>
                 <div class="kval" data-val>0 %</div>
               </div>
-              <input type="range" min="0" max="100" value="0" step="1" disabled />
+              <input type="range" min="0" max="100" value="0" step="1" />
             </div>
 
             <div class="knob tile" data-k="width" data-unit="%" data-min="50" data-max="150">
@@ -451,14 +486,20 @@
                 <div class="kname">WIDTH</div>
                 <div class="kval" data-val>100 %</div>
               </div>
-              <input type="range" min="50" max="150" value="100" step="1" disabled />
+              <input type="range" min="50" max="150" value="100" step="1" />
             </div>
           </div>
         </section>
 
+        <p class="hint">
+          ✅ Las perillas ahora afectan el audio en tiempo real (preview) en Original y Master.
+          “Procesar” sigue existiendo para render final en backend (FREE recorta 30s).
+        </p>
+
         <div class="foot">© WarMaster — backend Render + FFmpeg</div>
       </section>
 
+      <!-- Right -->
       <aside class="card">
         <h2>Reproductores</h2>
         <p class="sub">Compara el audio original vs el master generado.</p>
@@ -479,9 +520,13 @@
   </div>
 
   <script>
+    // =========
+    // API_BASE
+    // =========
     const qs = new URLSearchParams(location.search);
     const API_BASE = (qs.get("api") || "").trim() || location.origin;
 
+    // Plan (FREE/PLUS/PRO)
     let USER_PLAN = "FREE";
     (async ()=>{
       try{
@@ -493,6 +538,9 @@
       }catch(_){}
     })();
 
+    // =========
+    // fetchWithTimeout
+    // =========
     async function fetchWithTimeout(url, options={}, timeoutMs=180000){
       const ctrl = new AbortController();
       const id = setTimeout(() => ctrl.abort(), timeoutMs);
@@ -503,6 +551,9 @@
       }
     }
 
+    // =========
+    // UI refs
+    // =========
     const fileInput = document.getElementById("file");
     const pickBtn = document.getElementById("pickBtn");
     const drop = document.getElementById("drop");
@@ -522,16 +573,20 @@
 
     const origPlayer = document.getElementById("origPlayer");
     const masterPlayer = document.getElementById("masterPlayer");
+
     const knobWrap = document.getElementById("knobs");
 
+    const applyOrig = document.getElementById("applyOrig");
+    const applyMaster = document.getElementById("applyMaster");
+    const proMode = document.getElementById("proMode");
+
+    // =========
+    // State
+    // =========
     let selectedFile = null;
     let masterBlob = null;
     let masterUrl = null;
     let origUrl = null;
-
-    let masterId = null;            // ✅ NUEVO: id del master procesado
-    let applyTimer = null;          // ✅ debounce apply
-    let applyInFlight = false;
 
     let progTimer = null;
     let prog = 0;
@@ -546,7 +601,6 @@
     function resetMaster(){
       masterBlob = null;
       downloadBtn.disabled = true;
-      masterId = null;
 
       if (masterUrl){
         URL.revokeObjectURL(masterUrl);
@@ -554,11 +608,6 @@
       }
       masterPlayer.removeAttribute("src");
       masterPlayer.load();
-
-      [...knobWrap.querySelectorAll(".knob")].forEach(k=>{
-        k.classList.remove("on");
-        k.querySelector("input").disabled = true;
-      });
     }
 
     function setOriginalPreview(file){
@@ -571,7 +620,97 @@
       origPlayer.load();
     }
 
-    // EQ UI
+    function stopProgressTimer(){
+      if (progTimer){
+        clearInterval(progTimer);
+        progTimer = null;
+      }
+    }
+    function startFakeProgress(){
+      stopProgressTimer();
+      setProgress(0);
+      status.style.display = "block";
+      setStatus("Procesando...");
+      progTimer = setInterval(()=>{
+        const target = 92;
+        const step = Math.max(1, Math.round((target - prog) * 0.08));
+        setProgress(prog + step);
+        if (prog >= target) setProgress(target);
+      }, 180);
+    }
+    function finishProgressOk(){
+      stopProgressTimer();
+      setProgress(100);
+      setStatus("¡Listo! Master generado.");
+    }
+    function finishProgressFail(msg){
+      stopProgressTimer();
+      setProgress(0);
+      status.style.display = "block";
+      setStatus(msg || "Error procesando el audio.");
+    }
+
+    function updateProcessEnabled(){
+      processBtn.disabled = !selectedFile;
+    }
+
+    intensity.addEventListener("input", ()=> {
+      intVal.textContent = intensity.value;
+    });
+
+    pickBtn.addEventListener("click", ()=> fileInput.click());
+
+    fileInput.addEventListener("change", ()=>{
+      const f = fileInput.files && fileInput.files[0];
+      if (!f) return;
+      selectedFile = f;
+      fileName.textContent = f.name;
+      setOriginalPreview(f);
+      resetMaster();
+      updateProcessEnabled();
+      ensurePreviewChainReady(); // preparar WebAudio (al primer gesto suele ser ok)
+    });
+
+    // Drag & drop
+    ["dragenter","dragover"].forEach(ev=>{
+      drop.addEventListener(ev, (e)=>{
+        e.preventDefault(); e.stopPropagation();
+        drop.style.borderColor = "rgba(0,215,255,.45)";
+      });
+    });
+    ["dragleave","drop"].forEach(ev=>{
+      drop.addEventListener(ev, (e)=>{
+        e.preventDefault(); e.stopPropagation();
+        drop.style.borderColor = "rgba(255,255,255,.22)";
+      });
+    });
+    drop.addEventListener("drop", (e)=>{
+      const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (!f) return;
+      selectedFile = f;
+      fileInput.value = "";
+      fileName.textContent = f.name;
+      setOriginalPreview(f);
+      resetMaster();
+      updateProcessEnabled();
+      ensurePreviewChainReady();
+    });
+
+    downloadBtn.addEventListener("click", ()=>{
+      if (!masterBlob) return;
+      const url = masterUrl || URL.createObjectURL(masterBlob);
+      masterUrl = url;
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "warmaster_master.wav";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    });
+
+    // ==========================================================
+    // EQ LIVE UI (needle + curve)
+    // ==========================================================
     const eqPath = document.getElementById("eqPath");
     const eqPathGlow = document.getElementById("eqPathGlow");
     const eqPoints = document.getElementById("eqPoints");
@@ -591,10 +730,12 @@
 
     function updateEqCurve(low, mid, pres, air){
       if (!eqPath) return;
+
       const mapY = (db)=>{
         const v = Math.max(-12, Math.min(12, Number(db||0)));
         const t = (v + 12) / 24;
-        return 320 - t * 230;
+        const y = 320 - t * 230;
+        return y;
       };
 
       const pts = [
@@ -626,18 +767,26 @@
           c.setAttribute("r", "10");
           c.setAttribute("fill", "rgba(255,255,255,.88)");
           c.setAttribute("opacity", ".9");
-
           const inner = document.createElementNS("http://www.w3.org/2000/svg","circle");
           inner.setAttribute("cx", String(p.x));
           inner.setAttribute("cy", String(p.y));
           inner.setAttribute("r", "4.6");
           inner.setAttribute("fill", "rgba(10,12,20,1)");
           inner.setAttribute("opacity", ".85");
-
           eqPoints.appendChild(c);
           eqPoints.appendChild(inner);
         });
       }
+    }
+
+    function getKnobValues(){
+      const vals = { low: 0, mid: 0, pres: 0, air: 0, glue: 0, width: 100 };
+      [...knobWrap.querySelectorAll(".knob")].forEach(k=>{
+        const key = k.getAttribute("data-k");
+        const inp = k.querySelector("input");
+        if (key && inp) vals[key] = Number(inp.value);
+      });
+      return vals;
     }
 
     function updateEqUI(){
@@ -663,194 +812,363 @@
           else out.textContent = fmtPct(v);
         }
       });
+
       updateEqCurve(vals.low ?? 0, vals.mid ?? 0, vals.pres ?? 0, vals.air ?? 0);
     }
 
-    window.addEventListener("load", updateEqUI);
-
-    function enableKnobs(){
-      [...knobWrap.querySelectorAll(".knob")].forEach(k=>{
-        k.classList.add("on");
-        k.querySelector("input").disabled = false;
-      });
-    }
-
-    function stopProgressTimer(){
-      if (progTimer){ clearInterval(progTimer); progTimer = null; }
-    }
-
-    function startFakeProgress(){
-      stopProgressTimer();
-      setProgress(0);
-      status.style.display = "block";
-      setStatus("Procesando...");
-      progTimer = setInterval(()=>{
-        const target = 92;
-        const step = Math.max(1, Math.round((target - prog) * 0.08));
-        setProgress(prog + step);
-        if (prog >= target) setProgress(target);
-      }, 180);
-    }
-
-    function finishProgressOk(){
-      stopProgressTimer();
-      setProgress(100);
-      setStatus("¡Listo! Master generado.");
-    }
-
-    function finishProgressFail(msg){
-      stopProgressTimer();
-      setProgress(0);
-      status.style.display = "block";
-      setStatus(msg || "Error procesando el audio.");
-    }
-
-    function updateProcessEnabled(){
-      processBtn.disabled = !selectedFile;
-    }
-
-    intensity.addEventListener("input", ()=>{ intVal.textContent = intensity.value; });
-
-    pickBtn.addEventListener("click", ()=> fileInput.click());
-
-    fileInput.addEventListener("change", ()=>{
-      const f = fileInput.files && fileInput.files[0];
-      if (!f) return;
-      selectedFile = f;
-      fileName.textContent = f.name;
-      setOriginalPreview(f);
-      resetMaster();
-      updateProcessEnabled();
+    knobWrap.addEventListener("input", ()=>{
+      updateEqUI();
+      applyRealtimePreview();
     });
+    window.addEventListener("load", ()=>{ updateEqUI(); });
 
-    ["dragenter","dragover"].forEach(ev=>{
-      drop.addEventListener(ev, (e)=>{
-        e.preventDefault(); e.stopPropagation();
-        drop.style.borderColor = "rgba(0,215,255,.45)";
-      });
-    });
-    ["dragleave","drop"].forEach(ev=>{
-      drop.addEventListener(ev, (e)=>{
-        e.preventDefault(); e.stopPropagation();
-        drop.style.borderColor = "rgba(255,255,255,.22)";
-      });
-    });
-    drop.addEventListener("drop", (e)=>{
-      const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-      if (!f) return;
-      selectedFile = f;
-      fileInput.value = "";
-      fileName.textContent = f.name;
-      setOriginalPreview(f);
-      resetMaster();
-      updateProcessEnabled();
-    });
+    // ==========================================================
+    // REALTIME PREVIEW (WebAudio) — PRO (LANDR-like)
+    // Applies to Original and Master players
+    // ==========================================================
+    let audioCtx = null;
 
-    downloadBtn.addEventListener("click", ()=>{
-      if (!masterBlob) return;
-      const url = masterUrl || URL.createObjectURL(masterBlob);
-      masterUrl = url;
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "warmaster_master.wav";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    });
+    const chains = {
+      orig: null,
+      master: null,
+    };
 
-    function getKnobValues(){
-      const vals = { low: 0, mid: 0, pres: 0, air: 0, glue: 0, width: 100 };
-      [...knobWrap.querySelectorAll(".knob")].forEach(k=>{
-        const key = k.getAttribute("data-k");
-        const inp = k.querySelector("input");
-        if (key && inp) vals[key] = inp.value;
-      });
-      return vals;
-    }
-
-    async function applyKnobsDebounced(){
-      if (!masterId) return;
-      if (applyTimer) clearTimeout(applyTimer);
-
-      applyTimer = setTimeout(async ()=>{
-        if (applyInFlight) return; // evita spam si Render está lento
-        applyInFlight = true;
-
-        const vals = getKnobValues();
-        updateEqUI();
-
-        try{
-          setStatus("Actualizando preview...");
-          const fd = new FormData();
-          fd.append("master_id", masterId);
-          fd.append("preset", preset.value);
-          fd.append("intensity", String(intensity.value));
-
-          fd.append("k_low", String(vals.low ?? 0));
-          fd.append("k_mid", String(vals.mid ?? 0));
-          fd.append("k_pres", String(vals.pres ?? 0));
-          fd.append("k_air", String(vals.air ?? 0));
-          fd.append("k_glue", String(vals.glue ?? 0));
-          fd.append("k_width", String(vals.width ?? 100));
-          fd.append("k_sat", "0");
-          fd.append("k_out", "0");
-
-          const res = await fetchWithTimeout(API_BASE + "/api/master/apply", {
-            method: "POST",
-            body: fd
-          }, 120000);
-
-          if (!res.ok){
-            let msg = "Error aplicando perillas.";
-            try{
-              const j = await res.json();
-              if (j && j.detail) msg = String(j.detail);
-            }catch(_){}
-            setStatus(msg);
-            return;
-          }
-
-          const blob = await res.blob();
-          if (!blob || blob.size < 1024){
-            setStatus("Preview vacío (apply).");
-            return;
-          }
-
-          masterBlob = blob;
-
-          if (masterUrl){
-            URL.revokeObjectURL(masterUrl);
-            masterUrl = null;
-          }
-          masterUrl = URL.createObjectURL(blob);
-          masterPlayer.src = masterUrl;
-          masterPlayer.load();
-
-          setStatus("Preview actualizado ✅");
-        }catch(err){
-          const msg = (err && err.name === "AbortError") ? "Timeout aplicando perillas." : "Error de red aplicando perillas.";
-          setStatus(msg);
-        }finally{
-          applyInFlight = false;
-        }
-      }, 350);
-    }
-
-    // cuando mueves perillas, aplica sobre el master procesado
-    knobWrap.addEventListener("input", (e)=>{
-      if (e.target && e.target.matches('input[type="range"]')){
-        applyKnobsDebounced();
+    function ensureAudioCtx(){
+      if (!audioCtx){
+        const AC = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AC();
       }
+      return audioCtx;
+    }
+
+    function createSaturator(ctx){
+      const ws = ctx.createWaveShaper();
+      ws.oversample = "2x";
+      const makeCurve = (amount)=>{
+        const n = 44100;
+        const curve = new Float32Array(n);
+        const k = Math.max(0.001, amount);
+        for (let i=0; i<n; i++){
+          const x = (i * 2 / (n - 1)) - 1;
+          // soft tanh-ish
+          curve[i] = Math.tanh(k * x);
+        }
+        return curve;
+      };
+      ws._setAmount = (amt)=>{ ws.curve = makeCurve(amt); };
+      ws._setAmount(1.0);
+      return ws;
+    }
+
+    function createStereoWidener(ctx){
+      // mid/side widening:
+      // M = (L+R)/2, S = (L-R)/2
+      // S *= width, then:
+      // L = M + S, R = M - S
+      const splitter = ctx.createChannelSplitter(2);
+      const merger = ctx.createChannelMerger(2);
+
+      const gL = ctx.createGain();
+      const gR = ctx.createGain();
+
+      const sum = ctx.createGain();   // (L + R)
+      const diff = ctx.createGain();  // (L - R)
+      const invR = ctx.createGain(); invR.gain.value = -1;
+
+      // build sum: L + R
+      gL.gain.value = 1; gR.gain.value = 1;
+      splitter.connect(gL, 0);
+      splitter.connect(gR, 1);
+      gL.connect(sum);
+      gR.connect(sum);
+
+      // build diff: L - R
+      const gL2 = ctx.createGain(); gL2.gain.value = 1;
+      const gR2 = ctx.createGain(); gR2.gain.value = 1;
+      splitter.connect(gL2, 0);
+      splitter.connect(gR2, 1);
+      gR2.connect(invR);
+      gL2.connect(diff);
+      invR.connect(diff);
+
+      // M and S
+      const mid = ctx.createGain(); mid.gain.value = 0.5;
+      const side = ctx.createGain(); side.gain.value = 0.5;
+      sum.connect(mid);
+      diff.connect(side);
+
+      // width control
+      const sideGain = ctx.createGain(); sideGain.gain.value = 1.0;
+      side.connect(sideGain);
+
+      // L = M + S
+      const outL = ctx.createGain();
+      mid.connect(outL);
+      sideGain.connect(outL);
+
+      // R = M - S
+      const outR = ctx.createGain();
+      mid.connect(outR);
+      const sideInv = ctx.createGain(); sideInv.gain.value = -1;
+      sideGain.connect(sideInv);
+      sideInv.connect(outR);
+
+      outL.connect(merger, 0, 0);
+      outR.connect(merger, 0, 1);
+
+      return {
+        input: splitter,
+        output: merger,
+        setWidth: (pct)=>{
+          // pct 50..150 => width factor 0.5..1.5
+          const w = Math.max(50, Math.min(150, Number(pct||100))) / 100;
+          sideGain.gain.value = w;
+        }
+      };
+    }
+
+    function buildChainForPlayer(playerEl){
+      const ctx = ensureAudioCtx();
+
+      // media element source (only once per element)
+      const src = ctx.createMediaElementSource(playerEl);
+
+      // 4 EQ bands (peaking)
+      const low = ctx.createBiquadFilter(); low.type = "peaking"; low.frequency.value = 120;  low.Q.value = 0.9;
+      const mid = ctx.createBiquadFilter(); mid.type = "peaking"; mid.frequency.value = 630;  mid.Q.value = 1.0;
+      const pres= ctx.createBiquadFilter(); pres.type= "peaking"; pres.frequency.value= 1760; pres.Q.value= 1.0;
+      const air = ctx.createBiquadFilter(); air.type = "highshelf"; air.frequency.value = 8500; air.Q.value = 0.7;
+
+      // glue compressor
+      const comp = ctx.createDynamicsCompressor();
+      comp.threshold.value = -18;
+      comp.ratio.value = 2;
+      comp.attack.value = 0.01;
+      comp.release.value = 0.12;
+
+      // saturator
+      const sat = createSaturator(ctx);
+
+      // widener
+      const widener = createStereoWidener(ctx);
+
+      // output
+      const outGain = ctx.createGain(); outGain.gain.value = 1;
+
+      // connect
+      src.connect(low);
+      low.connect(mid);
+      mid.connect(pres);
+      pres.connect(air);
+      air.connect(comp);
+      comp.connect(sat);
+      sat.connect(widener.input);
+      widener.output.connect(outGain);
+      outGain.connect(ctx.destination);
+
+      return {
+        ctx,
+        src,
+        nodes: { low, mid, pres, air, comp, sat, widener, outGain }
+      };
+    }
+
+    function ensureChainFor(which){
+      if (which === "orig"){
+        if (!chains.orig){
+          chains.orig = buildChainForPlayer(origPlayer);
+        }
+        return chains.orig;
+      }
+      if (which === "master"){
+        if (!chains.master){
+          chains.master = buildChainForPlayer(masterPlayer);
+        }
+        return chains.master;
+      }
+      return null;
+    }
+
+    function ensurePreviewChainReady(){
+      // nada agresivo: solo prepara ctx en primer gesto
+      try { ensureAudioCtx(); } catch(_){}
+    }
+
+    async function resumeAudioContext(){
+      try{
+        const ctx = ensureAudioCtx();
+        if (ctx.state !== "running") await ctx.resume();
+      }catch(_){}
+    }
+
+    // Resume on any user interaction (mobile)
+    ["click","touchstart"].forEach(ev=>{
+      window.addEventListener(ev, ()=>{ resumeAudioContext(); }, {passive:true});
     });
 
+    function applyPresetToPreview(presetName){
+      // Sutil y “pro” (no exagera): se aplica al PREVIEW (no backend).
+      // Esto hace que el usuario sienta cambios incluso sin procesar.
+      const p = (presetName || "clean").toLowerCase();
+      const base = {
+        low: 0,
+        mid: 0,
+        pres: 0,
+        air: 0,
+        glue: 12,
+        width: 105
+      };
+      if (p === "warm"){ base.low = 1.5; base.air = -1.5; base.glue = 18; base.width = 102; }
+      else if (p === "club"){ base.low = 2.5; base.air = 1.0; base.glue = 22; base.width = 112; }
+      else if (p === "loud"){ base.low = 1.0; base.pres = 1.5; base.air = 1.5; base.glue = 30; base.width = 108; }
+      return base;
+    }
+
+    function proLinking(vals, presetName){
+      // Modo PRO tipo LANDR: compensaciones + auto output + glue/sat sutil
+      // IMPORTANT: límites bajos para que no destruya.
+      const base = applyPresetToPreview(presetName);
+
+      // knobs (usuario) + base preset
+      let low = (vals.low ?? 0) + base.low;
+      let mid = (vals.mid ?? 0) + base.mid;
+      let pres= (vals.pres?? 0) + base.pres;
+      let air = (vals.air ?? 0) + base.air;
+      let glue= (vals.glue?? 0);
+      let width=(vals.width?? 100);
+
+      // compensaciones suaves para que no “se vaya” el balance (LANDR vibe)
+      // - Si sube AIR mucho, baja un poco PRES (muy leve)
+      const airBoost = Math.max(0, air);
+      pres -= airBoost * 0.12;
+
+      // - Si sube LOW mucho, baja un toque MID para evitar “mud”
+      const lowBoost = Math.max(0, low);
+      mid -= lowBoost * 0.10;
+
+      // Glue pro: se suma algo cuando hay boosts grandes
+      const boostSum = Math.max(0, low) + Math.max(0, pres) + Math.max(0, air);
+      glue = Math.max(0, Math.min(100, glue + boostSum * 1.2 + base.glue));
+
+      // Width: si hay mucho low, reduce un poquito width para estabilidad
+      width = Math.max(50, Math.min(150, width));
+      width = width - (lowBoost * 0.6);
+      width = Math.max(50, Math.min(150, width));
+      // y suma base preset
+      width = Math.max(50, Math.min(150, width + (base.width - 100)));
+
+      // Saturación: leve según glue + boosts (no hay knob visible de sat en tu UI)
+      const satAmt = Math.max(0, Math.min(1, (glue/100)*0.55 + (boostSum/24)*0.35));
+      // Auto output: compensa volumen por boosts
+      // regla simple: cada +1 dB promedio de boosts => -0.35 dB aprox
+      const avgBoost = boostSum / 3;
+      const outDb = -Math.max(0, avgBoost) * 0.35 - satAmt * 1.2; // baja un poco si satura
+      const outLin = Math.pow(10, outDb / 20);
+
+      // clamps finales
+      low = Math.max(-12, Math.min(12, low));
+      mid = Math.max(-12, Math.min(12, mid));
+      pres= Math.max(-12, Math.min(12, pres));
+      air = Math.max(-12, Math.min(12, air));
+
+      return { low, mid, pres, air, glue, width, satAmt, outLin };
+    }
+
+    function normalLinking(vals, presetName){
+      // Sin PRO: aplica perillas “tal cual” + preset base muy leve (opcional)
+      const base = applyPresetToPreview(presetName);
+      let low = (vals.low ?? 0) + base.low;
+      let mid = (vals.mid ?? 0) + base.mid;
+      let pres= (vals.pres?? 0) + base.pres;
+      let air = (vals.air ?? 0) + base.air;
+      let glue= Math.max(0, Math.min(100, (vals.glue ?? 0) + base.glue));
+      let width= Math.max(50, Math.min(150, (vals.width ?? 100) + (base.width-100)));
+
+      const satAmt = Math.max(0, Math.min(1, glue/100 * 0.35)); // leve
+      const outLin = 1.0; // sin auto output
+
+      low = Math.max(-12, Math.min(12, low));
+      mid = Math.max(-12, Math.min(12, mid));
+      pres= Math.max(-12, Math.min(12, pres));
+      air = Math.max(-12, Math.min(12, air));
+
+      return { low, mid, pres, air, glue, width, satAmt, outLin };
+    }
+
+    function applySettingsToChain(chain, settings){
+      const { low, mid, pres, air, glue, width, satAmt, outLin } = settings;
+      const n = chain.nodes;
+
+      n.low.gain.value = low;
+      n.mid.gain.value = mid;
+      n.pres.gain.value = pres;
+      n.air.gain.value = air;
+
+      // glue -> compressor
+      // 0..100 -> threshold -26..-12 , ratio 1.4..4.0
+      const g = Math.max(0, Math.min(100, glue)) / 100;
+      n.comp.threshold.value = -12 - g * 14; // -12..-26
+      n.comp.ratio.value = 1.4 + g * 2.6;    // 1.4..4.0
+      n.comp.attack.value = 0.008 + (1-g)*0.01;
+      n.comp.release.value = 0.11 + g*0.08;
+
+      // sat
+      // amount 1..5 (muy leve)
+      const satAmount = 1.0 + satAmt * 3.0;
+      n.sat._setAmount(satAmount);
+
+      // width
+      n.widener.setWidth(width);
+
+      // output
+      n.outGain.gain.value = Math.max(0.2, Math.min(2.0, outLin));
+    }
+
+    function applyRealtimePreview(){
+      const vals = getKnobValues();
+      const usePro = !!proMode.checked;
+
+      const settings = usePro ? proLinking(vals, preset.value) : normalLinking(vals, preset.value);
+
+      // Original
+      if (applyOrig.checked && origPlayer.src){
+        try{
+          const chainO = ensureChainFor("orig");
+          applySettingsToChain(chainO, settings);
+        }catch(_){}
+      }
+
+      // Master
+      if (applyMaster.checked && masterPlayer.src){
+        try{
+          const chainM = ensureChainFor("master");
+          applySettingsToChain(chainM, settings);
+        }catch(_){}
+      }
+    }
+
+    // Apply when toggles change
+    [applyOrig, applyMaster, proMode, preset].forEach(el=>{
+      el.addEventListener("change", ()=> applyRealtimePreview());
+    });
+
+    // IMPORTANT: for iOS, create chain when play is pressed (user gesture)
+    origPlayer.addEventListener("play", ()=>{
+      try{ ensureChainFor("orig"); applyRealtimePreview(); }catch(_){}
+    });
+    masterPlayer.addEventListener("play", ()=>{
+      try{ ensureChainFor("master"); applyRealtimePreview(); }catch(_){}
+    });
+
+    // ==========================================================
+    // BACKEND PROCESS (render final)
+    // ==========================================================
     processBtn.addEventListener("click", async ()=>{
       if (!selectedFile) return;
 
       processBtn.disabled = true;
       downloadBtn.disabled = true;
       resetMaster();
-
-      [...knobWrap.querySelectorAll(".knob input")].forEach(i=> i.disabled = true);
 
       startFakeProgress();
 
@@ -859,13 +1177,15 @@
       fd.append("preset", preset.value);
       fd.append("intensity", String(intensity.value));
 
-      const vals = getKnobValues();
-      fd.append("k_low", String(vals.low ?? 0));
-      fd.append("k_mid", String(vals.mid ?? 0));
-      fd.append("k_pres", String(vals.pres ?? 0));
-      fd.append("k_air", String(vals.air ?? 0));
-      fd.append("k_glue", String(vals.glue ?? 0));
-      fd.append("k_width", String(vals.width ?? 100));
+      // knobs -> backend (por si quieres que el render final siga tus perillas)
+      // (tu app.py ya las soporta)
+      const v = getKnobValues();
+      fd.append("k_low", String(v.low ?? 0));
+      fd.append("k_mid", String(v.mid ?? 0));
+      fd.append("k_pres", String(v.pres ?? 0));
+      fd.append("k_air", String(v.air ?? 0));
+      fd.append("k_glue", String(v.glue ?? 0));
+      fd.append("k_width", String(v.width ?? 100));
       fd.append("k_sat", "0");
       fd.append("k_out", "0");
 
@@ -882,15 +1202,14 @@
             if (j && j.detail) msg = String(j.detail);
           }catch(_){}
           finishProgressFail(msg);
+          processBtn.disabled = false;
           return;
         }
-
-        // ✅ leer id para aplicar perillas después
-        masterId = res.headers.get("X-Master-Id") || null;
 
         const blob = await res.blob();
         if (!blob || blob.size < 1024){
           finishProgressFail("Master vacío.");
+          processBtn.disabled = false;
           return;
         }
 
@@ -906,9 +1225,10 @@
 
         finishProgressOk();
         if (USER_PLAN === "FREE") setStatus("¡Listo! Preview 30s (FREE).");
-        enableKnobs();                // ✅ ahora SÍ afecta (porque hace apply)
         downloadBtn.disabled = false;
 
+        // si el usuario quiere, puede escuchar master con preview realtime también
+        applyRealtimePreview();
       }catch(err){
         const msg = (err && err.name === "AbortError") ? "Timeout (180s). Intenta de nuevo." : "Error de red.";
         finishProgressFail(msg);
@@ -917,8 +1237,7 @@
       }
     });
 
-    // inicial
-    updateEqUI();
+    // init
     updateProcessEnabled();
   </script>
 </body>
