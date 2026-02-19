@@ -1,11 +1,10 @@
-
 <!doctype html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>WarMaster — Masterización Online</title>
-  <meta name="description" content="Masterización online rápida y profesional. Sube tu track, elige un estilo y descarga un master listo para Spotify, YouTube y Apple Music." />
+  <meta name="description" content="Masterización online rápida y profesional. Sube tu track, elige un estilo y descarga tu master." />
 
   <style>
     :root{
@@ -21,11 +20,10 @@
       --max: 1180px;
     }
     *{ box-sizing:border-box; }
-    html, body{ height:100%; }
-
+    html,body{ height:100%; }
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
       color:var(--text);
       background:
         radial-gradient(900px 500px at 10% 10%, rgba(138,92,255,.22), transparent 55%),
@@ -34,15 +32,12 @@
         linear-gradient(180deg, var(--bg0), var(--bg1) 55%, #06070b);
       overflow-x:hidden;
     }
-
     a{ color:inherit; text-decoration:none; }
-    .wrap{ width:min(var(--max), calc(100% - 40px)); margin:0 auto; }
+    .wrap{ width:min(var(--max), calc(100% - 36px)); margin:0 auto; }
 
     .grid-bg{
-      position: fixed;
-      inset: 0;
-      pointer-events:none;
-      opacity:.32;
+      position: fixed; inset: 0; pointer-events:none;
+      opacity:.28;
       background:
         linear-gradient(to right, rgba(255,255,255,.03) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(255,255,255,.03) 1px, transparent 1px);
@@ -51,30 +46,19 @@
     }
 
     header{
-      position: sticky;
-      top:0;
-      z-index:50;
+      position: sticky; top:0; z-index:50;
       backdrop-filter: blur(14px);
       background: rgba(7,8,12,.55);
       border-bottom:1px solid rgba(255,255,255,.08);
     }
-
     .nav{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:14px;
-      padding:16px 0;
-      flex-wrap:wrap;
+      display:flex; justify-content:space-between; align-items:center;
+      gap:14px; padding:16px 0; flex-wrap:wrap;
     }
-
     .brand{
-      font-size:22px;
-      font-weight:950;
-      letter-spacing:.2px;
-      display:flex;
-      align-items:center;
-      gap:10px;
+      display:flex; align-items:center; gap:10px;
+      font-size: 20px; font-weight: 950; letter-spacing:.2px;
+      user-select:none;
     }
     .dotlogo{
       width:34px;height:34px;border-radius:12px;
@@ -93,13 +77,9 @@
     }
 
     .navlinks{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      flex-wrap:wrap;
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
       color: rgba(233,237,247,.78);
-      font-size: 13px;
-      font-weight: 900;
+      font-size: 13px; font-weight: 900;
     }
     .navlinks a{
       padding:8px 10px;
@@ -120,13 +100,13 @@
       color: var(--text);
       cursor:pointer;
       font-weight:950;
-      text-decoration:none;
       display:inline-flex;
       align-items:center;
       justify-content:center;
       user-select:none;
-      transition: transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease, filter .12s ease;
       gap:10px;
+      white-space:nowrap;
     }
     .btn:hover{
       transform: translateY(-1px);
@@ -139,32 +119,31 @@
       color:#061018;
       box-shadow: 0 18px 60px rgba(0,0,0,.55);
     }
-    .btn.neon{
-      background: rgba(0,0,0,.16);
-      border: 1px solid rgba(0,215,255,.35);
-      box-shadow: 0 0 0 6px rgba(0,215,255,.10), 0 0 34px rgba(0,215,255,.10);
+    .btn.primary:hover{ filter: brightness(1.06); }
+
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      font-weight: 950;
+      font-size: 12px;
+      color: rgba(233,237,247,.9);
+      white-space:nowrap;
     }
-    .btn.neon:hover{
-      border-color: rgba(0,215,255,.65);
-      box-shadow: 0 0 0 8px rgba(0,215,255,.12), 0 0 44px rgba(0,215,255,.12);
-    }
-    .btn.alt{
-      background: rgba(0,0,0,.14);
-      border: 1px solid rgba(138,92,255,.30);
-      box-shadow: 0 0 0 6px rgba(138,92,255,.10), 0 0 34px rgba(138,92,255,.10);
-    }
-    .btn.alt:hover{
-      border-color: rgba(138,92,255,.60);
-      box-shadow: 0 0 0 8px rgba(138,92,255,.12), 0 0 44px rgba(138,92,255,.12);
+    .pill .dot{
+      width:8px; height:8px; border-radius:999px;
+      background: rgba(0,255,154,.75);
+      box-shadow: 0 0 0 6px rgba(0,255,154,.12);
     }
 
-    main{ padding: 30px 0 90px; }
+    main{ padding: 34px 0 92px; }
 
-    .hero{ padding: 52px 0 14px; }
     .heroGrid{
       display:grid;
       grid-template-columns: 1.2fr .8fr;
-      gap: 18px;
+      gap: 16px;
       align-items: start;
     }
     @media (max-width: 980px){ .heroGrid{ grid-template-columns: 1fr; } }
@@ -203,7 +182,6 @@
       line-height: 1.7;
       max-width: 72ch;
     }
-
     .heroActions{
       display:flex;
       gap: 12px;
@@ -211,7 +189,6 @@
       align-items:center;
       margin-top: 18px;
     }
-
     .chips{
       display:flex;
       flex-wrap: wrap;
@@ -238,48 +215,21 @@
       display:inline-block;
     }
 
-    .trustCard{
+    .sideCard{
       border-radius: var(--radius);
       border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.05);
       box-shadow: 0 14px 50px rgba(0,0,0,.35);
       overflow:hidden;
     }
-    .trustHead{
+    .sideHead{
       padding: 14px 14px 10px;
       border-bottom: 1px solid rgba(255,255,255,.08);
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
     }
-    .trustHead b{
-      font-size: 12px;
-      letter-spacing:.2px;
-      color: rgba(233,237,247,.90);
-    }
-    .pill{
-      display:inline-flex; align-items:center; gap:8px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      font-weight: 950;
-      font-size: 12px;
-      color: rgba(233,237,247,.9);
-    }
-    .dot{
-      width:8px; height:8px;
-      border-radius:999px;
-      background: rgba(0,255,154,.75);
-      box-shadow: 0 0 0 6px rgba(0,255,154,.12);
-    }
-    .trustBody{
-      padding: 14px;
-      display:flex;
-      flex-direction:column;
-      gap: 12px;
-    }
+    .sideHead b{ font-size: 12px; letter-spacing:.2px; color: rgba(233,237,247,.90); }
+    .sideBody{ padding: 14px; display:flex; flex-direction:column; gap: 12px; }
+
     .stats{
       display:grid;
       grid-template-columns: repeat(3, 1fr);
@@ -292,31 +242,16 @@
       background: rgba(0,0,0,.16);
       padding: 12px;
     }
-    .stat .k{
-      color: rgba(233,237,247,.65);
-      font-size: 11px;
-      font-weight: 950;
-      letter-spacing:.2px;
-    }
-    .stat .v{
-      margin-top: 6px;
-      font-size: 20px;
-      font-weight: 980;
-      letter-spacing:-.4px;
-    }
+    .stat .k{ color: rgba(233,237,247,.65); font-size: 11px; font-weight: 950; letter-spacing:.2px; }
+    .stat .v{ margin-top: 6px; font-size: 20px; font-weight: 980; letter-spacing:-.4px; }
 
-    .trustList{
-      display:flex;
-      flex-direction:column;
-      gap: 8px;
+    .list{
+      display:flex; flex-direction:column; gap: 8px;
       color: rgba(233,237,247,.76);
-      font-size: 13px;
-      line-height: 1.55;
+      font-size: 13px; line-height: 1.55;
     }
-    .trustList .item{
-      display:flex;
-      gap: 10px;
-      align-items:flex-start;
+    .list .item{
+      display:flex; gap: 10px; align-items:flex-start;
       padding: 10px 10px;
       border-radius: 16px;
       border: 1px solid rgba(255,255,255,.10);
@@ -332,6 +267,7 @@
       font-weight: 950;
       flex: 0 0 auto;
       margin-top: 1px;
+      user-select:none;
     }
 
     .section{ padding: 56px 0 0; }
@@ -347,6 +283,7 @@
       line-height: 1.7;
       max-width: 72ch;
     }
+
     .cards{
       display:grid;
       grid-template-columns: repeat(3, 1fr);
@@ -361,18 +298,12 @@
       border: 1px solid rgba(255,255,255,.12);
       box-shadow: var(--shadow);
       overflow:hidden;
-      transition: transform .14s ease, border-color .14s ease, background .14s ease;
+      transition: transform .14s ease, border-color .14s ease;
+      min-height: 220px;
+      display:flex; flex-direction:column; gap: 12px;
     }
-    .card:hover{
-      transform: translateY(-3px);
-      border-color: rgba(0,215,255,.26);
-    }
-    .kicker{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      margin-bottom: 10px;
-    }
+    .card:hover{ transform: translateY(-3px); border-color: rgba(0,215,255,.26); }
+    .kicker{ display:flex; align-items:center; gap:10px; }
     .icon{
       width: 40px; height: 40px;
       border-radius: 16px;
@@ -386,202 +317,57 @@
       flex: 0 0 auto;
     }
     .card h3{ margin:0; font-size: 16px; letter-spacing: -.2px; }
-    .card p{
-      margin: 10px 0 0;
-      color: rgba(233,237,247,.72);
-      font-size: 13px;
-      line-height: 1.6;
-    }
+    .card p{ margin:0; color: rgba(233,237,247,.72); font-size: 13px; line-height: 1.6; }
 
-    .plan{
-      display:flex;
-      flex-direction:column;
-      gap: 12px;
-      min-height: 220px;
-    }
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap: 8px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      color: rgba(233,237,247,.9);
-      font-size: 12px;
-      font-weight: 980;
-      width: fit-content;
-    }
-    .badge i{
-      width: 9px; height:9px;
-      border-radius: 999px;
-      background: rgba(0,215,255,.9);
-      box-shadow: 0 0 0 6px rgba(0,215,255,.12);
-      display:inline-block;
-    }
+    .priceRow{ margin-top:auto; display:flex; align-items:flex-end; justify-content:space-between; gap: 10px; }
     .price{
-      font-size: 44px;
-      letter-spacing: -1px;
-      font-weight: 990;
+      font-size: 26px;
+      font-weight: 980;
+      letter-spacing:-.6px;
     }
-    .meta{
-      margin-top:-6px;
+    .price small{
+      display:block;
+      font-size: 12px;
+      color: rgba(233,237,247,.65);
+      font-weight: 900;
+      letter-spacing:.2px;
+      margin-top: 4px;
+    }
+    .mini{
+      font-size: 12px;
       color: rgba(233,237,247,.70);
-      font-size: 13px;
-      line-height: 1.5;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.14);
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-weight: 950;
+      white-space:nowrap;
     }
 
     footer{
-      margin-top: 70px;
-      padding: 18px 0 0;
-      border-top: 1px solid rgba(255,255,255,.08);
-      color: rgba(233,237,247,.55);
+      padding: 44px 0 26px;
+      color: rgba(233,237,247,.52);
       font-size: 12px;
-      line-height: 1.6;
+      text-align:center;
     }
-    .footRow{
-      display:flex;
-      justify-content:space-between;
-      gap: 12px;
-      flex-wrap:wrap;
-      padding: 16px 0 0;
-    }
-    .footLinks{
-      display:flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .footLinks a{
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.03);
-    }
-    .footLinks a:hover{
-      border-color: rgba(0,215,255,.24);
-      background: rgba(255,255,255,.05);
-    }
+    .fine{ margin-top: 10px; color: rgba(233,237,247,.45); font-size: 11px; line-height: 1.55; }
 
-    /* ===== Modal ===== */
-    .modalOverlay{
+    .toast{
       position: fixed;
-      inset: 0;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding: 18px;
-      background: rgba(0,0,0,.62);
-      backdrop-filter: blur(8px);
-      z-index: 999;
-      animation: fadeIn .14s ease;
-    }
-    .modalOverlay.open{ display:flex; }
-    @keyframes fadeIn{ from{ opacity:0; } to{ opacity:1; } }
-
-    .modal{
-      width: min(520px, 100%);
-      border-radius: 24px;
+      left: 50%;
+      bottom: 16px;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.45);
       border: 1px solid rgba(255,255,255,.14);
-      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
-      box-shadow: 0 30px 110px rgba(0,0,0,.7);
-      overflow:hidden;
-      position:relative;
-      transform: translateY(8px) scale(.98);
-      animation: pop .16s ease forwards;
-    }
-    @keyframes pop{ to{ transform: translateY(0) scale(1); } }
-    .modal::before{
-      content:"";
-      position:absolute; inset:-2px;
-      background:
-        radial-gradient(420px 220px at 20% 20%, rgba(138,92,255,.22), transparent 60%),
-        radial-gradient(420px 220px at 85% 30%, rgba(0,215,255,.18), transparent 60%),
-        radial-gradient(520px 240px at 40% 95%, rgba(0,255,154,.12), transparent 60%);
-      pointer-events:none;
-      opacity:.95;
-    }
-    .modal > *{ position:relative; }
-
-    .modalHead{
-      padding: 14px 14px 10px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-    }
-    .modalTitle{
-      font-weight: 980;
-      font-size: 14px;
-      letter-spacing:.2px;
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-    .miniLogo{
-      width:28px;height:28px;border-radius:10px;
-      background:
-        radial-gradient(circle at 30% 30%, rgba(0,215,255,.95), transparent 55%),
-        radial-gradient(circle at 70% 70%, rgba(138,92,255,.95), transparent 55%),
-        linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.02));
-      border:1px solid rgba(255,255,255,.12);
-      box-shadow: 0 12px 40px rgba(0,0,0,.45);
-    }
-    .closeBtn{
-      width: 40px;
-      height: 38px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      cursor:pointer;
-      font-weight: 980;
-    }
-    .closeBtn:hover{
-      transform: translateY(-1px);
-      background: rgba(255,255,255,.08);
-      border-color: rgba(255,255,255,.22);
-    }
-
-    .modalBody{ padding: 14px; }
-
-    .field{
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.18);
-      padding: 12px;
-      margin-bottom: 10px;
-    }
-    .field label{
-      display:block;
-      font-size: 12px;
-      font-weight: 980;
-      color: rgba(233,237,247,.72);
-      margin-bottom: 8px;
-    }
-    .field input{
-      width:100%;
+      backdrop-filter: blur(12px);
+      color: rgba(233,237,247,.92);
       padding: 10px 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.22);
-      color: var(--text);
-      outline:none;
-    }
-
-    .modalActions{
-      display:flex;
-      gap: 10px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-      margin-top: 10px;
-    }
-
-    .finePrint{
-      margin-top: 10px;
-      color: rgba(233,237,247,.55);
+      border-radius: 14px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.45);
+      display:none;
+      max-width: min(720px, calc(100% - 24px));
       font-size: 12px;
-      line-height: 1.5;
+      line-height: 1.45;
     }
   </style>
 </head>
@@ -592,335 +378,208 @@
   <header>
     <div class="wrap">
       <div class="nav">
-        <a class="brand" href="index.html" aria-label="WarMaster Home">
+        <div class="brand">
           <span class="dotlogo" aria-hidden="true"></span>
           <span>War<span class="grad">Master</span></span>
-        </a>
+        </div>
 
-        <nav class="navlinks" aria-label="Navegación">
-          <a href="#como">Cómo funciona</a>
-          <a href="#features">Características</a>
-          <a href="#precios">Precios</a>
-        </nav>
-
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <button class="btn neon" id="btnLogin" type="button">Iniciar sesión</button>
-          <button class="btn primary" id="btnRegister" type="button">Crear cuenta</button>
+        <div class="navlinks">
+          <span class="pill" id="apiPill"><span class="dot"></span> API: auto</span>
+          <a href="master.html" id="goMasterLink">Nuevo Master</a>
+          <a href="dashboard.html" id="goDashLink">Dashboard</a>
+          <button class="btn primary" id="goMasterBtn" type="button">Empezar</button>
         </div>
       </div>
     </div>
   </header>
 
-  <main>
-    <div class="wrap">
+  <main class="wrap">
+    <section class="hero">
+      <div class="heroGrid">
+        <div class="heroCard">
+          <h1>Masteriza tu track en minutos con <span class="grad">WarMaster</span>.</h1>
+          <p class="lead">
+            Sube tu canción, elige preset e intensidad y descarga un master listo para plataformas.
+            Tu UI de master está pensada tipo LANDR: clara, futurista y directa.
+          </p>
 
-      <section class="hero">
-        <div class="heroGrid">
-          <div class="heroCard">
-            <h1>Masteriza tu música con <span class="grad">calidad profesional</span></h1>
-            <p class="lead">
-              Sube tu track, elige un estilo y descarga un master listo para distribución.
-              Diseñado para sonar fuerte, limpio y competitivo en plataformas.
-            </p>
-
-            <div class="heroActions">
-              <a class="btn primary" href="master.html">Probar master ahora</a>
-              <a class="btn alt" href="dashboard.html">Entrar al dashboard</a>
-            </div>
-
-            <div class="chips" aria-label="Highlights">
-              <span class="chip"><i></i> Procesamiento en la nube</span>
-              <span class="chip"><i></i> A/B + Descarga</span>
-              <span class="chip"><i></i> Presets por género</span>
-              <span class="chip"><i></i> Listo para plataformas</span>
-            </div>
+          <div class="heroActions">
+            <button class="btn primary" id="ctaMaster" type="button">Ir a Master</button>
+            <a class="btn" id="ctaDash" href="dashboard.html">Ver Dashboard</a>
           </div>
 
-          <aside class="trustCard">
-            <div class="trustHead">
-              <b>Listo para publicar</b>
-              <span class="pill"><span class="dot"></span> Online</span>
-            </div>
+          <div class="chips">
+            <span class="chip"><i></i> Render + FFmpeg</span>
+            <span class="chip"><i></i> Preview FREE 30s</span>
+            <span class="chip"><i></i> Presets + Intensidad</span>
+            <span class="chip"><i></i> EQ Live UI</span>
+          </div>
+        </div>
 
-            <div class="trustBody">
-              <div class="stats" aria-label="Estadísticas">
-                <div class="stat">
-                  <div class="k">Renders</div>
-                  <div class="v">1.000+</div>
-                </div>
-                <div class="stat">
-                  <div class="k">Tiempo promedio</div>
-                  <div class="v">~1–3 min</div>
-                </div>
-                <div class="stat">
-                  <div class="k">Formatos</div>
-                  <div class="v">WAV/MP3</div>
-                </div>
+        <aside class="sideCard">
+          <div class="sideHead">
+            <b>Estado del sistema</b>
+            <span class="pill"><span class="dot"></span> Online</span>
+          </div>
+          <div class="sideBody">
+            <div class="stats">
+              <div class="stat">
+                <div class="k">Plan</div>
+                <div class="v" id="planText">FREE</div>
               </div>
-
-              <div class="trustList" aria-label="Garantías">
-                <div class="item">
-                  <span class="check">✓</span>
-                  <div>
-                    <b>Optimizado para plataformas</b><br>
-                    <span style="color:rgba(233,237,247,.7);">Spotify • YouTube • Apple Music</span>
-                  </div>
-                </div>
-
-                <div class="item">
-                  <span class="check">✓</span>
-                  <div>
-                    <b>Control de intensidad</b><br>
-                    <span style="color:rgba(233,237,247,.7);">Suave → agresivo sin complicarte</span>
-                  </div>
-                </div>
-
-                <div class="item">
-                  <span class="check">✓</span>
-                  <div>
-                    <b>Privacidad</b><br>
-                    <span style="color:rgba(233,237,247,.7);">Tus archivos no se publican</span>
-                  </div>
-                </div>
+              <div class="stat">
+                <div class="k">Límite FREE</div>
+                <div class="v">30s</div>
               </div>
-
-              <div class="finePrint">
-                * Cifras y tiempos referenciales para beta. Depende del tamaño del audio y la carga del servidor.
+              <div class="stat">
+                <div class="k">Límite PLUS/PRO</div>
+                <div class="v">6 min</div>
               </div>
             </div>
-          </aside>
+
+            <div class="list">
+              <div class="item"><div class="check">✓</div><div>Subida y master funcionando en Render</div></div>
+              <div class="item"><div class="check">✓</div><div>Descarga directa desde el navegador</div></div>
+              <div class="item"><div class="check">✓</div><div>Dashboard con lista y reproductor</div></div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="sectionTitle">¿Cómo funciona?</h2>
+      <p class="sectionLead">Flujo simple: subir → procesar → comparar → descargar.</p>
+
+      <div class="cards">
+        <div class="card">
+          <div class="kicker">
+            <div class="icon">1</div>
+            <h3>Sube tu audio</h3>
+          </div>
+          <p>Arrastra o selecciona WAV/MP3 (máx 100MB). En FREE te damos preview 30s para evitar timeouts.</p>
         </div>
-      </section>
 
-      <section class="section" id="como">
-        <h2 class="sectionTitle">Cómo funciona</h2>
-        <p class="sectionLead">Tres pasos para obtener un master listo para subir a plataformas.</p>
-
-        <div class="cards">
-          <div class="card">
-            <div class="kicker">
-              <div class="icon">1</div>
-              <h3>Sube tu track</h3>
-            </div>
-            <p>WAV o MP3. Luego limitamos tamaño/duración en backend.</p>
+        <div class="card">
+          <div class="kicker">
+            <div class="icon">2</div>
+            <h3>Elige preset + intensidad</h3>
           </div>
-
-          <div class="card">
-            <div class="kicker">
-              <div class="icon">2</div>
-              <h3>Elige el estilo</h3>
-            </div>
-            <p>Presets por carácter + intensidad para el master.</p>
-          </div>
-
-          <div class="card">
-            <div class="kicker">
-              <div class="icon">3</div>
-              <h3>Descarga y publica</h3>
-            </div>
-            <p>A/B y descarga lista para distribución.</p>
-          </div>
+          <p>Define el carácter del master. Luego puedes ajustar EQ Live desde el UI (por ahora demo visual en beta estable).</p>
         </div>
-      </section>
 
-      <section class="section" id="features">
-        <h2 class="sectionTitle">Características</h2>
-        <p class="sectionLead">Una experiencia rápida y profesional.</p>
-
-        <div class="cards">
-          <div class="card">
-            <div class="kicker">
-              <div class="icon">A</div>
-              <h3>Presets por género</h3>
-            </div>
-            <p>Clean, Club, Warm, Bright, Heavy (puedes agregar más).</p>
+        <div class="card">
+          <div class="kicker">
+            <div class="icon">3</div>
+            <h3>Descarga y comparte</h3>
           </div>
+          <p>Escucha el resultado en el reproductor y descarga tu WAV. Tus masters quedan listados en el Dashboard.</p>
+        </div>
+      </div>
+    </section>
 
-          <div class="card">
-            <div class="kicker">
-              <div class="icon">I</div>
-              <h3>Intensidad ajustable</h3>
-            </div>
-            <p>Define cuánta compresión/saturación quieres en el resultado.</p>
+    <section class="section">
+      <h2 class="sectionTitle">Planes</h2>
+      <p class="sectionLead">Tu backend ya soporta plan por `/api/me`. Si no existe, queda FREE.</p>
+
+      <div class="cards">
+        <div class="card">
+          <div class="kicker">
+            <div class="icon">F</div>
+            <h3>FREE</h3>
           </div>
-
-          <div class="card">
-            <div class="kicker">
-              <div class="icon">Q</div>
-              <h3>Exportación lista</h3>
-            </div>
-            <p>WAV / MP3 listos para Spotify / YouTube / Apple Music.</p>
+          <p>Ideal para probar. Procesa un preview de 30 segundos para máxima estabilidad.</p>
+          <div class="priceRow">
+            <div class="price">$0 <small>preview 30s</small></div>
+            <span class="mini">Estable</span>
           </div>
         </div>
-      </section>
 
-      <section class="section" id="precios">
-        <h2 class="sectionTitle">Precios</h2>
-        <p class="sectionLead">Modelo demo. Luego conectas Stripe o créditos.</p>
-
-        <div class="cards">
-          <div class="card plan">
-            <span class="badge"><i></i> Recruit</span>
-            <h3>Free</h3>
-            <div class="price">$0</div>
-            <div class="meta">2 masters/mes • MP3 • Presets básicos</div>
-            <div style="margin-top:auto;">
-              <a class="btn alt" href="master.html">Probar</a>
-            </div>
+        <div class="card">
+          <div class="kicker">
+            <div class="icon">+</div>
+            <h3>PLUS</h3>
           </div>
-
-          <div class="card plan">
-            <span class="badge"><i></i> Popular</span>
-            <h3>Pro</h3>
-            <div class="price">$12</div>
-            <div class="meta">20 masters/mes • WAV 24-bit • A/B • Targets</div>
-            <div style="margin-top:auto;">
-              <button class="btn primary" type="button" id="btnChoosePro">Elegir Pro</button>
-            </div>
-          </div>
-
-          <div class="card plan">
-            <span class="badge"><i></i> Studio</span>
-            <h3>Studio</h3>
-            <div class="price">$29</div>
-            <div class="meta">Ilimitado* • Prioridad • API / Integración</div>
-            <div style="margin-top:auto;">
-              <button class="btn primary" type="button" id="btnChooseStudio">Hablar con ventas</button>
-            </div>
+          <p>Hasta 6 minutos por track (límite por estabilidad). Mejor para canciones completas.</p>
+          <div class="priceRow">
+            <div class="price">$— <small>hasta 6 min</small></div>
+            <span class="mini">Próximamente</span>
           </div>
         </div>
-      </section>
 
-      <footer>
-        <div class="footRow">
-          <div>© <span id="year"></span> WarMaster — beta1.1</div>
-          <div class="footLinks">
-            <a href="master.html">Nuevo master</a>
-            <a href="dashboard.html">Dashboard</a>
-            <a href="#como">Cómo funciona</a>
+        <div class="card">
+          <div class="kicker">
+            <div class="icon">P</div>
+            <h3>PRO</h3>
+          </div>
+          <p>Para uso intensivo. Misma base pero pensado para mejoras futuras (true preview, más controles).</p>
+          <div class="priceRow">
+            <div class="price">$— <small>hasta 6 min</small></div>
+            <span class="mini">Próximamente</span>
           </div>
         </div>
-      </footer>
+      </div>
+    </section>
 
-    </div>
+    <footer>
+      © WarMaster — Render + FastAPI + FFmpeg
+      <div class="fine">
+        Tip: si estás usando backend externo, abre la web así: <b>index.html?api=https://backendwm.onrender.com</b>
+      </div>
+    </footer>
   </main>
 
-  <!-- MODAL LOGIN -->
-  <div class="modalOverlay" id="loginOverlay" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-label="Iniciar sesión">
-      <div class="modalHead">
-        <div class="modalTitle"><span class="miniLogo"></span> Iniciar sesión</div>
-        <button class="closeBtn" type="button" data-close="login">✕</button>
-      </div>
-      <div class="modalBody">
-        <div class="field">
-          <label>Email</label>
-          <input id="loginEmail" type="email" placeholder="tu@email.com" />
-        </div>
-        <div class="field">
-          <label>Contraseña</label>
-          <input id="loginPass" type="password" placeholder="••••••••" />
-        </div>
-        <div class="modalActions">
-          <button class="btn neon" type="button" data-switch="register">Crear cuenta</button>
-          <button class="btn primary" type="button" id="btnLoginSubmit">Entrar</button>
-        </div>
-        <div class="finePrint">
-          * Demo UI (beta1.1). Aún no hay usuarios reales.
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL REGISTER -->
-  <div class="modalOverlay" id="registerOverlay" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-label="Crear cuenta">
-      <div class="modalHead">
-        <div class="modalTitle"><span class="miniLogo"></span> Crear cuenta</div>
-        <button class="closeBtn" type="button" data-close="register">✕</button>
-      </div>
-      <div class="modalBody">
-        <div class="field">
-          <label>Nombre</label>
-          <input id="regName" type="text" placeholder="Tu nombre" />
-        </div>
-        <div class="field">
-          <label>Email</label>
-          <input id="regEmail" type="email" placeholder="tu@email.com" />
-        </div>
-        <div class="field">
-          <label>Contraseña</label>
-          <input id="regPass" type="password" placeholder="••••••••" />
-        </div>
-        <div class="modalActions">
-          <button class="btn neon" type="button" data-switch="login">Ya tengo cuenta</button>
-          <button class="btn primary" type="button" id="btnRegisterSubmit">Crear</button>
-        </div>
-        <div class="finePrint">
-          * Demo UI (beta1.1). Más adelante conectamos FastAPI + DB.
-        </div>
-      </div>
-    </div>
-  </div>
+  <div class="toast" id="toast"></div>
 
   <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
+    // =========
+    // API_BASE
+    // =========
+    const qs = new URLSearchParams(location.search);
+    const API_BASE = (qs.get("api") || "").trim() || location.origin;
 
-    const loginOverlay = document.getElementById("loginOverlay");
-    const registerOverlay = document.getElementById("registerOverlay");
+    // Mostrar api pill
+    const apiPill = document.getElementById("apiPill");
+    apiPill.textContent = "API: " + (qs.get("api") ? qs.get("api") : "mismo dominio");
 
-    function openOverlay(which){
-      if(which === "login"){
-        loginOverlay.classList.add("open");
-        loginOverlay.setAttribute("aria-hidden","false");
-        registerOverlay.classList.remove("open");
-        registerOverlay.setAttribute("aria-hidden","true");
-      } else {
-        registerOverlay.classList.add("open");
-        registerOverlay.setAttribute("aria-hidden","false");
-        loginOverlay.classList.remove("open");
-        loginOverlay.setAttribute("aria-hidden","true");
+    // Carry qs
+    function qsCarry(path){
+      const api = qs.get("api");
+      return api ? (path + "?api=" + encodeURIComponent(api)) : path;
+    }
+
+    // Links
+    document.getElementById("goMasterBtn").onclick = () => location.href = qsCarry("master.html");
+    document.getElementById("ctaMaster").onclick = () => location.href = qsCarry("master.html");
+    document.getElementById("ctaDash").href = qsCarry("dashboard.html");
+    document.getElementById("goMasterLink").href = qsCarry("master.html");
+    document.getElementById("goDashLink").href = qsCarry("dashboard.html");
+
+    // Toast
+    const toast = document.getElementById("toast");
+    let toastT = null;
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.style.display = "block";
+      clearTimeout(toastT);
+      toastT = setTimeout(()=> toast.style.display="none", 2600);
+    }
+
+    // Plan
+    (async ()=>{
+      try{
+        const r = await fetch(API_BASE + "/api/me");
+        if(!r.ok) throw new Error("no");
+        const j = await r.json();
+        const plan = (j && j.plan ? String(j.plan).toUpperCase() : "FREE");
+        document.getElementById("planText").textContent = ["FREE","PLUS","PRO"].includes(plan) ? plan : "FREE";
+      }catch(_){
+        document.getElementById("planText").textContent = "FREE";
       }
-    }
-    function closeOverlay(which){
-      const el = (which === "login") ? loginOverlay : registerOverlay;
-      el.classList.remove("open");
-      el.setAttribute("aria-hidden","true");
-    }
+    })();
 
-    document.getElementById("btnLogin").addEventListener("click", ()=> openOverlay("login"));
-    document.getElementById("btnRegister").addEventListener("click", ()=> openOverlay("register"));
-
-    document.querySelectorAll("[data-close]").forEach(btn=>{
-      btn.addEventListener("click", ()=> closeOverlay(btn.getAttribute("data-close")));
-    });
-
-    document.querySelectorAll("[data-switch]").forEach(btn=>{
-      btn.addEventListener("click", ()=> openOverlay(btn.getAttribute("data-switch")));
-    });
-
-    [loginOverlay, registerOverlay].forEach(ov=>{
-      ov.addEventListener("click", (e)=>{
-        if(e.target === ov){
-          ov.classList.remove("open");
-          ov.setAttribute("aria-hidden","true");
-        }
-      });
-    });
-
-    // Demo actions
-    document.getElementById("btnLoginSubmit").addEventListener("click", ()=>{
-      alert("Login demo (beta1.1). Luego conectamos usuarios reales.");
-      closeOverlay("login");
-      window.location.href = "dashboard.html";
-    });
-    document.getElementById("btnRegisterSubmit").addEventListener("click", ()=>{
-      alert("Registro demo (beta1.1). Luego conectamos usuarios reales.");
-      closeOverlay("register");
-      window.location.href = "dashboard.html";
-    });
-    document.getElementById("btnChoosePro").addEventListener("click", ()=> alert("Checkout demo. Luego conectamos Stripe."));
-    document.getElementById("btnChooseStudio").addEventListener("click", ()=> alert("Ventas demo. Luego conectamos contacto/Stripe."));
+    // Mini aviso si api viene por qs
+    if(qs.get("api")) showToast("Usando backend: " + qs.get("api"));
   </script>
 </body>
 </html>
