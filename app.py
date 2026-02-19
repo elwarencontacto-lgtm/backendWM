@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Query
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -75,7 +75,7 @@ def run_cmd(cmd: list[str], timeout_s: int = FFMPEG_TIMEOUT_SECONDS) -> None:
             timeout=timeout_s
         )
     except subprocess.TimeoutExpired:
-        raise HTTPException(status_code=504, detail="FFmpeg timeout (Render cortó / proceso muy largo).")
+        raise HTTPException(status_code=504, detail="FFmpeg timeout (proceso muy largo / Render cortó).")
 
     if proc.returncode != 0:
         raise HTTPException(
@@ -167,9 +167,6 @@ def preset_chain(
         eq_base = "bass=g=-1:f=120,treble=g=4:f=8500"
     elif preset == "heavy":
         eq_base = "bass=g=5:f=90,treble=g=2:f=3500"
-    elif preset == "loud":
-        # ✅ agregado para que el preset del front exista realmente
-        eq_base = "bass=g=3:f=110,treble=g=3:f=7500"
     else:
         eq_base = "bass=g=2:f=120,treble=g=1:f=8000"
 
@@ -221,9 +218,59 @@ def preset_chain(
     )
 
 
+def ensure_clean_wav(in_path: Path, clean_path: Path) -> None:
+    """
+    Convierte el input a WAV PCM 44.1k stereo para:
+    - tener una base estable
+    - permitir "apply knobs" después sin perder el original
+    """
+    cmd = [
+        "ffmpeg", "-y",
+        "-hide_banner",
+        "-i", str(in_path),
+        "-vn",
+        "-ar", "44100",
+        "-ac", "2",
+        "-sample_fmt", "s16",
+        str(clean_path)
+    ]
+    run_cmd(cmd)
+
+
+def render_master_from_clean(
+    clean_path: Path,
+    out_path: Path,
+    preset: str,
+    intensity: int,
+    k_low: float, k_mid: float, k_pres: float, k_air: float,
+    k_glue: float, k_width: float, k_sat: float, k_out: float,
+    clip_seconds: Optional[int] = None,
+) -> None:
+    filters = preset_chain(
+        preset=preset,
+        intensity=intensity,
+        k_low=k_low, k_mid=k_mid, k_pres=k_pres, k_air=k_air,
+        k_glue=k_glue, k_width=k_width, k_sat=k_sat, k_out=k_out
+    )
+
+    cmd = ["ffmpeg", "-y", "-hide_banner", "-i", str(clean_path)]
+    if clip_seconds:
+        cmd += ["-t", str(int(clip_seconds))]
+
+    cmd += [
+        "-vn",
+        "-af", filters,
+        "-ar", "44100",
+        "-ac", "2",
+        "-sample_fmt", "s16",
+        str(out_path)
+    ]
+    run_cmd(cmd)
+
+
 def build_preview_wav(master_id: str, seconds: int) -> Path:
-    in_path = TMP_DIR / f"master_{master_id}.wav"
-    if not in_path.exists():
+    out_path = TMP_DIR / f"master_{master_id}.wav"
+    if not out_path.exists():
         raise HTTPException(status_code=404, detail="Archivo no encontrado.")
 
     seconds = int(max(5, min(60, seconds)))
@@ -232,7 +279,7 @@ def build_preview_wav(master_id: str, seconds: int) -> Path:
     cmd = [
         "ffmpeg", "-y",
         "-hide_banner",
-        "-i", str(in_path),
+        "-i", str(out_path),
         "-t", str(seconds),
         "-vn",
         "-ar", "44100",
@@ -249,10 +296,8 @@ def build_preview_wav(master_id: str, seconds: int) -> Path:
 
 
 def resolve_download_path(master_id: str) -> Path:
-    m = masters.get(master_id)
-    if not m:
+    if master_id not in masters:
         raise HTTPException(status_code=404, detail="Master no encontrado.")
-
     out_path = TMP_DIR / f"master_{master_id}.wav"
     if not out_path.exists():
         raise HTTPException(status_code=404, detail="Archivo no encontrado.")
@@ -269,6 +314,7 @@ def health():
 
 @app.get("/api/me")
 def me():
+    # beta: fijo. luego lo haces real (auth/pagos)
     return {"plan": "FREE"}
 
 
@@ -298,6 +344,7 @@ def api_download_master(master_id: str):
     return download_master(master_id)
 
 
+# LEGACY
 @app.get("/stream/{master_id}")
 def stream_master(master_id: str):
     if master_id not in masters:
@@ -315,6 +362,7 @@ def stream_master(master_id: str):
     )
 
 
+# LEGACY
 @app.get("/download/{master_id}")
 def download_master(master_id: str):
     dl_path = resolve_download_path(master_id)
@@ -370,10 +418,12 @@ async def master(
     name = safe_filename(file.filename)
 
     in_path = TMP_DIR / f"in_{master_id}_{name}"
+    clean_path = TMP_DIR / f"clean_{master_id}.wav"
     out_path = TMP_DIR / f"master_{master_id}.wav"
 
     rq = normalize_quality(requested_quality)
 
+    # Guardar metadata
     masters[master_id] = {
         "id": master_id,
         "title": name,
@@ -381,12 +431,17 @@ async def master(
         "intensity": int(clamp_int(intensity, 0, 100, 55)),
         "quality": rq,
         "created_at": datetime.utcnow().isoformat(),
+        "paths": {
+            "clean": str(clean_path),
+            "master": str(out_path),
+        },
         "knobs": {
             "low": k_low, "mid": k_mid, "pres": k_pres, "air": k_air,
             "glue": k_glue, "width": k_width, "sat": k_sat, "out": k_out
         }
     }
 
+    # Guardar archivo
     try:
         with in_path.open("wb") as f:
             shutil.copyfileobj(file.file, f)
@@ -396,15 +451,18 @@ async def master(
         except Exception:
             pass
 
+    # Validar tamaño
     if in_path.stat().st_size > MAX_FILE_SIZE_BYTES:
         cleanup_files(in_path)
         raise HTTPException(status_code=400, detail="Supera 100MB.")
 
+    # Validar duración (solo PAID)
     duration = get_audio_duration_seconds(in_path)
     if rq in ("PLUS", "PRO") and duration > MAX_DURATION_SECONDS_PAID:
         cleanup_files(in_path)
         raise HTTPException(status_code=400, detail="Supera 6 minutos (límite por estabilidad).")
 
+    # Clamp knobs
     k_low = clamp_float(k_low, -12.0, 12.0, 0.0)
     k_mid = clamp_float(k_mid, -12.0, 12.0, 0.0)
     k_pres = clamp_float(k_pres, -12.0, 12.0, 0.0)
@@ -414,39 +472,107 @@ async def master(
     k_sat = clamp_float(k_sat, 0.0, 100.0, 0.0)
     k_out = clamp_float(k_out, -12.0, 6.0, 0.0)
 
-    filters = preset_chain(
-        preset=preset,
-        intensity=intensity,
-        k_low=k_low, k_mid=k_mid, k_pres=k_pres, k_air=k_air,
-        k_glue=k_glue, k_width=k_width, k_sat=k_sat, k_out=k_out
+    clip_seconds: Optional[int] = FREE_PREVIEW_SECONDS if rq == "FREE" else None
+
+    try:
+        # 1) convertir a WAV limpio (se queda guardado para aplicar knobs después)
+        ensure_clean_wav(in_path, clean_path)
+
+        # 2) render master desde clean
+        render_master_from_clean(
+            clean_path=clean_path,
+            out_path=out_path,
+            preset=preset,
+            intensity=intensity,
+            k_low=k_low, k_mid=k_mid, k_pres=k_pres, k_air=k_air,
+            k_glue=k_glue, k_width=k_width, k_sat=k_sat, k_out=k_out,
+            clip_seconds=clip_seconds,
+        )
+    except Exception:
+        cleanup_files(in_path, clean_path, out_path)
+        masters.pop(master_id, None)
+        raise
+    finally:
+        cleanup_files(in_path)
+
+    if not out_path.exists() or out_path.stat().st_size < 1024:
+        cleanup_files(clean_path, out_path)
+        masters.pop(master_id, None)
+        raise HTTPException(status_code=500, detail="Master vacío.")
+
+    return FileResponse(
+        path=str(out_path),
+        media_type="audio/wav",
+        filename="warmaster_master.wav",
+        headers={"X-Master-Id": master_id}
     )
+
+
+# ✅ NUEVO: aplicar perillas SOBRE el master ya procesado (re-render desde clean_{id}.wav)
+@app.post("/api/master/apply")
+async def master_apply(
+    master_id: str = Form(...),
+
+    preset: Optional[str] = Form(None),
+    intensity: Optional[int] = Form(None),
+
+    k_low: float = Form(0.0),
+    k_mid: float = Form(0.0),
+    k_pres: float = Form(0.0),
+    k_air: float = Form(0.0),
+    k_glue: float = Form(0.0),
+    k_width: float = Form(100.0),
+    k_sat: float = Form(0.0),
+    k_out: float = Form(0.0),
+):
+    m = masters.get(master_id)
+    if not m:
+        raise HTTPException(status_code=404, detail="Master no encontrado.")
+
+    clean_path = Path(m.get("paths", {}).get("clean", ""))
+    out_path = TMP_DIR / f"master_{master_id}.wav"
+    if not clean_path.exists():
+        raise HTTPException(status_code=404, detail="Base (clean) no encontrada. Reprocesa desde cero.")
+
+    # usar preset/intensity guardados si no vienen
+    preset_use = (preset if preset is not None else m.get("preset", "clean"))
+    intensity_use = int(intensity if intensity is not None else m.get("intensity", 55))
+
+    rq = normalize_quality(m.get("quality"))
+
+    # clamp knobs
+    k_low = clamp_float(k_low, -12.0, 12.0, 0.0)
+    k_mid = clamp_float(k_mid, -12.0, 12.0, 0.0)
+    k_pres = clamp_float(k_pres, -12.0, 12.0, 0.0)
+    k_air = clamp_float(k_air, -12.0, 12.0, 0.0)
+    k_glue = clamp_float(k_glue, 0.0, 100.0, 0.0)
+    k_width = clamp_float(k_width, 50.0, 150.0, 100.0)
+    k_sat = clamp_float(k_sat, 0.0, 100.0, 0.0)
+    k_out = clamp_float(k_out, -12.0, 6.0, 0.0)
 
     clip_seconds: Optional[int] = FREE_PREVIEW_SECONDS if rq == "FREE" else None
 
-    cmd = ["ffmpeg", "-y", "-hide_banner", "-i", str(in_path)]
-    if clip_seconds:
-        cmd += ["-t", str(int(clip_seconds))]
-
-    cmd += [
-        "-vn",
-        "-af", filters,
-        "-ar", "44100",
-        "-ac", "2",
-        "-sample_fmt", "s16",
-        str(out_path)
-    ]
-
-    try:
-        run_cmd(cmd)
-    except Exception:
-        cleanup_files(in_path, out_path)
-        raise
+    # render nuevo master (overwrite)
+    render_master_from_clean(
+        clean_path=clean_path,
+        out_path=out_path,
+        preset=preset_use,
+        intensity=intensity_use,
+        k_low=k_low, k_mid=k_mid, k_pres=k_pres, k_air=k_air,
+        k_glue=k_glue, k_width=k_width, k_sat=k_sat, k_out=k_out,
+        clip_seconds=clip_seconds,
+    )
 
     if not out_path.exists() or out_path.stat().st_size < 1024:
-        cleanup_files(in_path, out_path)
-        raise HTTPException(status_code=500, detail="Master vacío.")
+        raise HTTPException(status_code=500, detail="Master vacío (apply).")
 
-    cleanup_files(in_path)
+    # actualizar metadata
+    m["preset"] = preset_use
+    m["intensity"] = intensity_use
+    m["knobs"] = {
+        "low": k_low, "mid": k_mid, "pres": k_pres, "air": k_air,
+        "glue": k_glue, "width": k_width, "sat": k_sat, "out": k_out
+    }
 
     return FileResponse(
         path=str(out_path),
@@ -461,4 +587,8 @@ def root():
     return RedirectResponse(url="/index.html")
 
 
+# =========================
+# STATIC FILES
+# =========================
 app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="public")
+
