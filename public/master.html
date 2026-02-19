@@ -9,7 +9,6 @@
     :root{
       --bg0:#07080c;
       --bg1:#0b0e16;
-      --panel: rgba(15,17,24,.78);
       --text:#e9edf7;
       --muted: rgba(233,237,247,.72);
       --a:#8a5cff;
@@ -17,7 +16,7 @@
       --c:#00ff9a;
       --shadow: 0 24px 70px rgba(0,0,0,.55);
       --radius: 22px;
-      --max: 1180px;
+      --max: 980px;
     }
     *{ box-sizing:border-box; }
     html, body{ height:100%; }
@@ -30,10 +29,14 @@
         radial-gradient(800px 500px at 90% 15%, rgba(0,215,255,.18), transparent 55%),
         radial-gradient(700px 500px at 40% 90%, rgba(0,255,154,.10), transparent 60%),
         linear-gradient(180deg, var(--bg0), var(--bg1));
-      touch-action: manipulation;
     }
-    .wrap{ max-width: var(--max); margin: 0 auto; padding: 28px 18px 44px; }
-    header{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom: 18px; }
+
+    .wrap{ max-width: var(--max); margin: 0 auto; padding: 28px 18px 40px; }
+
+    header{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:16px; margin-bottom: 18px;
+    }
     .brand{ display:flex; align-items:center; gap:12px; user-select:none; }
     .logo{
       width:44px; height:44px; border-radius: 14px;
@@ -44,6 +47,8 @@
     }
     .brand h1{ margin:0; font-size: 18px; letter-spacing:.2px; }
     .brand small{ display:block; color: var(--muted); margin-top: 2px; font-size: 12px; }
+
+    .nav{ display:flex; gap:10px; align-items:center; }
     .nav a{
       color: var(--text);
       text-decoration:none;
@@ -55,12 +60,21 @@
       backdrop-filter: blur(10px);
     }
     .nav a:hover{ border-color: rgba(255,255,255,.22); }
+    .pill{
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: rgba(233,237,247,.92);
+      white-space: nowrap;
+    }
 
-    .grid{ display:grid; grid-template-columns: 1.10fr .90fr; gap: 16px; }
-    @media (max-width: 980px){ .grid{ grid-template-columns: 1fr; } }
+    .grid{ display:grid; grid-template-columns: 1.1fr .9fr; gap: 16px; }
+    @media (max-width: 900px){ .grid{ grid-template-columns: 1fr; } }
 
     .card{
-      background: var(--panel);
+      background: rgba(15,17,24,.78);
       border: 1px solid rgba(255,255,255,.10);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
@@ -83,17 +97,11 @@
     .drop strong{ font-size: 13px; }
     .drop span{ color: var(--muted); font-size: 12px; display:block; margin-top:4px; }
 
-    .row{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 12px;
-    }
+    .row{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
     @media (max-width: 520px){ .row{ grid-template-columns:1fr; } }
 
     label{ font-size: 12px; color: var(--muted); display:block; margin-bottom: 8px; }
     select, input[type="range"]{ width:100%; }
-
     select{
       background: rgba(0,0,0,.28);
       color: var(--text);
@@ -110,73 +118,58 @@
       padding: 10px 12px;
     }
     .rangeTop{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-      margin-bottom: 6px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .pill{
-      font-size: 12px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      color: rgba(233,237,247,.92);
-      font-weight: 900;
+      display:flex; align-items:center; justify-content:space-between; gap: 10px;
+      margin-bottom: 6px; font-size: 12px; color: var(--muted);
     }
 
     .actions{ display:flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
     .btn{
-      appearance:none;
-      border:0;
-      cursor:pointer;
-      border-radius: 16px;
-      padding: 12px 14px;
-      font-weight: 950;
-      font-size: 13px;
+      appearance:none; border:0; cursor:pointer;
+      border-radius: 16px; padding: 12px 14px;
+      font-weight: 700; font-size: 13px;
       color: #0a0b10;
       background: linear-gradient(135deg, var(--c), var(--b));
       box-shadow: 0 16px 40px rgba(0,0,0,.35);
-      user-select:none;
     }
     .btn.secondary{
       color: var(--text);
       background: rgba(0,0,0,.22);
       border: 1px solid rgba(255,255,255,.14);
       box-shadow: none;
-      font-weight: 950;
+      font-weight: 600;
     }
     .btn:disabled{ opacity: .55; cursor:not-allowed; filter: grayscale(.2); }
 
     .status{ margin-top: 14px; display:grid; gap: 10px; }
     .bar{
-      height: 12px;
-      border-radius: 999px;
+      height: 12px; border-radius: 999px;
       background: rgba(255,255,255,.10);
       overflow:hidden;
       border: 1px solid rgba(255,255,255,.10);
+      position: relative;
     }
     .bar > i{
-      display:block;
-      height:100%;
-      width: 0%;
+      display:block; height:100%; width: 0%;
       border-radius: 999px;
       background: linear-gradient(90deg, rgba(138,92,255,1), rgba(0,215,255,1), rgba(0,255,154,1));
       box-shadow: 0 0 25px rgba(0,215,255,.18);
       transition: width .18s ease;
     }
-    .statusLine{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 12px;
-      color: var(--muted);
-      font-size: 12px;
+    .bar.loading:after{
+      content:"";
+      position:absolute; inset:0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent);
+      transform: translateX(-60%);
+      animation: shimmer 1.05s infinite;
+      pointer-events:none;
     }
-    .statusLine b{ color: rgba(233,237,247,.92); font-weight:950; }
+    @keyframes shimmer{ 0%{ transform: translateX(-60%); } 100%{ transform: translateX(60%); } }
+
+    .statusLine{
+      display:flex; align-items:center; justify-content:space-between; gap: 12px;
+      color: var(--muted); font-size: 12px;
+    }
+    .statusLine b{ color: rgba(233,237,247,.92); font-weight:700; }
 
     .player{ display:grid; gap: 12px; }
     .player .box{
@@ -190,101 +183,61 @@
     .hint{ margin-top: 12px; color: var(--muted); font-size: 12px; line-height: 1.35; }
     .foot{ margin-top: 14px; color: rgba(233,237,247,.55); font-size: 11px; text-align:center; }
 
-    /* ===== PRO VIZ ===== */
-    .vizShell{
+    /* ===== EQ LIVE (replica UI) ===== */
+    .eq-live{
       margin-top: 14px;
-      border-radius: 22px;
+      padding: 14px;
+      border-radius: 20px;
       border: 1px solid rgba(255,255,255,.10);
       background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.10));
       box-shadow: 0 18px 55px rgba(0,0,0,.45);
-      overflow:hidden;
     }
-    .vizTop{
-      padding: 14px 14px 10px;
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
+    .eq-head{
+      display:flex; align-items:flex-start; justify-content:space-between;
+      gap:10px; padding: 4px 4px 10px;
     }
-    .vizTop h3{ margin:0; font-size: 20px; letter-spacing:.2px; }
-    .vizSub{ margin-top: 4px; color: rgba(233,237,247,.62); font-size: 13px; }
+    .eq-head h3{ margin:0; font-size: 20px; letter-spacing:.2px; }
+    .eq-sub{ margin-top: 4px; color: rgba(233,237,247,.62); font-size: 13px; }
 
-    .chiprow{ display:flex; gap:8px; flex-wrap:wrap; margin-top: 8px; }
-    .chip{
-      font-size: 12px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      color: rgba(233,237,247,.90);
-      cursor:pointer;
-      user-select:none;
-      font-weight:950;
-      letter-spacing:.2px;
-    }
-    .chip.on{
-      border-color: rgba(0,215,255,.35);
-      box-shadow: 0 0 0 2px rgba(0,215,255,.12);
-    }
-    .chip.warn.on{
-      border-color: rgba(0,255,154,.35);
-      box-shadow: 0 0 0 2px rgba(0,255,154,.10);
-    }
-
-    .vizStage{
+    .eq-graph-wrap{
       position: relative;
-      border-top: 1px solid rgba(255,255,255,.08);
-      border-bottom: 1px solid rgba(255,255,255,.08);
+      border-radius: 22px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.08);
       background:
         radial-gradient(550px 320px at 30% 15%, rgba(138,92,255,.12), transparent 65%),
         radial-gradient(520px 320px at 70% 20%, rgba(0,215,255,.10), transparent 65%),
-        linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,.44));
+        linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,.40));
       aspect-ratio: 16/9;
-      overflow:hidden;
-      touch-action: none;
     }
-    .vizStage:before{
+    .eq-graph-wrap svg{ width:100%; height:100%; display:block; opacity: .98; }
+    .eq-graph-wrap:before{
       content:"";
       position:absolute; inset:0;
       background-image:
         linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
       background-size: 10% 20%;
-      opacity: .33;
+      opacity: .35;
       pointer-events:none;
-      z-index:1;
     }
-    .vizStage:after{
+    .eq-graph-wrap:after{
       content:"";
       position:absolute; inset:-2px;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), inset 0 -40px 120px rgba(0,0,0,.58);
+      border-radius: 22px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), inset 0 -40px 120px rgba(0,0,0,.55);
       pointer-events:none;
-      z-index:7;
     }
-    #waveCanvas{ position:absolute; inset:0; width:100%; height:100%; z-index:2; }
-    #specCanvas{ position:absolute; inset:0; width:100%; height:100%; z-index:3; opacity:.90; mix-blend-mode: screen; pointer-events:none; }
-    #playhead{ position:absolute; top:0; bottom:0; width:2px; background: rgba(255,255,255,.88); box-shadow: 0 0 18px rgba(0,215,255,.35); z-index:6; opacity:.95; transform: translateX(0); }
-    .phGlow{
-      position:absolute; top:0; bottom:0; width:14px;
-      background: radial-gradient(circle, rgba(0,215,255,.16), transparent 70%);
-      z-index:5; pointer-events:none;
-      transform: translateX(0);
-    }
-    .eqSvgWrap{ position:absolute; inset:0; z-index:4; pointer-events:none; }
-    .eqSvgWrap svg{ width:100%; height:100%; display:block; opacity: .98; }
 
     .knobs-eq{
-      padding: 14px;
+      margin-top: 14px;
       display:grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 12px;
     }
-    @media (min-width: 760px){
-      .knobs-eq{ grid-template-columns: repeat(4, 1fr); }
-    }
+    @media (min-width: 720px){ .knobs-eq{ grid-template-columns: repeat(3, 1fr); } }
 
-    .tile{
+    .knob.tile{
       position: relative;
       padding: 14px 14px 12px;
       border-radius: 22px;
@@ -293,18 +246,19 @@
         radial-gradient(240px 180px at 30% 15%, rgba(255,255,255,.06), transparent 70%),
         linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.14));
       box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
-      min-height: 178px;
+      opacity: .55;
+      min-height: 168px;
       display:flex;
       flex-direction:column;
       align-items:center;
       justify-content:center;
       gap: 10px;
       user-select:none;
-      touch-action: none;
     }
+    .knob.tile.on{ opacity: 1; }
+
     .dial{
-      width: 98px; height: 98px; border-radius: 999px;
-      position: relative;
+      width: 92px; height: 92px; border-radius: 999px; position: relative;
       background:
         radial-gradient(circle at 35% 30%, rgba(255,255,255,.10), rgba(255,255,255,0) 58%),
         radial-gradient(circle at 50% 60%, rgba(0,0,0,.35), rgba(0,0,0,.65));
@@ -313,137 +267,36 @@
         inset 0 -16px 30px rgba(0,0,0,.35),
         0 18px 40px rgba(0,0,0,.35);
     }
-    .dial:before{
-      content:"";
-      position:absolute; inset:-14px;
-      border-radius: 999px;
-      background:
-        repeating-conic-gradient(from 220deg,
-          rgba(255,255,255,.28) 0 2deg,
-          rgba(255,255,255,0) 2deg 10deg);
-      opacity:.45;
-      -webkit-mask: radial-gradient(circle, transparent 62%, #000 63%);
-              mask: radial-gradient(circle, transparent 62%, #000 63%);
-      pointer-events:none;
-    }
     .dial:after{
       content:"";
       position:absolute; inset: 10px;
       border-radius: 999px;
       box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
       opacity: .9;
-      pointer-events:none;
     }
     .needle{
-      position:absolute;
-      left:50%; top:50%;
-      width: 48px; height: 7px;
+      position:absolute; left:50%; top:50%;
+      width: 44px; height: 6px;
       transform-origin: 0% 50%;
       transform: translateY(-50%) rotate(-45deg);
       border-radius: 999px;
-      background: linear-gradient(90deg, rgba(0,215,255,.95), rgba(138,92,255,.95));
+      background: linear-gradient(90deg, rgba(0,215,255,.92), rgba(138,92,255,.92));
       box-shadow: 0 0 18px rgba(138,92,255,.22);
     }
     .kmeta{ text-align:center; }
-    .kname{ font-weight: 950; letter-spacing: .8px; font-size: 14px; }
-    .kval{ margin-top: 6px; color: rgba(233,237,247,.88); font-size: 13px; }
+    .kname{ font-weight: 800; letter-spacing: .8px; font-size: 14px; }
+    .kval{ margin-top: 6px; color: rgba(233,237,247,.85); font-size: 13px; }
 
-    .tile input[type="range"]{
-      position:absolute; inset:0; width:100%; height:100%;
+    .knob.tile input[type="range"]{
+      position:absolute; inset:0;
+      width:100%; height:100%;
       opacity:0; cursor: pointer;
       -webkit-appearance: none; appearance: none;
+      touch-action: pan-y;
     }
-    .tile input[type="range"]::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; width: 1px; height: 1px; }
-
-    .vizBottom{
-      padding: 12px 14px 14px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-      color: rgba(233,237,247,.65);
-      font-size: 12px;
-      flex-wrap: wrap;
+    .knob.tile input[type="range"]::-webkit-slider-thumb{
+      -webkit-appearance:none; appearance:none; width: 1px; height: 1px;
     }
-
-    /* A/B PRO */
-    .ab{ display:flex; align-items:center; gap:10px; flex-wrap: wrap; }
-    .btnGroup{ display:flex; gap:8px; flex-wrap:wrap; }
-    .btn.abbtn{
-      padding: 10px 12px;
-      border-radius: 14px;
-      font-weight: 950;
-    }
-    .btn.abbtn.secondary{ font-weight: 950; }
-    .btn.abbtn.on{
-      box-shadow: 0 0 0 2px rgba(0,215,255,.14), 0 16px 40px rgba(0,0,0,.35);
-      outline: none;
-    }
-    .ab .slider{
-      min-width: 220px;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding: 8px 10px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.16);
-    }
-    .ab .lab{ font-size: 11px; color: rgba(233,237,247,.70); white-space: nowrap; font-weight:950; }
-
-    /* Meters */
-    .meters{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-    .mcard{
-      padding: 8px 10px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.16);
-      min-width: 220px;
-    }
-    .mrow{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-    .mrow .t{ font-size: 11px; color: rgba(233,237,247,.70); font-weight:950; }
-    .mrow .v{ font-size: 12px; color: rgba(233,237,247,.92); font-weight:950; }
-    .mbar{
-      margin-top: 8px;
-      height: 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.10);
-      overflow:hidden;
-      border: 1px solid rgba(255,255,255,.10);
-    }
-    .mbar i{
-      display:block; height:100%; width:0%;
-      border-radius: 999px;
-      background: linear-gradient(90deg, rgba(0,255,154,1), rgba(0,215,255,1), rgba(138,92,255,1));
-      box-shadow: 0 0 22px rgba(0,215,255,.16);
-      transition: width .10s linear;
-    }
-
-    /* Pro toggle */
-    .proRow{
-      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
-      margin-top: 10px;
-    }
-    .toggle{
-      display:flex; align-items:center; gap:10px;
-      padding: 8px 10px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.16);
-      user-select:none;
-      cursor:pointer;
-      font-weight:950;
-    }
-    .dot{
-      width:10px; height:10px; border-radius:99px;
-      background: rgba(233,237,247,.35);
-      box-shadow: 0 0 0 3px rgba(255,255,255,.06);
-    }
-    .toggle.on .dot{
-      background: rgba(0,255,154,.95);
-      box-shadow: 0 0 0 3px rgba(0,255,154,.14);
-    }
-    .toggle small{ color: rgba(233,237,247,.70); font-weight:900; }
   </style>
 </head>
 
@@ -454,26 +307,28 @@
         <div class="logo" aria-hidden="true"></div>
         <div>
           <h1>WarMaster</h1>
-          <small>Masterización Online — PRO LANDR UX</small>
+          <small>Masterización Online — EQ Live Preview (backend real)</small>
         </div>
       </div>
       <div class="nav">
+        <span class="pill" id="planPill">Plan: …</span>
         <a href="dashboard.html">Dashboard</a>
       </div>
     </header>
 
     <div class="grid">
-      <!-- LEFT -->
+      <!-- Left -->
       <section class="card">
         <h2>Nuevo master</h2>
         <p class="sub">
-          Perillas = <b>preview real</b>. Visual LANDR: waveform + spectrum + EQ curve + A/B con <b>AUTO LEVEL</b>.
+          Sube tu track, elige preset y mueve perillas: escucharás <b>preview real (15s)</b> desde backend.
+          Si quieres el render final, presiona <b>Procesar</b>.
         </p>
 
         <div class="drop" id="drop">
           <div>
             <strong id="fileName">Ningún archivo seleccionado</strong>
-            <span>WAV / MP3 • Máx 100MB • Máx 6 min (PLUS/PRO) • FREE recorta a 30s</span>
+            <span id="limitsLine">WAV / MP3 • límites: …</span>
           </div>
           <button class="btn secondary" id="pickBtn" type="button">Elegir archivo</button>
           <input id="file" type="file" accept="audio/*" hidden />
@@ -501,187 +356,124 @@
         </div>
 
         <div class="actions">
-          <button class="btn" id="processBtn" type="button" disabled>Procesar</button>
-          <button class="btn secondary" id="downloadBtn" type="button" disabled>Descargar master</button>
+          <button class="btn" id="processBtn" type="button" disabled>Procesar (Final)</button>
+          <button class="btn secondary" id="downloadBtn" type="button" disabled>Descargar</button>
         </div>
 
         <div class="status" id="status" style="display:none;">
-          <div class="bar"><i id="barFill"></i></div>
+          <div class="bar" id="bar"><i id="barFill"></i></div>
           <div class="statusLine">
-            <span id="statusText">Listo para procesar</span>
+            <span id="statusText">Listo</span>
             <span><b id="pct">0</b>%</span>
           </div>
         </div>
 
-        <!-- PRO VIZ -->
-        <section class="vizShell" id="vizShell">
-          <div class="vizTop">
+        <p class="hint" id="hintLine">
+          Tip: el preview se re-genera mientras arrastras (throttle). Si suena con lag, es porque el backend renderiza 15s en cada cambio.
+        </p>
+
+        <section class="eq-live">
+          <div class="eq-head">
             <div>
               <h3>EQ Live</h3>
-              <div class="vizSub">Waveform + Spectrum + EQ curve (preview real)</div>
-
-              <div class="chiprow">
-                <div class="chip on" id="chipBoth" title="Afecta original y master">Original + Master</div>
-                <div class="chip" id="chipOrig" title="Solo original">Solo Original</div>
-                <div class="chip" id="chipMaster" title="Solo master">Solo Master</div>
-                <div class="chip warn on" id="chipAutoLevel" title="Iguala volumen A/B automáticamente (LANDR style)">AUTO LEVEL</div>
-              </div>
-
-              <div class="proRow">
-                <div class="toggle on" id="toggleFine" title="FINE: ajustes más precisos (móvil). En PC también sirve mantener Shift.">
-                  <span class="dot"></span>
-                  <span>FINE <small>(precisión)</small></span>
-                </div>
-                <div class="toggle on" id="toggleMomentary" title="B momentary: mantener presionado B para oír master, soltar para volver.">
-                  <span class="dot"></span>
-                  <span>B MOMENTARY</span>
-                </div>
-              </div>
+              <div class="eq-sub">Preview real (15s) desde backend</div>
             </div>
-
-            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-              <div class="pill" id="planPill">PLAN: …</div>
-              <div class="pill" id="syncPill">SYNC: —</div>
-              <div class="pill" id="levelPill">LEVEL: —</div>
-            </div>
+            <div class="pill" id="previewPill">Preview: —</div>
           </div>
 
-          <div class="vizStage" id="vizStage">
-            <canvas id="waveCanvas"></canvas>
-            <canvas id="specCanvas"></canvas>
+          <div class="eq-graph-wrap">
+            <svg id="eqSvg" viewBox="0 0 1000 420" preserveAspectRatio="none" aria-label="EQ curve preview">
+              <defs>
+                <linearGradient id="eqGrad" x1="0" x2="1" y1="0" y2="0">
+                  <stop offset="0%" stop-color="rgba(0,215,255,.95)"/>
+                  <stop offset="55%" stop-color="rgba(138,92,255,.95)"/>
+                  <stop offset="100%" stop-color="rgba(0,255,154,.95)"/>
+                </linearGradient>
+                <filter id="eqGlow">
+                  <feGaussianBlur stdDeviation="2.2" result="blur"/>
+                  <feMerge>
+                    <feMergeNode in="blur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
 
-            <div class="eqSvgWrap">
-              <svg id="eqSvg" viewBox="0 0 1000 420" preserveAspectRatio="none" aria-label="EQ curve preview">
-                <defs>
-                  <linearGradient id="eqGrad" x1="0" x2="1" y1="0" y2="0">
-                    <stop offset="0%" stop-color="rgba(0,215,255,.95)"/>
-                    <stop offset="55%" stop-color="rgba(138,92,255,.95)"/>
-                    <stop offset="100%" stop-color="rgba(0,255,154,.95)"/>
-                  </linearGradient>
-                  <filter id="eqGlow">
-                    <feGaussianBlur stdDeviation="2.2" result="blur"/>
-                    <feMerge>
-                      <feMergeNode in="blur"/>
-                      <feMergeNode in="SourceGraphic"/>
-                    </feMerge>
-                  </filter>
-                </defs>
-
-                <path id="eqPathGlow" d="" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/>
-                <path id="eqPath" d="" fill="none" stroke="url(#eqGrad)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" filter="url(#eqGlow)"/>
-                <g id="eqPoints"></g>
-              </svg>
-            </div>
-
-            <div class="phGlow" id="phGlow"></div>
-            <div id="playhead"></div>
+              <path id="eqPathGlow" d="" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/>
+              <path id="eqPath" d="" fill="none" stroke="url(#eqGrad)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" filter="url(#eqGlow)"/>
+              <g id="eqPoints"></g>
+            </svg>
           </div>
 
           <div class="knobs-eq" id="knobs">
-            <div class="tile" data-k="low" data-unit="dB" data-min="-12" data-max="12" data-default="0">
-              <div class="dial"><div class="needle"></div></div>
+            <div class="knob tile" data-k="low" data-unit="dB" data-min="-12" data-max="12">
+              <div class="dial" aria-hidden="true"><div class="needle"></div></div>
               <div class="kmeta"><div class="kname">LOW</div><div class="kval" data-val>+0.0 dB</div></div>
-              <input id="k_low" type="range" min="-12" max="12" value="0" step="0.1"/>
+              <input type="range" min="-12" max="12" value="0" step="0.1" disabled />
             </div>
 
-            <div class="tile" data-k="mid" data-unit="dB" data-min="-12" data-max="12" data-default="0">
-              <div class="dial"><div class="needle"></div></div>
+            <div class="knob tile" data-k="mid" data-unit="dB" data-min="-12" data-max="12">
+              <div class="dial" aria-hidden="true"><div class="needle"></div></div>
               <div class="kmeta"><div class="kname">MID</div><div class="kval" data-val>+0.0 dB</div></div>
-              <input id="k_mid" type="range" min="-12" max="12" value="0" step="0.1"/>
+              <input type="range" min="-12" max="12" value="0" step="0.1" disabled />
             </div>
 
-            <div class="tile" data-k="pres" data-unit="dB" data-min="-12" data-max="12" data-default="0">
-              <div class="dial"><div class="needle"></div></div>
+            <div class="knob tile" data-k="pres" data-unit="dB" data-min="-12" data-max="12">
+              <div class="dial" aria-hidden="true"><div class="needle"></div></div>
               <div class="kmeta"><div class="kname">PRESENCE</div><div class="kval" data-val>+0.0 dB</div></div>
-              <input id="k_pres" type="range" min="-12" max="12" value="0" step="0.1"/>
+              <input type="range" min="-12" max="12" value="0" step="0.1" disabled />
             </div>
 
-            <div class="tile" data-k="air" data-unit="dB" data-min="-12" data-max="12" data-default="0">
-              <div class="dial"><div class="needle"></div></div>
+            <div class="knob tile" data-k="air" data-unit="dB" data-min="-12" data-max="12">
+              <div class="dial" aria-hidden="true"><div class="needle"></div></div>
               <div class="kmeta"><div class="kname">AIR</div><div class="kval" data-val>+0.0 dB</div></div>
-              <input id="k_air" type="range" min="-12" max="12" value="0" step="0.1"/>
+              <input type="range" min="-12" max="12" value="0" step="0.1" disabled />
             </div>
 
-            <div class="tile" data-k="glue" data-unit="%" data-min="0" data-max="100" data-default="0">
-              <div class="dial"><div class="needle"></div></div>
+            <div class="knob tile" data-k="glue" data-unit="%" data-min="0" data-max="100">
+              <div class="dial" aria-hidden="true"><div class="needle"></div></div>
               <div class="kmeta"><div class="kname">GLUE</div><div class="kval" data-val>0 %</div></div>
-              <input id="k_glue" type="range" min="0" max="100" value="0" step="1"/>
+              <input type="range" min="0" max="100" value="0" step="1" disabled />
             </div>
 
-            <div class="tile" data-k="width" data-unit="%" data-min="50" data-max="150" data-default="100">
-              <div class="dial"><div class="needle"></div></div>
+            <div class="knob tile" data-k="width" data-unit="%" data-min="50" data-max="150">
+              <div class="dial" aria-hidden="true"><div class="needle"></div></div>
               <div class="kmeta"><div class="kname">WIDTH</div><div class="kval" data-val>100 %</div></div>
-              <input id="k_width" type="range" min="50" max="150" value="100" step="1"/>
+              <input type="range" min="50" max="150" value="100" step="1" disabled />
             </div>
 
-            <div class="tile" data-k="sat" data-unit="%" data-min="0" data-max="100" data-default="0">
-              <div class="dial"><div class="needle"></div></div>
+            <!-- ✅ RESTAURADO: SAT -->
+            <div class="knob tile" data-k="sat" data-unit="%" data-min="0" data-max="100">
+              <div class="dial" aria-hidden="true"><div class="needle"></div></div>
               <div class="kmeta"><div class="kname">SAT</div><div class="kval" data-val>0 %</div></div>
-              <input id="k_sat" type="range" min="0" max="100" value="0" step="1"/>
+              <input type="range" min="0" max="100" value="0" step="1" disabled />
             </div>
 
-            <div class="tile" data-k="out" data-unit="dB" data-min="-12" data-max="6" data-default="0">
-              <div class="dial"><div class="needle"></div></div>
-              <div class="kmeta"><div class="kname">OUTPUT</div><div class="kval" data-val>+0.0 dB</div></div>
-              <input id="k_out" type="range" min="-12" max="6" value="0" step="0.1"/>
-            </div>
-          </div>
-
-          <div class="vizBottom">
-            <div class="ab">
-              <div class="btnGroup">
-                <button class="btn abbtn secondary on" id="btnA" type="button" title="Solo Original (A)">A</button>
-                <button class="btn abbtn secondary" id="btnB" type="button" title="Solo Master (B) — mantener para momentary">B</button>
-                <button class="btn abbtn secondary" id="btnABPlay" type="button" title="Reproduce A y B sincronizados">A/B Play</button>
-              </div>
-
-              <div class="ab slider" title="0=Original, 100=Master">
-                <span class="lab">A</span>
-                <input id="xfade" type="range" min="0" max="100" value="50" step="1" />
-                <span class="lab">B</span>
-              </div>
-
-              <div class="pill" id="abLabel">Crossfade: 50%</div>
-            </div>
-
-            <div class="meters">
-              <div class="mcard">
-                <div class="mrow"><span class="t">RMS</span><span class="v" id="rmsTxt">— dB</span></div>
-                <div class="mbar"><i id="rmsBar"></i></div>
-              </div>
-              <div class="mcard">
-                <div class="mrow"><span class="t">PEAK</span><span class="v" id="peakTxt">— dB</span></div>
-                <div class="mbar"><i id="peakBar"></i></div>
-              </div>
-              <div class="mcard">
-                <div class="mrow"><span class="t">LOUD</span><span class="v" id="loudTxt">— LUFS*</span></div>
-                <div class="mbar"><i id="loudBar"></i></div>
-              </div>
+            <!-- ✅ RESTAURADO: OUT -->
+            <div class="knob tile" data-k="out" data-unit="dB" data-min="-12" data-max="6">
+              <div class="dial" aria-hidden="true"><div class="needle"></div></div>
+              <div class="kmeta"><div class="kname">OUT</div><div class="kval" data-val>+0.0 dB</div></div>
+              <input type="range" min="-12" max="6" value="0" step="0.1" disabled />
             </div>
           </div>
         </section>
 
-        <p class="hint">
-          Tips PRO: <b>Doble tap</b> en una perilla = reset. En PC: <b>Shift</b> = FINE.
-        </p>
-
-        <div class="foot">© WarMaster — backend Render + FFmpeg</div>
+        <div class="foot">© WarMaster — Preview real backend + perillas</div>
       </section>
 
-      <!-- RIGHT -->
+      <!-- Right -->
       <aside class="card">
         <h2>Reproductores</h2>
-        <p class="sub">Original vs Master. A/B Play mantiene ambos sincronizados.</p>
+        <p class="sub">Original (local) vs Preview/Master (backend).</p>
 
         <div class="player">
           <div class="box">
             <label>Original</label>
-            <audio id="origPlayer" controls crossorigin="anonymous"></audio>
+            <audio id="origPlayer" controls></audio>
           </div>
 
           <div class="box">
-            <label>Master</label>
-            <audio id="masterPlayer" controls crossorigin="anonymous"></audio>
+            <label>Preview / Master</label>
+            <audio id="masterPlayer" controls></audio>
           </div>
         </div>
       </aside>
@@ -689,22 +481,35 @@
   </div>
 
   <script>
-    // ========= API_BASE =========
+    // =========
+    // API_BASE
+    // =========
     const qs = new URLSearchParams(location.search);
     const API_BASE = (qs.get("api") || "").trim() || location.origin;
 
+    // =========
+    // fetchWithTimeout
+    // =========
     async function fetchWithTimeout(url, options={}, timeoutMs=180000){
-      const ctrl = new AbortController();
-      const id = setTimeout(() => ctrl.abort(), timeoutMs);
-      try{ return await fetch(url, { ...options, signal: ctrl.signal }); }
-      finally{ clearTimeout(id); }
+      const hasSignal = !!options.signal;
+      const ctrl = hasSignal ? null : new AbortController();
+      const signal = options.signal || ctrl.signal;
+      const id = setTimeout(() => { try{ ctrl && ctrl.abort(); }catch(_){} }, timeoutMs);
+      try{
+        return await fetch(url, { ...options, signal });
+      } finally {
+        clearTimeout(id);
+      }
     }
 
-    // ========= UI refs =========
+    // =========
+    // UI refs
+    // =========
     const fileInput = document.getElementById("file");
     const pickBtn = document.getElementById("pickBtn");
     const drop = document.getElementById("drop");
     const fileName = document.getElementById("fileName");
+    const limitsLine = document.getElementById("limitsLine");
 
     const preset = document.getElementById("preset");
     const intensity = document.getElementById("intensity");
@@ -715,719 +520,153 @@
 
     const status = document.getElementById("status");
     const statusText = document.getElementById("statusText");
+    const bar = document.getElementById("bar");
     const barFill = document.getElementById("barFill");
     const pctEl = document.getElementById("pct");
 
     const origPlayer = document.getElementById("origPlayer");
     const masterPlayer = document.getElementById("masterPlayer");
 
-    const planPill = document.getElementById("planPill");
-    const syncPill = document.getElementById("syncPill");
-    const levelPill = document.getElementById("levelPill");
-
     const knobWrap = document.getElementById("knobs");
+    const previewPill = document.getElementById("previewPill");
+    const planPill = document.getElementById("planPill");
+
+    // =========
+    // EQ curve refs
+    // =========
     const eqPath = document.getElementById("eqPath");
     const eqPathGlow = document.getElementById("eqPathGlow");
     const eqPoints = document.getElementById("eqPoints");
 
-    const chipBoth = document.getElementById("chipBoth");
-    const chipOrig = document.getElementById("chipOrig");
-    const chipMaster = document.getElementById("chipMaster");
-    const chipAutoLevel = document.getElementById("chipAutoLevel");
-
-    const toggleFine = document.getElementById("toggleFine");
-    const toggleMomentary = document.getElementById("toggleMomentary");
-
-    const btnA = document.getElementById("btnA");
-    const btnB = document.getElementById("btnB");
-    const btnABPlay = document.getElementById("btnABPlay");
-    const xfade = document.getElementById("xfade");
-    const abLabel = document.getElementById("abLabel");
-
-    const waveCanvas = document.getElementById("waveCanvas");
-    const waveCtx = waveCanvas.getContext("2d");
-    const specCanvas = document.getElementById("specCanvas");
-    const specCtx = specCanvas.getContext("2d");
-    const playhead = document.getElementById("playhead");
-    const phGlow = document.getElementById("phGlow");
-    const vizStage = document.getElementById("vizStage");
-
-    const rmsTxt = document.getElementById("rmsTxt");
-    const peakTxt = document.getElementById("peakTxt");
-    const loudTxt = document.getElementById("loudTxt");
-    const rmsBar = document.getElementById("rmsBar");
-    const peakBar = document.getElementById("peakBar");
-    const loudBar = document.getElementById("loudBar");
-
-    // ========= State =========
-    let USER_PLAN = "FREE";
+    // =========
+    // State
+    // =========
+    let USER_PLAN = "FREE";          // FREE/PLUS/PRO
     let selectedFile = null;
+    let sourceId = null;
 
-    let masterBlob = null;
-    let masterUrl = null;
     let origUrl = null;
+    let previewUrl = null;
+    let finalUrl = null;
+    let lastBlobForDownload = null;
 
-    let progTimer = null;
-    let prog = 0;
+    let uploadAbort = null;
+    let previewAbort = null;
+    let finalAbort = null;
 
-    // WebAudio
-    let AC = null;
-    let mixBus = null;
-    let graphOrig = null;
-    let graphMaster = null;
+    const PREVIEW_SECONDS = 15;
+    const PREVIEW_THROTTLE_MS = 550;
+    const PREVIEW_TRAIL_MS = 260;
 
-    let analyser = null, specData = null, specRAF = null;
-    let meterAnalyser = null, meterData = null, meterRAF = null;
+    let previewTimer = null;
+    let lastPreviewStart = 0;
 
-    let bufOrig = null, bufMaster = null;
-    let waveRAF = null;
-
-    let previewTarget = "BOTH"; // BOTH | ORIG | MASTER
-
-    // A/B
-    let lastMixBeforeMomentary = 50;
-    let momentaryActive = false;
-
-    // sync
-    let syncTimer = null;
-    let isSyncing = false;
-
-    // auto level
-    let autoLevelOn = true;
-    let levelTrimDbA = 0;
-    let levelTrimDbB = 0;
-
-    // PRO toggles
-    let fineOn = true;
-    let momentaryOn = true;
-
-    function ensureAC(){
-      if (AC) return AC;
-      const Ctx = window.AudioContext || window.webkitAudioContext;
-      if (!Ctx) return null;
-      AC = new Ctx();
-      return AC;
+    // =========
+    // Helpers UI
+    // =========
+    function setProgress(p){
+      const pp = Math.max(0, Math.min(100, Math.round(p)));
+      barFill.style.width = pp + "%";
+      pctEl.textContent = String(pp);
     }
-    async function resumeAC(){
-      const ac = ensureAC();
-      if (!ac) return;
-      if (ac.state !== "running"){
-        try{ await ac.resume(); }catch(_){}
-      }
+    function setStatus(msg){
+      status.style.display = "block";
+      statusText.textContent = msg || "";
     }
-    function cleanupObjectURL(url){
-      try{ if (url) URL.revokeObjectURL(url); }catch(_){}
+    function setLoading(on){
+      if (on) bar.classList.add("loading");
+      else bar.classList.remove("loading");
     }
-    function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
-    function dbToGain(db){ return Math.pow(10, (Number(db||0))/20); }
-    function linToDb(x){ return 20 * Math.log10(Math.max(1e-9, x)); }
+    function setPreviewBadge(txt){ previewPill.textContent = txt; }
 
-    function ensureMixBus(){
-      const ac = ensureAC();
-      if (!ac) return;
+    function revokeUrl(u){ try{ if (u) URL.revokeObjectURL(u); }catch(_){} }
 
-      if (!mixBus){
-        mixBus = ac.createGain();
-        mixBus.gain.value = 1.0;
-
-        analyser = ac.createAnalyser();
-        analyser.fftSize = 2048;
-        analyser.smoothingTimeConstant = 0.88;
-
-        meterAnalyser = ac.createAnalyser();
-        meterAnalyser.fftSize = 2048;
-        meterAnalyser.smoothingTimeConstant = 0.50;
-
-        mixBus.connect(analyser);
-        mixBus.connect(meterAnalyser);
-        analyser.connect(ac.destination);
-
-        specData = new Uint8Array(analyser.frequencyBinCount);
-        meterData = new Float32Array(meterAnalyser.fftSize);
-      }
+    function resetAudioOutputs(){
+      lastBlobForDownload = null;
+      downloadBtn.disabled = true;
+      revokeUrl(previewUrl); previewUrl = null;
+      revokeUrl(finalUrl); finalUrl = null;
+      masterPlayer.removeAttribute("src");
+      masterPlayer.load();
     }
 
-    function makeSaturator(ac){
-      const ws = ac.createWaveShaper();
-      ws.oversample = "4x";
-      function setDrive(pct){
-        const p = clamp(Number(pct||0), 0, 100) / 100;
-        const drive = 1 + p * 18;
-        const n = 4096;
-        const curve = new Float32Array(n);
-        for (let i=0; i<n; i++){
-          const x = (i/(n-1))*2 - 1;
-          curve[i] = Math.tanh(x * drive);
-        }
-        ws.curve = curve;
-      }
-      setDrive(0);
-      return { node: ws, setDrive };
+    function setOriginalPreview(file){
+      revokeUrl(origUrl); origUrl = null;
+      origUrl = URL.createObjectURL(file);
+      origPlayer.src = origUrl;
+      origPlayer.load();
     }
 
-    function setWidthMatrix(widthNodes, widthPct){
-      const w = clamp(Number(widthPct||100), 50, 150);
-      const k = w / 100.0;
-      const a = (1.0 + k) / 2.0;
-      const b = (1.0 - k) / 2.0;
-      widthNodes.gL0.gain.value = a;
-      widthNodes.gL1.gain.value = b;
-      widthNodes.gR0.gain.value = b;
-      widthNodes.gR1.gain.value = a;
+    function enableKnobs(){
+      [...knobWrap.querySelectorAll(".knob")].forEach(k=>{
+        k.classList.add("on");
+        k.querySelector("input").disabled = false;
+      });
     }
-
-    function buildGraphForPlayer(playerEl){
-      const ac = ensureAC();
-      if (!ac) return null;
-      ensureMixBus();
-
-      const src = ac.createMediaElementSource(playerEl);
-
-      const preGain = ac.createGain();
-      preGain.gain.value = 1.0;
-
-      const low = ac.createBiquadFilter();
-      low.type = "lowshelf"; low.frequency.value = 120;
-
-      const mid = ac.createBiquadFilter();
-      mid.type = "peaking"; mid.frequency.value = 630; mid.Q.value = 0.85;
-
-      const pres = ac.createBiquadFilter();
-      pres.type = "peaking"; pres.frequency.value = 1760; pres.Q.value = 0.90;
-
-      const air = ac.createBiquadFilter();
-      air.type = "highshelf"; air.frequency.value = 8500;
-
-      const comp = ac.createDynamicsCompressor();
-      comp.threshold.value = -24;
-      comp.ratio.value = 2;
-      comp.attack.value = 0.01;
-      comp.release.value = 0.20;
-
-      const splitter = ac.createChannelSplitter(2);
-      const merger = ac.createChannelMerger(2);
-      const gL0 = ac.createGain(), gL1 = ac.createGain(), gR0 = ac.createGain(), gR1 = ac.createGain();
-
-      const sat = makeSaturator(ac);
-
-      const out = ac.createGain();
-      out.gain.value = 1.0;
-
-      const mixGain = ac.createGain();
-      mixGain.gain.value = 1.0;
-
-      src.connect(preGain);
-      preGain.connect(low);
-      low.connect(mid);
-      mid.connect(pres);
-      pres.connect(air);
-      air.connect(comp);
-      comp.connect(splitter);
-
-      splitter.connect(gL0, 0);
-      splitter.connect(gL1, 1);
-      splitter.connect(gR0, 0);
-      splitter.connect(gR1, 1);
-
-      gL0.connect(merger, 0, 0);
-      gL1.connect(merger, 0, 0);
-      gR0.connect(merger, 0, 1);
-      gR1.connect(merger, 0, 1);
-
-      merger.connect(sat.node);
-      sat.node.connect(out);
-      out.connect(mixGain);
-      mixGain.connect(mixBus);
-
-      setWidthMatrix({gL0,gL1,gR0,gR1}, 100);
-
-      return { preGain, low, mid, pres, air, comp, width:{gL0,gL1,gR0,gR1}, sat, out, mixGain };
-    }
-
-    function applyParamsToGraph(graph, params){
-      if (!graph) return;
-
-      graph.low.gain.value = Number(params.low ?? 0);
-      graph.mid.gain.value = Number(params.mid ?? 0);
-      graph.pres.gain.value = Number(params.pres ?? 0);
-      graph.air.gain.value = Number(params.air ?? 0);
-
-      const glue = clamp(Number(params.glue ?? 0), 0, 100);
-      const p = glue / 100;
-      graph.comp.threshold.value = -12 - p * 24;
-      graph.comp.ratio.value = 1.2 + p * 5.0;
-      graph.comp.attack.value = 0.003 + (1-p)*0.02;
-      graph.comp.release.value = 0.12 + p*0.18;
-
-      setWidthMatrix(graph.width, Number(params.width ?? 100));
-      graph.sat.setDrive(Number(params.sat ?? 0));
-
-      const outDb = clamp(Number(params.out ?? 0), -12, 6);
-      graph.out.gain.value = dbToGain(outDb);
-    }
-
-    function getKnobValues(){
-      const get = (id)=> Number(document.getElementById(id)?.value ?? 0);
-      return {
-        low: get("k_low"),
-        mid: get("k_mid"),
-        pres: get("k_pres"),
-        air: get("k_air"),
-        glue: get("k_glue"),
-        width: get("k_width"),
-        sat: get("k_sat"),
-        out: get("k_out"),
-      };
-    }
-
-    function applyPreview(){
-      const params = getKnobValues();
-      if (previewTarget === "BOTH" || previewTarget === "ORIG") applyParamsToGraph(graphOrig, params);
-      if (previewTarget === "BOTH" || previewTarget === "MASTER") applyParamsToGraph(graphMaster, params);
-    }
-
-    function setChip(target){
-      previewTarget = target;
-      [chipBoth, chipOrig, chipMaster].forEach(c=> c.classList.remove("on"));
-      if (target === "BOTH") chipBoth.classList.add("on");
-      if (target === "ORIG") chipOrig.classList.add("on");
-      if (target === "MASTER") chipMaster.classList.add("on");
-      applyPreview();
-    }
-
-    // ========= AUTO LEVEL (más estable) =========
-    function computeRmsDbWindow(buf, startRatio=0.15, endRatio=0.85){
-      if (!buf) return null;
-      const ch0 = buf.getChannelData(0);
-      const ch1 = buf.numberOfChannels > 1 ? buf.getChannelData(1) : null;
-      const n = ch0.length;
-      const a = Math.floor(n * startRatio);
-      const b = Math.floor(n * endRatio);
-      const len = Math.max(1, b - a);
-
-      // sample cap
-      const step = Math.max(1, Math.floor(len / 180000));
-
-      let sumSq = 0;
-      let count = 0;
-      for (let i=a; i<b; i+=step){
-        const s = ch1 ? (ch0[i]+ch1[i]) * 0.5 : ch0[i];
-        sumSq += s*s;
-        count++;
-      }
-      const rms = Math.sqrt(sumSq / Math.max(1,count));
-      return linToDb(rms);
-    }
-
-    function updateAutoLevelGains(){
-      if (graphOrig) graphOrig.preGain.gain.value = autoLevelOn ? dbToGain(levelTrimDbA) : 1.0;
-      if (graphMaster) graphMaster.preGain.gain.value = autoLevelOn ? dbToGain(levelTrimDbB) : 1.0;
-      levelPill.textContent = "LEVEL: " + (autoLevelOn
-        ? `A ${levelTrimDbA>=0?"+":""}${levelTrimDbA.toFixed(1)} dB • B ${levelTrimDbB>=0?"+":""}${levelTrimDbB.toFixed(1)} dB`
-        : "OFF"
-      );
-    }
-
-    function computeAndSetAutoLevel(){
-      if (!autoLevelOn){
-        levelTrimDbA = 0; levelTrimDbB = 0;
-        updateAutoLevelGains();
-        return;
-      }
-
-      const rmsA = computeRmsDbWindow(bufOrig);
-      const rmsB = computeRmsDbWindow(bufMaster);
-
-      const targetDb = -18.0;
-      if (rmsA == null){
-        levelTrimDbA = 0; levelTrimDbB = 0;
-        updateAutoLevelGains();
-        return;
-      }
-
-      levelTrimDbA = clamp(targetDb - rmsA, -10, 10);
-      levelTrimDbB = (rmsB == null) ? 0 : clamp(targetDb - rmsB, -10, 10);
-
-      updateAutoLevelGains();
-    }
-
-    // ========= Ensure graphs =========
-    function ensureGraphs(){
-      ensureAC(); ensureMixBus();
-
-      if (!graphOrig){
-        try{ graphOrig = buildGraphForPlayer(origPlayer); }catch(_){}
-      }
-      if (!graphMaster){
-        try{ graphMaster = buildGraphForPlayer(masterPlayer); }catch(_){}
-      }
-
-      applyPreview();
-      updateCrossfade();
-      updateAutoLevelGains();
-      startSpectrum();
-      startMeters();
-      startWaveformLoop();
-      startSyncLoop();
-    }
-
-    // ========= A/B =========
-    function setABButtonsState(which){
-      btnA.classList.toggle("on", which === "A");
-      btnB.classList.toggle("on", which === "B");
-    }
-
-    function setCrossfadeValue(v){
-      const nv = clamp(Number(v), 0, 100);
-      xfade.value = String(nv);
-      updateCrossfade();
-    }
-
-    function updateCrossfade(){
-      const v = clamp(Number(xfade.value||50), 0, 100);
-      abLabel.textContent = `Crossfade: ${v}%`;
-
-      const t = v / 100;
-      // equal-power
-      if (graphOrig) graphOrig.mixGain.gain.value = Math.cos(t * Math.PI * 0.5);
-      if (graphMaster) graphMaster.mixGain.gain.value = Math.sin(t * Math.PI * 0.5);
-
-      if (v <= 0.5) setABButtonsState("A");
-      else if (v >= 99.5) setABButtonsState("B");
-      else { btnA.classList.remove("on"); btnB.classList.remove("on"); }
-    }
-
-    async function abPlay(){
-      await resumeAC();
-      ensureGraphs();
-
-      if (!masterPlayer.src){
-        origPlayer.play().catch(()=>{});
-        return;
-      }
-      const t = Math.max(origPlayer.currentTime || 0, masterPlayer.currentTime || 0);
-      try{ origPlayer.currentTime = t; }catch(_){}
-      try{ masterPlayer.currentTime = t; }catch(_){}
-      origPlayer.play().catch(()=>{});
-      masterPlayer.play().catch(()=>{});
-    }
-
-    function momentaryBStart(){
-      if (!momentaryOn) return;
-      if (momentaryActive) return;
-      momentaryActive = true;
-      lastMixBeforeMomentary = Number(xfade.value||50);
-      setCrossfadeValue(100);
-      setABButtonsState("B");
-    }
-    function momentaryBEnd(){
-      if (!momentaryOn) return;
-      if (!momentaryActive) return;
-      momentaryActive = false;
-      setCrossfadeValue(lastMixBeforeMomentary);
-      updateCrossfade();
-    }
-
-    // ========= SYNC =========
-    function setSyncPill(txt){ syncPill.textContent = "SYNC: " + txt; }
-    function hardSyncTo(time){
-      try{ origPlayer.currentTime = time; }catch(_){}
-      try{ masterPlayer.currentTime = time; }catch(_){}
-    }
-    function startSyncLoop(){
-      if (syncTimer) return;
-      syncTimer = setInterval(()=>{
-        if (!masterPlayer.src) { setSyncPill("—"); return; }
-        const a = origPlayer, b = masterPlayer;
-        if (a.paused && b.paused){ setSyncPill("PAUSE"); return; }
-
-        if (!a.paused && b.paused){ b.play().catch(()=>{}); }
-        else if (a.paused && !b.paused){ a.play().catch(()=>{}); }
-
-        const ta = a.currentTime || 0;
-        const tb = b.currentTime || 0;
-        const drift = ta - tb;
-        const ad = Math.abs(drift);
-
-        if (ad < 0.03){ setSyncPill("LOCK"); return; }
-        if (ad < 0.18){
-          setSyncPill("TRIM");
-          hardSyncTo((ta + tb) * 0.5);
-          return;
-        }
-        setSyncPill("HARD");
-        hardSyncTo(Math.max(ta, tb));
-      }, 250);
-    }
-    function bindSeekSync(player){
-      player.addEventListener("seeking", ()=>{
-        if (!masterPlayer.src) return;
-        if (isSyncing) return;
-        isSyncing = true;
-        const t = player.currentTime || 0;
-        hardSyncTo(t);
-        setTimeout(()=>{ isSyncing=false; }, 80);
+    function disableKnobs(){
+      [...knobWrap.querySelectorAll(".knob")].forEach(k=>{
+        k.classList.remove("on");
+        k.querySelector("input").disabled = true;
       });
     }
 
-    // ========= Canvas sizing =========
-    function resizeCanvasToDisplaySize(canvas){
-      const rect = canvas.getBoundingClientRect();
-      const dpr = Math.max(1, window.devicePixelRatio || 1);
-      const w = Math.max(1, Math.floor(rect.width * dpr));
-      const h = Math.max(1, Math.floor(rect.height * dpr));
-      if (canvas.width !== w || canvas.height !== h){
-        canvas.width = w;
-        canvas.height = h;
-      }
-      return {w, h, dpr};
+    function updateButtons(){
+      processBtn.disabled = !sourceId;
     }
 
-    // ========= Spectrum (mejor "log feel") =========
-    function startSpectrum(){
-      if (!analyser || !specCtx) return;
-      if (specRAF) return;
-
-      const draw = ()=>{
-        specRAF = requestAnimationFrame(draw);
-        const {w, h} = resizeCanvasToDisplaySize(specCanvas);
-        specCtx.clearRect(0,0,w,h);
-
-        analyser.getByteFrequencyData(specData);
-        const n = specData.length;
-
-        const bars = 120;
-        const pad = Math.floor(w * 0.05);
-        const usableW = w - pad*2;
-        const baseY = h - Math.floor(h*0.16);
-
-        // pseudo log mapping
-        const idxFor = (i)=>{
-          const t = i / (bars-1);
-          const log = Math.pow(t, 2.2);
-          return Math.floor(log * (n-1));
-        };
-
-        for (let i=0; i<bars; i++){
-          const idx = idxFor(i);
-          const v = (specData[idx] / 255);
-
-          const x = pad + (i/(bars-1)) * usableW;
-          const barH = Math.max(2, v * (h*0.58));
-          const y = baseY - barH;
-
-          const grad = specCtx.createLinearGradient(0, y, 0, baseY);
-          grad.addColorStop(0, "rgba(0,255,154,.38)");
-          grad.addColorStop(0.55, "rgba(138,92,255,.28)");
-          grad.addColorStop(1, "rgba(0,215,255,.16)");
-
-          specCtx.fillStyle = grad;
-          const bw = Math.max(2, usableW / bars * 0.55);
-          specCtx.fillRect(x - bw/2, y, bw, barH);
-        }
-
-        // baseline glow
-        specCtx.globalAlpha = 0.22;
-        specCtx.fillStyle = "rgba(0,215,255,.38)";
-        specCtx.fillRect(0, baseY+1, w, 1);
-        specCtx.globalAlpha = 1;
-      };
-
-      draw();
-      window.addEventListener("resize", ()=>resizeCanvasToDisplaySize(specCanvas));
-    }
-
-    // ========= Meters =========
-    function meterBarFromDb(db){
-      const t = (db + 60) / 60;
-      return clamp(t, 0, 1);
-    }
-    function startMeters(){
-      if (!meterAnalyser || !meterData) return;
-      if (meterRAF) return;
-
-      let peakHold = -120;
-      let lastHoldT = performance.now();
-
-      const draw = ()=>{
-        meterRAF = requestAnimationFrame(draw);
-
-        meterAnalyser.getFloatTimeDomainData(meterData);
-
-        let sumSq = 0;
-        let peak = 0;
-        for (let i=0; i<meterData.length; i++){
-          const s = meterData[i];
-          sumSq += s*s;
-          const a = Math.abs(s);
-          if (a > peak) peak = a;
-        }
-        const rms = Math.sqrt(sumSq / meterData.length);
-        const rmsDb = linToDb(rms);
-        const peakDb = linToDb(peak);
-        const loudApprox = rmsDb + 1.5;
-
-        const now = performance.now();
-        if (peakDb > peakHold || (now - lastHoldT) > 300){
-          peakHold = peakDb;
-          lastHoldT = now;
-        }else{
-          peakHold = peakHold - 0.5;
-        }
-
-        rmsTxt.textContent = `${rmsDb.toFixed(1)} dB`;
-        peakTxt.textContent = `${peakHold.toFixed(1)} dB`;
-        loudTxt.textContent = `${loudApprox.toFixed(1)} LUFS*`;
-
-        rmsBar.style.width = (meterBarFromDb(rmsDb) * 100).toFixed(0) + "%";
-        peakBar.style.width = (meterBarFromDb(peakHold) * 100).toFixed(0) + "%";
-        loudBar.style.width = (meterBarFromDb(loudApprox) * 100).toFixed(0) + "%";
-      };
-
-      draw();
-    }
-
-    // ========= Waveform =========
-    function downsamplePeaks(buf, samples){
-      if (!buf) return null;
-      const ch0 = buf.getChannelData(0);
-      const ch1 = buf.numberOfChannels > 1 ? buf.getChannelData(1) : null;
-      const n = ch0.length;
-      const step = Math.max(1, Math.floor(n / samples));
-      const mins = new Float32Array(samples);
-      const maxs = new Float32Array(samples);
-      let idx = 0;
-
-      for (let i=0; i<n && idx<samples; i+=step){
-        let mn = 1, mx = -1;
-        const end = Math.min(n, i+step);
-        for (let j=i; j<end; j++){
-          const s = ch1 ? (ch0[j]+ch1[j])*0.5 : ch0[j];
-          if (s < mn) mn = s;
-          if (s > mx) mx = s;
-        }
-        mins[idx] = mn;
-        maxs[idx] = mx;
-        idx++;
-      }
-      return {mins, maxs, len: idx};
-    }
-
-    function drawWaveform(){
-      const {w, h} = resizeCanvasToDisplaySize(waveCanvas);
-      waveCtx.clearRect(0,0,w,h);
-
-      // vignette
-      waveCtx.globalAlpha = 0.18;
-      const g = waveCtx.createLinearGradient(0,0,0,h);
-      g.addColorStop(0, "rgba(0,0,0,.20)");
-      g.addColorStop(1, "rgba(0,0,0,.58)");
-      waveCtx.fillStyle = g;
-      waveCtx.fillRect(0,0,w,h);
-      waveCtx.globalAlpha = 1;
-
-      const padX = Math.floor(w*0.05);
-      const topY = Math.floor(h*0.28);
-      const botY = Math.floor(h*0.72);
-
-      waveCtx.globalAlpha = 0.38;
-      waveCtx.font = `${Math.max(10, Math.floor(h*0.06))}px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial`;
-      waveCtx.fillStyle = "rgba(233,237,247,.65)";
-      waveCtx.fillText("A", padX, topY-8);
-      waveCtx.fillText("B", padX, botY-8);
-      waveCtx.globalAlpha = 1;
-
-      const samples = Math.min(1600, Math.floor((w - padX*2)));
-      const pA = downsamplePeaks(bufOrig, samples);
-      const pB = downsamplePeaks(bufMaster, samples);
-
-      function drawPeaks(peaks, centerY, amp, strokeCss, glowCss){
-        if (!peaks) return;
-        waveCtx.save();
-
-        waveCtx.globalAlpha = 0.22;
-        waveCtx.strokeStyle = glowCss;
-        waveCtx.lineWidth = 3;
-        waveCtx.beginPath();
-        for (let i=0; i<peaks.len; i++){
-          const x = padX + (i/(peaks.len-1)) * (w - padX*2);
-          const y1 = centerY + peaks.mins[i]*amp;
-          const y2 = centerY + peaks.maxs[i]*amp;
-          waveCtx.moveTo(x, y1);
-          waveCtx.lineTo(x, y2);
-        }
-        waveCtx.stroke();
-
-        waveCtx.globalAlpha = 0.85;
-        waveCtx.strokeStyle = strokeCss;
-        waveCtx.lineWidth = 1;
-        waveCtx.beginPath();
-        for (let i=0; i<peaks.len; i++){
-          const x = padX + (i/(peaks.len-1)) * (w - padX*2);
-          const y1 = centerY + peaks.mins[i]*amp;
-          const y2 = centerY + peaks.maxs[i]*amp;
-          waveCtx.moveTo(x, y1);
-          waveCtx.lineTo(x, y2);
-        }
-        waveCtx.stroke();
-
-        waveCtx.restore();
-      }
-
-      const amp = Math.floor(h*0.18);
-      drawPeaks(pA, topY, amp, "rgba(0,215,255,.90)", "rgba(0,215,255,.58)");
-      drawPeaks(pB, botY, amp, "rgba(0,255,154,.88)", "rgba(0,255,154,.52)");
-    }
-
-    function updatePlayhead(){
-      const hasB = !!masterPlayer.src;
-      const t = hasB ? Math.max(origPlayer.currentTime||0, masterPlayer.currentTime||0) : (origPlayer.currentTime||0);
-      const dur = hasB ? Math.max(origPlayer.duration||0, masterPlayer.duration||0) : (origPlayer.duration||0);
-      const ratio = (dur && isFinite(dur) && dur > 0) ? clamp(t/dur, 0, 1) : 0;
-
-      const rect = waveCanvas.getBoundingClientRect();
-      const x = rect.width * ratio;
-
-      playhead.style.transform = `translateX(${x}px)`;
-      phGlow.style.transform = `translateX(${x-6}px)`;
-    }
-
-    function startWaveformLoop(){
-      if (waveRAF) return;
-      const loop = ()=>{
-        waveRAF = requestAnimationFrame(loop);
-        updatePlayhead();
-      };
-      loop();
-    }
-
-    // ========= Decode =========
-    async function decodeToBuffer(fileOrBlob){
-      const ac = ensureAC();
-      if (!ac) return null;
+    // =========
+    // Plan from backend (/api/me)
+    // =========
+    async function loadPlan(){
       try{
-        const ab = await fileOrBlob.arrayBuffer();
-        return await ac.decodeAudioData(ab.slice(0));
-      }catch(_){
-        return null;
+        const r = await fetchWithTimeout(API_BASE + "/api/me", {}, 10000);
+        if (r.ok){
+          const j = await r.json();
+          const p = (j && j.plan) ? String(j.plan).toUpperCase() : "FREE";
+          USER_PLAN = (p === "PLUS" || p === "PRO") ? p : "FREE";
+        } else {
+          USER_PLAN = "FREE";
+        }
+      } catch(_){
+        USER_PLAN = "FREE";
+      }
+
+      planPill.textContent = "Plan: " + USER_PLAN;
+
+      // línea de límites (según lo que pediste)
+      if (USER_PLAN === "FREE"){
+        limitsLine.textContent = "WAV / MP3 • FREE: máx 100MB • descarga 30s";
+      } else {
+        limitsLine.textContent = "WAV / MP3 • PLUS/PRO: ilimitado • descarga completa";
       }
     }
 
-    // ========= EQ Curve UI =========
+    function requestedQuality(){
+      // lo que mandamos al backend para enforcement
+      return USER_PLAN;
+    }
+
+    // =========
+    // EQ UI helpers
+    // =========
     function fmtDb(v){
       const n = Number(v || 0);
       const sign = n > 0 ? "+" : "";
       return `${sign}${n.toFixed(1)} dB`;
     }
     function fmtPct(v){ return `${Math.round(Number(v||0))} %`; }
+
     function setNeedle(tile, norm){
       const ang = -55 + (norm * 110);
       const needle = tile.querySelector(".needle");
       if (needle) needle.style.transform = `translateY(-50%) rotate(${ang}deg)`;
     }
+
     function updateEqCurve(low, mid, pres, air){
+      if (!eqPath) return;
+
       const mapY = (db)=>{
-        const v = clamp(Number(db||0), -12, 12);
+        const v = Math.max(-12, Math.min(12, Number(db||0)));
         const t = (v + 12) / 24;
         return 320 - t * 230;
       };
@@ -1449,30 +688,44 @@
                  S ${pts[5].x-90} ${pts[5].y}, ${pts[5].x} ${pts[5].y}`;
 
       eqPath.setAttribute("d", d);
-      eqPathGlow.setAttribute("d", d);
+      if (eqPathGlow) eqPathGlow.setAttribute("d", d);
 
-      eqPoints.innerHTML = "";
-      const handlePts = [pts[1], pts[2], pts[3], pts[4]];
-      handlePts.forEach((p)=>{
-        const c = document.createElementNS("http://www.w3.org/2000/svg","circle");
-        c.setAttribute("cx", String(p.x));
-        c.setAttribute("cy", String(p.y));
-        c.setAttribute("r", "10");
-        c.setAttribute("fill", "rgba(255,255,255,.88)");
-        c.setAttribute("opacity", ".9");
-        const inner = document.createElementNS("http://www.w3.org/2000/svg","circle");
-        inner.setAttribute("cx", String(p.x));
-        inner.setAttribute("cy", String(p.y));
-        inner.setAttribute("r", "4.6");
-        inner.setAttribute("fill", "rgba(10,12,20,1)");
-        inner.setAttribute("opacity", ".85");
-        eqPoints.appendChild(c);
-        eqPoints.appendChild(inner);
+      if (eqPoints){
+        eqPoints.innerHTML = "";
+        const handlePts = [pts[1], pts[2], pts[3], pts[4]];
+        handlePts.forEach((p)=>{
+          const c = document.createElementNS("http://www.w3.org/2000/svg","circle");
+          c.setAttribute("cx", String(p.x));
+          c.setAttribute("cy", String(p.y));
+          c.setAttribute("r", "10");
+          c.setAttribute("fill", "rgba(255,255,255,.88)");
+          c.setAttribute("opacity", ".9");
+
+          const inner = document.createElementNS("http://www.w3.org/2000/svg","circle");
+          inner.setAttribute("cx", String(p.x));
+          inner.setAttribute("cy", String(p.y));
+          inner.setAttribute("r", "4.6");
+          inner.setAttribute("fill", "rgba(10,12,20,1)");
+          inner.setAttribute("opacity", ".85");
+
+          eqPoints.appendChild(c);
+          eqPoints.appendChild(inner);
+        });
+      }
+    }
+
+    function getKnobValues(){
+      const vals = { low: 0, mid: 0, pres: 0, air: 0, glue: 0, width: 100, sat: 0, out: 0 };
+      [...knobWrap.querySelectorAll(".knob")].forEach(k=>{
+        const key = k.getAttribute("data-k");
+        const inp = k.querySelector("input");
+        if (key && inp) vals[key] = Number(inp.value);
       });
+      return vals;
     }
 
     function updateEqUI(){
-      const tiles = [...knobWrap.querySelectorAll(".tile")];
+      const tiles = [...knobWrap.querySelectorAll(".knob.tile")];
       const vals = {};
       tiles.forEach(tile=>{
         const key = tile.getAttribute("data-k");
@@ -1487,191 +740,250 @@
         vals[key] = v;
 
         const norm = (v - min) / (max - min || 1);
-        setNeedle(tile, clamp(norm, 0, 1));
+        setNeedle(tile, Math.max(0, Math.min(1, norm)));
 
         if (out){
-          out.textContent = (unit === "dB") ? fmtDb(v) : fmtPct(v);
+          if (unit === "dB") out.textContent = fmtDb(v);
+          else out.textContent = fmtPct(v);
         }
       });
 
       updateEqCurve(vals.low ?? 0, vals.mid ?? 0, vals.pres ?? 0, vals.air ?? 0);
-      applyPreview();
     }
 
-    // ========= PRO knobs drag + dbltap reset =========
-    const DRAG_SENS = 0.14;
-    const DRAG_SENS_FINE = 0.045;
+    // =========
+    // Preview scheduling
+    // =========
+    function schedulePreviewRender(){
+      if (!sourceId) return;
 
-    function isFine(e){ return fineOn || (e && e.shiftKey); }
+      const now = Date.now();
+      const elapsed = now - lastPreviewStart;
 
-    function attachKnobDrag(tile){
-      const input = tile.querySelector('input[type="range"]');
-      if (!input) return;
+      if (elapsed >= PREVIEW_THROTTLE_MS){
+        runPreviewRender();
+        return;
+      }
 
-      let dragging = false;
-      let startY = 0;
-      let startVal = 0;
-      let lastTap = 0;
-
-      const min = ()=> Number(input.min);
-      const max = ()=> Number(input.max);
-      const step = ()=> Number(input.step || 1);
-      const def = ()=> Number(tile.getAttribute("data-default") || input.value || 0);
-
-      const reset = ()=>{
-        input.value = String(def());
-        input.dispatchEvent(new Event("input", {bubbles:true}));
-      };
-
-      const onDown = async (e)=>{
-        await resumeAC();
-        ensureGraphs();
-
-        const now = Date.now();
-        if (now - lastTap < 280){
-          reset();
-          lastTap = 0;
-          e.preventDefault();
-          return;
-        }
-        lastTap = now;
-
-        dragging = true;
-        startY = (e.touches ? e.touches[0].clientY : e.clientY);
-        startVal = Number(input.value);
-        try{ tile.setPointerCapture?.(e.pointerId); }catch(_){}
-        e.preventDefault();
-      };
-
-      const onMove = (e)=>{
-        if (!dragging) return;
-        const y = (e.touches ? e.touches[0].clientY : e.clientY);
-        const dy = startY - y;
-
-        const sens = isFine(e) ? DRAG_SENS_FINE : DRAG_SENS;
-
-        let next = startVal + dy * sens;
-
-        const st = step();
-        if (st > 0) next = Math.round(next / st) * st;
-
-        next = clamp(next, min(), max());
-        input.value = String(next);
-        input.dispatchEvent(new Event("input", {bubbles:true}));
-      };
-
-      const onUp = ()=>{ dragging = false; };
-
-      tile.addEventListener("pointerdown", onDown);
-      tile.addEventListener("pointermove", onMove);
-      tile.addEventListener("pointerup", onUp);
-      tile.addEventListener("pointercancel", onUp);
-
-      tile.addEventListener("touchstart", onDown, {passive:false});
-      tile.addEventListener("touchmove", onMove, {passive:false});
-      tile.addEventListener("touchend", onUp);
-      tile.addEventListener("touchcancel", onUp);
+      if (previewTimer) clearTimeout(previewTimer);
+      previewTimer = setTimeout(()=> runPreviewRender(), PREVIEW_TRAIL_MS);
     }
 
-    // ========= Progress =========
-    function setProgress(p){
-      prog = clamp(Math.round(p), 0, 100);
-      barFill.style.width = prog + "%";
-      pctEl.textContent = String(prog);
-    }
-    function setStatus(msg){ statusText.textContent = msg; }
-    function stopProgressTimer(){
-      if (progTimer){ clearInterval(progTimer); progTimer = null; }
-    }
-    function startFakeProgress(){
-      stopProgressTimer();
-      setProgress(0);
-      status.style.display = "block";
-      setStatus("Procesando...");
-      progTimer = setInterval(()=>{
-        const target = 92;
-        const step = Math.max(1, Math.round((target - prog) * 0.08));
-        setProgress(prog + step);
-        if (prog >= target) setProgress(target);
-      }, 180);
-    }
-    function finishProgressOk(){
-      stopProgressTimer();
-      setProgress(100);
-      setStatus("¡Listo! Master generado.");
-    }
-    function finishProgressFail(msg){
-      stopProgressTimer();
-      setProgress(0);
-      status.style.display = "block";
-      setStatus(msg || "Error procesando el audio.");
+    // =========
+    // Upload source (una sola vez)
+    // =========
+    async function uploadSource(file){
+      try{ uploadAbort && uploadAbort.abort(); }catch(_){}
+      uploadAbort = new AbortController();
+
+      setStatus("Subiendo audio…");
+      setLoading(true);
+      setProgress(12);
+      setPreviewBadge("Preview: subiendo…");
+
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("requested_quality", requestedQuality());
+
+      const res = await fetchWithTimeout(API_BASE + "/api/source", {
+        method:"POST",
+        body: fd,
+        signal: uploadAbort.signal
+      }, 180000);
+
+      if (!res.ok){
+        let msg = "Error subiendo.";
+        try{ const j = await res.json(); if (j && j.detail) msg = String(j.detail); }catch(_){}
+        throw new Error(msg);
+      }
+
+      const j = await res.json();
+      if (!j || !j.source_id) throw new Error("Respuesta inválida del backend (source_id).");
+
+      setProgress(35);
+      setStatus("Audio cargado. Mueve perillas para generar preview real (15s).");
+      setPreviewBadge("Preview: listo");
+      return j.source_id;
     }
 
-    function resetMaster(){
-      masterBlob = null;
-      downloadBtn.disabled = true;
-      if (masterUrl){ cleanupObjectURL(masterUrl); masterUrl = null; }
-      masterPlayer.removeAttribute("src");
+    // =========
+    // Preview render (backend real)
+    // =========
+    async function runPreviewRender(){
+      if (!sourceId) return;
+
+      try{ previewAbort && previewAbort.abort(); }catch(_){}
+      previewAbort = new AbortController();
+
+      lastPreviewStart = Date.now();
+      setPreviewBadge("Preview: renderizando…");
+      setStatus("Generando preview (15s)…");
+      setLoading(true);
+      setProgress(55);
+
+      const vals = getKnobValues();
+      const fd = new FormData();
+      fd.append("source_id", sourceId);
+      fd.append("seconds", String(PREVIEW_SECONDS));
+      fd.append("preset", preset.value);
+      fd.append("intensity", String(intensity.value));
+
+      fd.append("k_low", String(vals.low ?? 0));
+      fd.append("k_mid", String(vals.mid ?? 0));
+      fd.append("k_pres", String(vals.pres ?? 0));
+      fd.append("k_air", String(vals.air ?? 0));
+      fd.append("k_glue", String(vals.glue ?? 0));
+      fd.append("k_width", String(vals.width ?? 100));
+      fd.append("k_sat", String(vals.sat ?? 0));
+      fd.append("k_out", String(vals.out ?? 0));
+
+      const res = await fetchWithTimeout(API_BASE + "/api/preview_render", {
+        method:"POST",
+        body: fd,
+        signal: previewAbort.signal
+      }, 180000);
+
+      if (!res.ok){
+        let msg = "Error generando preview.";
+        try{ const j = await res.json(); if (j && j.detail) msg = String(j.detail); }catch(_){}
+        throw new Error(msg);
+      }
+
+      const blob = await res.blob();
+      if (!blob || blob.size < 1024) throw new Error("Preview vacío.");
+
+      revokeUrl(previewUrl);
+      previewUrl = URL.createObjectURL(blob);
+      masterPlayer.src = previewUrl;
       masterPlayer.load();
-      bufMaster = null;
-      drawWaveform();
-      computeAndSetAutoLevel();
+
+      lastBlobForDownload = blob;
+      downloadBtn.disabled = false;
+
+      setProgress(82);
+      setStatus("Preview listo. Sigue moviendo perillas para actualizar.");
+      setPreviewBadge("Preview: listo");
     }
 
-    function setOriginalPreview(file){
-      if (origUrl){ cleanupObjectURL(origUrl); origUrl = null; }
-      origUrl = URL.createObjectURL(file);
-      origPlayer.src = origUrl;
-      origPlayer.load();
+    // =========
+    // Final render (/api/master) sin re-subir
+    // =========
+    async function runFinalRender(){
+      if (!sourceId) return;
+
+      try{ finalAbort && finalAbort.abort(); }catch(_){}
+      finalAbort = new AbortController();
+
+      setStatus("Procesando master final…");
+      setLoading(true);
+      setProgress(65);
+      setPreviewBadge("Preview: —");
+      processBtn.disabled = true;
+
+      const vals = getKnobValues();
+      const fd = new FormData();
+      fd.append("source_id", sourceId);
+      fd.append("preset", preset.value);
+      fd.append("intensity", String(intensity.value));
+
+      fd.append("k_low", String(vals.low ?? 0));
+      fd.append("k_mid", String(vals.mid ?? 0));
+      fd.append("k_pres", String(vals.pres ?? 0));
+      fd.append("k_air", String(vals.air ?? 0));
+      fd.append("k_glue", String(vals.glue ?? 0));
+      fd.append("k_width", String(vals.width ?? 100));
+      fd.append("k_sat", String(vals.sat ?? 0));
+      fd.append("k_out", String(vals.out ?? 0));
+
+      // enforcement backend (FREE => 30s, PLUS/PRO => full)
+      fd.append("requested_quality", requestedQuality());
+
+      const res = await fetchWithTimeout(API_BASE + "/api/master", {
+        method:"POST",
+        body: fd,
+        signal: finalAbort.signal
+      }, 240000);
+
+      if (!res.ok){
+        let msg = "Error procesando.";
+        try{ const j = await res.json(); if (j && j.detail) msg = String(j.detail); }catch(_){}
+        throw new Error(msg);
+      }
+
+      const blob = await res.blob();
+      if (!blob || blob.size < 1024) throw new Error("Master vacío.");
+
+      revokeUrl(finalUrl);
+      finalUrl = URL.createObjectURL(blob);
+      masterPlayer.src = finalUrl;
+      masterPlayer.load();
+
+      lastBlobForDownload = blob;
+      downloadBtn.disabled = false;
+
+      setProgress(100);
+      setStatus(USER_PLAN === "FREE" ? "¡Listo! Render final (FREE = 30s)." : "¡Listo! Master final completo.");
     }
 
-    function updateProcessEnabled(){ processBtn.disabled = !selectedFile; }
+    // =========
+    // Events
+    // =========
+    knobWrap.addEventListener("input", (e)=>{
+      if (e.target && e.target.matches('input[type="range"]')) {
+        updateEqUI();
+        schedulePreviewRender();
+      }
+    });
 
-    // ========= Plan =========
-    (async ()=>{
-      try{
-        const r = await fetch(API_BASE + "/api/me");
-        if (r.ok){
-          const j = await r.json();
-          if (j && j.plan) USER_PLAN = String(j.plan).toUpperCase();
-        }
-      }catch(_){}
-      planPill.textContent = "PLAN: " + USER_PLAN;
-    })();
+    intensity.addEventListener("input", ()=>{
+      intVal.textContent = intensity.value;
+      schedulePreviewRender();
+    });
 
-    // ========= Seek sync =========
-    bindSeekSync(origPlayer);
-    bindSeekSync(masterPlayer);
+    preset.addEventListener("change", ()=> schedulePreviewRender());
 
-    // ========= UI events =========
-    intensity.addEventListener("input", ()=> { intVal.textContent = intensity.value; });
     pickBtn.addEventListener("click", ()=> fileInput.click());
 
-    toggleFine.addEventListener("click", ()=>{
-      fineOn = !fineOn;
-      toggleFine.classList.toggle("on", fineOn);
-    });
-    toggleMomentary.addEventListener("click", ()=>{
-      momentaryOn = !momentaryOn;
-      toggleMomentary.classList.toggle("on", momentaryOn);
-      if (!momentaryOn) { momentaryActive = false; }
-    });
-
-    fileInput.addEventListener("change", async ()=>{
-      const f = fileInput.files && fileInput.files[0];
-      if (!f) return;
+    async function onPickedFile(f){
       selectedFile = f;
       fileName.textContent = f.name;
+
       setOriginalPreview(f);
-      resetMaster();
-      updateProcessEnabled();
+      resetAudioOutputs();
 
-      await resumeAC();
-      ensureGraphs();
+      sourceId = null;
+      updateButtons();
+      disableKnobs();
 
-      bufOrig = await decodeToBuffer(f);
-      drawWaveform();
-      computeAndSetAutoLevel();
+      try{
+        await loadPlan(); // refresca plan antes de subir
+        const sid = await uploadSource(f);
+        sourceId = sid;
+
+        enableKnobs();
+        updateButtons();
+        setProgress(40);
+
+        // preview inicial
+        updateEqUI();
+        schedulePreviewRender();
+      } catch(err){
+        setStatus(err && err.message ? err.message : "Error subiendo.");
+        setProgress(0);
+        setLoading(false);
+        setPreviewBadge("Preview: error");
+        sourceId = null;
+        updateButtons();
+        disableKnobs();
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fileInput.addEventListener("change", ()=>{
+      const f = fileInput.files && fileInput.files[0];
+      if (!f) return;
+      onPickedFile(f);
     });
 
     ["dragenter","dragover"].forEach(ev=>{
@@ -1686,219 +998,50 @@
         drop.style.borderColor = "rgba(255,255,255,.22)";
       });
     });
-    drop.addEventListener("drop", async (e)=>{
+    drop.addEventListener("drop", (e)=>{
       const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
       if (!f) return;
-      selectedFile = f;
       fileInput.value = "";
-      fileName.textContent = f.name;
-      setOriginalPreview(f);
-      resetMaster();
-      updateProcessEnabled();
-
-      await resumeAC();
-      ensureGraphs();
-
-      bufOrig = await decodeToBuffer(f);
-      drawWaveform();
-      computeAndSetAutoLevel();
-    });
-
-    chipBoth.addEventListener("click", async ()=>{ await resumeAC(); ensureGraphs(); setChip("BOTH"); });
-    chipOrig.addEventListener("click", async ()=>{ await resumeAC(); ensureGraphs(); setChip("ORIG"); });
-    chipMaster.addEventListener("click", async ()=>{ await resumeAC(); ensureGraphs(); setChip("MASTER"); });
-
-    chipAutoLevel.addEventListener("click", async ()=>{
-      await resumeAC(); ensureGraphs();
-      autoLevelOn = !autoLevelOn;
-      chipAutoLevel.classList.toggle("on", autoLevelOn);
-      computeAndSetAutoLevel();
-    });
-
-    knobWrap.addEventListener("input", async (e)=>{
-      if (e.target && e.target.matches('input[type="range"]')){
-        await resumeAC();
-        ensureGraphs();
-        updateEqUI();
-        if (!momentaryActive) updateCrossfade();
-      }
-    });
-
-    [...knobWrap.querySelectorAll(".tile")].forEach(attachKnobDrag);
-
-    btnABPlay.addEventListener("click", async ()=>{ await abPlay(); });
-
-    btnA.addEventListener("click", async ()=>{
-      await resumeAC(); ensureGraphs();
-      momentaryActive = false;
-      setCrossfadeValue(0);
-      setABButtonsState("A");
-    });
-
-    btnB.addEventListener("click", async ()=>{
-      await resumeAC(); ensureGraphs();
-      momentaryActive = false;
-      setCrossfadeValue(100);
-      setABButtonsState("B");
-    });
-
-    const startMomentary = async (e)=>{
-      if (!momentaryOn) return;
-      e.preventDefault();
-      await resumeAC(); ensureGraphs();
-      momentaryBStart();
-      await abPlay();
-    };
-    const endMomentary = (e)=>{
-      if (!momentaryOn) return;
-      e.preventDefault();
-      momentaryBEnd();
-    };
-
-    btnB.addEventListener("pointerdown", startMomentary);
-    btnB.addEventListener("pointerup", endMomentary);
-    btnB.addEventListener("pointercancel", endMomentary);
-    btnB.addEventListener("mouseleave", endMomentary);
-
-    btnB.addEventListener("touchstart", startMomentary, {passive:false});
-    btnB.addEventListener("touchend", endMomentary, {passive:false});
-    btnB.addEventListener("touchcancel", endMomentary, {passive:false});
-
-    xfade.addEventListener("input", async ()=>{
-      await resumeAC(); ensureGraphs();
-      if (!momentaryActive) updateCrossfade();
-    });
-
-    origPlayer.addEventListener("play", async ()=>{ await resumeAC(); ensureGraphs(); });
-    masterPlayer.addEventListener("play", async ()=>{ await resumeAC(); ensureGraphs(); });
-
-    // Click waveform to seek
-    vizStage.addEventListener("pointerdown", async (e)=>{
-      // avoid seek while dragging knobs (stage only)
-      if (e.target !== vizStage && e.target !== waveCanvas) return;
-      await resumeAC();
-      const rect = waveCanvas.getBoundingClientRect();
-      const x = clamp(e.clientX - rect.left, 0, rect.width);
-      const ratio = rect.width ? x / rect.width : 0;
-      const dur = masterPlayer.src ? Math.max(origPlayer.duration||0, masterPlayer.duration||0) : (origPlayer.duration||0);
-      if (!dur || !isFinite(dur)) return;
-      const t = ratio * dur;
-      hardSyncTo(t);
-      ensureGraphs();
-      updatePlayhead();
+      onPickedFile(f);
     });
 
     downloadBtn.addEventListener("click", ()=>{
-      if (!masterBlob) return;
-      const url = masterUrl || URL.createObjectURL(masterBlob);
-      masterUrl = url;
+      if (!lastBlobForDownload) return;
+      const url = URL.createObjectURL(lastBlobForDownload);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "warmaster_master.wav";
+      a.download = "warmaster_output.wav";
       document.body.appendChild(a);
       a.click();
       a.remove();
+      setTimeout(()=> revokeUrl(url), 1500);
     });
 
-    // Process -> backend master (real)
     processBtn.addEventListener("click", async ()=>{
-      if (!selectedFile) return;
-
-      processBtn.disabled = true;
-      downloadBtn.disabled = true;
-      resetMaster();
-
-      startFakeProgress();
-
-      const vals = getKnobValues();
-      const fd = new FormData();
-      fd.append("file", selectedFile);
-      fd.append("preset", preset.value);
-      fd.append("intensity", String(intensity.value));
-
-      fd.append("k_low", String(vals.low ?? 0));
-      fd.append("k_mid", String(vals.mid ?? 0));
-      fd.append("k_pres", String(vals.pres ?? 0));
-      fd.append("k_air", String(vals.air ?? 0));
-      fd.append("k_glue", String(vals.glue ?? 0));
-      fd.append("k_width", String(vals.width ?? 100));
-      fd.append("k_sat", String(vals.sat ?? 0));
-      fd.append("k_out", String(vals.out ?? 0));
-
       try{
-        const res = await fetchWithTimeout(API_BASE + "/api/master", { method:"POST", body: fd }, 180000);
-
-        if (!res.ok){
-          let msg = "Error en el backend.";
-          try{
-            const j = await res.json();
-            if (j && j.detail) msg = String(j.detail);
-          }catch(_){}
-          finishProgressFail(msg);
-          processBtn.disabled = false;
-          return;
-        }
-
-        const blob = await res.blob();
-        if (!blob || blob.size < 1024){
-          finishProgressFail("Master vacío.");
-          processBtn.disabled = false;
-          return;
-        }
-
-        masterBlob = blob;
-
-        if (masterUrl){ cleanupObjectURL(masterUrl); masterUrl = null; }
-        masterUrl = URL.createObjectURL(blob);
-        masterPlayer.src = masterUrl;
-        masterPlayer.load();
-
-        finishProgressOk();
-        if (USER_PLAN === "FREE") setStatus("¡Listo! Preview 30s (FREE).");
-        downloadBtn.disabled = false;
-
-        await resumeAC();
-        ensureGraphs();
-        applyPreview();
-        updateCrossfade();
-
-        bufMaster = await decodeToBuffer(blob);
-        drawWaveform();
-        computeAndSetAutoLevel();
-
-      }catch(err){
-        const msg = (err && err.name === "AbortError") ? "Timeout (180s). Intenta de nuevo." : "Error de red.";
-        finishProgressFail(msg);
-      }finally{
-        processBtn.disabled = false;
+        setLoading(true);
+        await runFinalRender();
+      } catch(err){
+        setStatus(err && err.message ? err.message : "Error de red.");
+        setProgress(0);
+      } finally {
+        setLoading(false);
+        processBtn.disabled = !sourceId;
       }
     });
 
-    // ========= Init =========
-    function updateProcessEnabled(){ processBtn.disabled = !selectedFile; }
-
-    function setProgress(p){
-      prog = clamp(Math.round(p), 0, 100);
-      barFill.style.width = prog + "%";
-      pctEl.textContent = String(prog);
-    }
-
-    function setStatus(msg){ statusText.textContent = msg; }
-
-    // init visual
-    window.addEventListener("load", ()=>{
+    // =========
+    // Init
+    // =========
+    (async ()=>{
+      disableKnobs();
+      setProgress(0);
+      setStatus("Selecciona un archivo para comenzar.");
+      setPreviewBadge("Preview: —");
+      await loadPlan();
       updateEqUI();
-      updateCrossfade();
-      drawWaveform();
-      updateProcessEnabled();
-    });
-
-    // ensure loops start once audio context is ready
-    window.addEventListener("pointerdown", async ()=>{
-      await resumeAC();
-      ensureGraphs();
-    }, { once:true });
-
+      updateButtons();
+    })();
   </script>
 </body>
 </html>
