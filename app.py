@@ -16,22 +16,20 @@ from fastapi.staticfiles import StaticFiles
 # ========================
 # CONFIG
 # =========================
-MAX_FILE_SIZE_MB = 100
-MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
+# FREE: límite de subida
+FREE_MAX_FILE_SIZE_MB = 100
+FREE_MAX_FILE_SIZE_BYTES = FREE_MAX_FILE_SIZE_MB * 1024 * 1024
 
-# FREE: procesa solo preview para evitar timeout (render final)
+# FREE: render final / descarga solo 30s
 FREE_PREVIEW_SECONDS = 30
 
-# PLUS/PRO: límite por estabilidad
-MAX_DURATION_SECONDS_PAID = 6 * 60  # 6 minutos
-
 # Preview real backend (al mover perillas)
-PREVIEW_RENDER_SECONDS_DEFAULT = 10
-PREVIEW_RENDER_SECONDS_MAX = 15  # para no morir por timeout
-PREVIEW_RENDER_TIMEOUT_SECONDS = 90
+PREVIEW_RENDER_SECONDS_DEFAULT = 15
+PREVIEW_RENDER_SECONDS_MAX = 15
+PREVIEW_RENDER_TIMEOUT_SECONDS = 120  # preview más largo -> más timeout
 
-# Seguridad: si FFmpeg se cuelga, cortamos
-FFMPEG_TIMEOUT_SECONDS = 240  # render final
+# Render final
+FFMPEG_TIMEOUT_SECONDS = 360  # 6 min (ajústalo si quieres)
 
 BASE_DIR = Path(__file__).parent
 TMP_DIR = BASE_DIR / "tmp"
@@ -45,12 +43,9 @@ app = FastAPI()
 # =========================
 # STORAGE (MEMORIA)
 # =========================
-# masters: metadata de masters finales (y también guardaremos source_id si aplica)
 masters: Dict[str, Dict[str, Any]] = {}
+sources: Dict[str, Dict[str, Any]] = {}  # source_id -> {path,title,created_at,duration,quality}
 
-# sources: guarda el archivo original subido (para previews en tiempo real sin re-subir)
-# source_id -> {path, title, created_at, duration, quality}
-sources: Dict[str, Dict[str, Any]] = {}
 
 # =========================
 # CORS
@@ -85,16 +80,10 @@ def run_cmd(cmd: list[str], timeout_s: int) -> None:
             timeout=timeout_s
         )
     except subprocess.TimeoutExpired:
-        raise HTTPException(
-            status_code=504,
-            detail="FFmpeg timeout (proceso muy largo / Render cortó). Prueba con menos segundos."
-        )
+        raise HTTPException(status_code=504, detail="FFmpeg timeout (proceso muy largo / Render cortó).")
 
     if proc.returncode != 0:
-        raise HTTPException(
-            status_code=500,
-            detail=f"FFmpeg error:\n{proc.stderr[-8000:]}"
-        )
+        raise HTTPException(status_code=500, detail=f"FFmpeg error:\n{proc.stderr[-8000:]}")
 
 
 def safe_filename(name: str) -> str:
@@ -170,13 +159,6 @@ def preset_chain(
     k_sat: float,
     k_out: float,
 ) -> str:
-    """
-    Devuelve cadena FFmpeg -af
-    - Decimales con punto (.) ✅
-    - Sin variables con acento ✅
-    - Width con pan compatible ✅
-    - Sat sin asoftclip (más compatible) ✅
-    """
     intensity_i = clamp_int(intensity, 0, 100, 55)
 
     thr = -18.0 - (intensity_i * 0.10)
@@ -248,17 +230,6 @@ def preset_chain(
     )
 
 
-def resolve_download_path(master_id: str) -> Path:
-    m = masters.get(master_id)
-    if not m:
-        raise HTTPException(status_code=404, detail="Master no encontrado.")
-
-    out_path = TMP_DIR / f"master_{master_id}.wav"
-    if not out_path.exists():
-        raise HTTPException(status_code=404, detail="Archivo no encontrado.")
-    return out_path
-
-
 # =========================
 # ENDPOINTS
 # =========================
@@ -269,7 +240,7 @@ def health():
 
 @app.get("/api/me")
 def me():
-    # beta: fijo. luego lo haces real
+    # OJO: esto es demo. Cuando tengas auth/pagos, aquí devuelves el plan real.
     return {"plan": "FREE"}
 
 
@@ -297,20 +268,16 @@ async def upload_source(
     file: UploadFile = File(...),
     requested_quality: Optional[str] = Form(None),
 ):
-    """
-    Sube el audio 1 vez y devuelve source_id.
-    Luego /api/preview_render usa ese source_id y re-renderiza previews cortos.
-    """
     if not file or not file.filename:
         raise HTTPException(status_code=400, detail="Archivo inválido.")
 
-    source_id = uuid.uuid4().hex[:10]
-    name = safe_filename(file.filename)
-
-    src_path = TMP_DIR / f"src_{source_id}_{name}"
     rq = normalize_quality(requested_quality)
 
-    # Guardar archivo
+    source_id = uuid.uuid4().hex[:10]
+    name = safe_filename(file.filename)
+    src_path = TMP_DIR / f"src_{source_id}_{name}"
+
+    # Guardar
     try:
         with src_path.open("wb") as f:
             shutil.copyfileobj(file.file, f)
@@ -324,16 +291,14 @@ async def upload_source(
         cleanup_files(src_path)
         raise HTTPException(status_code=400, detail="No se pudo guardar el archivo.")
 
-    # Validar tamaño
-    if src_path.stat().st_size > MAX_FILE_SIZE_BYTES:
-        cleanup_files(src_path)
-        raise HTTPException(status_code=400, detail="Supera 100MB.")
+    # FREE: limita 100MB
+    if rq == "FREE":
+        if src_path.stat().st_size > FREE_MAX_FILE_SIZE_BYTES:
+            cleanup_files(src_path)
+            raise HTTPException(status_code=400, detail="FREE: supera 100MB.")
 
-    # Duración y límites
+    # Duración: NO se limita (PLUS/PRO ilimitado). FREE tampoco se limita aquí; solo se limita la descarga final.
     duration = get_audio_duration_seconds(src_path)
-    if rq in ("PLUS", "PRO") and duration > MAX_DURATION_SECONDS_PAID:
-        cleanup_files(src_path)
-        raise HTTPException(status_code=400, detail="Supera 6 minutos (límite por estabilidad).")
 
     sources[source_id] = {
         "id": source_id,
@@ -354,7 +319,7 @@ async def upload_source(
 
 
 # =========================
-# PREVIEW REAL BACKEND (FFmpeg) — knobs live
+# PREVIEW REAL BACKEND (FFmpeg) — 15s
 # =========================
 @app.post("/api/preview_render")
 async def preview_render(
@@ -362,7 +327,6 @@ async def preview_render(
     preset: str = Form("clean"),
     intensity: int = Form(55),
 
-    # knobs
     k_low: float = Form(0.0),
     k_mid: float = Form(0.0),
     k_pres: float = Form(0.0),
@@ -374,10 +338,6 @@ async def preview_render(
 
     seconds: int = Form(PREVIEW_RENDER_SECONDS_DEFAULT),
 ):
-    """
-    Renderiza un preview CORTO (default 10s) desde el source ya subido.
-    Devuelve WAV.
-    """
     src_path = resolve_source_path(source_id)
 
     seconds_i = clamp_int(seconds, 3, PREVIEW_RENDER_SECONDS_MAX, PREVIEW_RENDER_SECONDS_DEFAULT)
@@ -421,7 +381,6 @@ async def preview_render(
         cleanup_files(out_path)
         raise HTTPException(status_code=500, detail="Preview vacío.")
 
-    # Nota: no borramos el preview inmediatamente porque lo estamos sirviendo.
     return FileResponse(
         path=str(out_path),
         media_type="audio/wav",
@@ -431,14 +390,13 @@ async def preview_render(
 
 
 # =========================
-# MASTER FINAL (Render completo)
+# MASTER FINAL
+# - FREE: retorna 30s (descarga final limitada)
+# - PLUS/PRO: sin límite (en código)
 # =========================
 @app.post("/api/master")
 async def master(
-    # puedes subir archivo directo como antes...
     file: Optional[UploadFile] = File(None),
-
-    # ...o mandar source_id y no re-subir
     source_id: Optional[str] = Form(None),
 
     preset: str = Form("clean"),
@@ -458,21 +416,25 @@ async def master(
 ):
     rq = normalize_quality(requested_quality)
 
-    # Determinar input
+    # Input
     use_path: Optional[Path] = None
     original_name = "audio"
+    tmp_uploaded_path: Optional[Path] = None  # para borrar si subió directo
 
     if source_id:
         use_path = resolve_source_path(source_id)
         s = sources.get(source_id) or {}
         original_name = s.get("title") or "audio"
+        # si viene source_id, usamos la calidad guardada si existe
+        rq = normalize_quality(s.get("quality") or rq)
     else:
         if not file or not file.filename:
-            raise HTTPException(status_code=400, detail="Archivo inválido (falta file o source_id).")
-        original_name = safe_filename(file.filename)
+            raise HTTPException(status_code=400, detail="Falta file o source_id.")
 
+        original_name = safe_filename(file.filename)
         in_id = uuid.uuid4().hex[:8]
-        use_path = TMP_DIR / f"in_{in_id}_{original_name}"
+        tmp_uploaded_path = TMP_DIR / f"in_{in_id}_{original_name}"
+        use_path = tmp_uploaded_path
 
         try:
             with use_path.open("wb") as f:
@@ -483,18 +445,17 @@ async def master(
             except Exception:
                 pass
 
-        if use_path.stat().st_size > MAX_FILE_SIZE_BYTES:
+        if not use_path.exists() or use_path.stat().st_size < 1024:
             cleanup_files(use_path)
-            raise HTTPException(status_code=400, detail="Supera 100MB.")
+            raise HTTPException(status_code=400, detail="No se pudo guardar el archivo.")
 
-    # Duración:
-    duration = get_audio_duration_seconds(use_path)
-    if rq in ("PLUS", "PRO") and duration > MAX_DURATION_SECONDS_PAID:
-        if not source_id:
-            cleanup_files(use_path)
-        raise HTTPException(status_code=400, detail="Supera 6 minutos (límite por estabilidad).")
+        # FREE: limita 100MB (si sube directo al master)
+        if rq == "FREE":
+            if use_path.stat().st_size > FREE_MAX_FILE_SIZE_BYTES:
+                cleanup_files(use_path)
+                raise HTTPException(status_code=400, detail="FREE: supera 100MB.")
 
-    # Clamp knobs
+    # Knobs clamp
     k_low = clamp_float(k_low, -12.0, 12.0, 0.0)
     k_mid = clamp_float(k_mid, -12.0, 12.0, 0.0)
     k_pres = clamp_float(k_pres, -12.0, 12.0, 0.0)
@@ -528,7 +489,7 @@ async def master(
         }
     }
 
-    # FREE: recorta a 30s
+    # FREE: recorta a 30s (esto es tu “descarga final” FREE)
     clip_seconds: Optional[int] = FREE_PREVIEW_SECONDS if rq == "FREE" else None
 
     cmd = ["ffmpeg", "-y", "-hide_banner", "-i", str(use_path)]
@@ -547,20 +508,20 @@ async def master(
     try:
         run_cmd(cmd, timeout_s=FFMPEG_TIMEOUT_SECONDS)
     except Exception:
-        if not source_id:
-            cleanup_files(use_path)
+        if tmp_uploaded_path:
+            cleanup_files(tmp_uploaded_path)
         cleanup_files(out_path)
         raise
 
     if not out_path.exists() or out_path.stat().st_size < 1024:
-        if not source_id:
-            cleanup_files(use_path)
+        if tmp_uploaded_path:
+            cleanup_files(tmp_uploaded_path)
         cleanup_files(out_path)
         raise HTTPException(status_code=500, detail="Master vacío.")
 
-    # si el input venía por upload directo, lo borramos
-    if not source_id:
-        cleanup_files(use_path)
+    # borrar upload temporal si corresponde
+    if tmp_uploaded_path:
+        cleanup_files(tmp_uploaded_path)
 
     return FileResponse(
         path=str(out_path),
@@ -571,7 +532,7 @@ async def master(
 
 
 # =========================
-# STREAM/DOWNLOAD (compat)
+# Compat stream/download
 # =========================
 @app.get("/api/masters/{master_id}/stream")
 def api_stream_master(master_id: str):
@@ -602,13 +563,19 @@ def stream_master(master_id: str):
 
 @app.get("/download/{master_id}")
 def download_master(master_id: str):
-    dl_path = resolve_download_path(master_id)
+    if master_id not in masters:
+        raise HTTPException(status_code=404, detail="Master no encontrado.")
+
+    out_path = TMP_DIR / f"master_{master_id}.wav"
+    if not out_path.exists():
+        raise HTTPException(status_code=404, detail="Archivo no encontrado.")
+
     m = masters.get(master_id) or {}
     q = normalize_quality(m.get("quality"))
     fname = "warmaster_master.wav" if q in ("PLUS", "PRO") else f"warmaster_preview_{FREE_PREVIEW_SECONDS}s.wav"
 
     return FileResponse(
-        path=str(dl_path),
+        path=str(out_path),
         media_type="audio/wav",
         filename=fname
     )
