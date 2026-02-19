@@ -9,6 +9,10 @@
     :root{
       --bg0:#07080c;
       --bg1:#0b0e16;
+      --panel: rgba(15,17,24,.78);
+      --panel2: rgba(0,0,0,.16);
+      --stroke: rgba(255,255,255,.10);
+      --stroke2: rgba(255,255,255,.14);
       --text:#e9edf7;
       --muted: rgba(233,237,247,.72);
       --a:#8a5cff;
@@ -16,10 +20,12 @@
       --c:#00ff9a;
       --shadow: 0 24px 70px rgba(0,0,0,.55);
       --radius: 22px;
-      --max: 980px;
+      --max: 1150px;
     }
+
     *{ box-sizing:border-box; }
     html, body{ height:100%; }
+
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
@@ -31,12 +37,20 @@
         linear-gradient(180deg, var(--bg0), var(--bg1));
     }
 
-    .wrap{ max-width: var(--max); margin: 0 auto; padding: 28px 18px 40px; }
+    .wrap{
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 28px 18px 44px;
+    }
 
     header{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:16px; margin-bottom: 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom: 18px;
     }
+
     .brand{ display:flex; align-items:center; gap:12px; user-select:none; }
     .logo{
       width:44px; height:44px; border-radius: 14px;
@@ -48,7 +62,6 @@
     .brand h1{ margin:0; font-size: 18px; letter-spacing:.2px; }
     .brand small{ display:block; color: var(--muted); margin-top: 2px; font-size: 12px; }
 
-    .nav{ display:flex; gap:10px; align-items:center; }
     .nav a{
       color: var(--text);
       text-decoration:none;
@@ -60,21 +73,12 @@
       backdrop-filter: blur(10px);
     }
     .nav a:hover{ border-color: rgba(255,255,255,.22); }
-    .pill{
-      font-size: 12px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      color: rgba(233,237,247,.92);
-      white-space: nowrap;
-    }
 
-    .grid{ display:grid; grid-template-columns: 1.1fr .9fr; gap: 16px; }
-    @media (max-width: 900px){ .grid{ grid-template-columns: 1fr; } }
+    .grid{ display:grid; grid-template-columns: 1.08fr .92fr; gap: 16px; }
+    @media (max-width: 980px){ .grid{ grid-template-columns: 1fr; } }
 
     .card{
-      background: rgba(15,17,24,.78);
+      background: var(--panel);
       border: 1px solid rgba(255,255,255,.10);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
@@ -97,11 +101,17 @@
     .drop strong{ font-size: 13px; }
     .drop span{ color: var(--muted); font-size: 12px; display:block; margin-top:4px; }
 
-    .row{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .row{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
     @media (max-width: 520px){ .row{ grid-template-columns:1fr; } }
 
     label{ font-size: 12px; color: var(--muted); display:block; margin-bottom: 8px; }
     select, input[type="range"]{ width:100%; }
+
     select{
       background: rgba(0,0,0,.28);
       color: var(--text);
@@ -118,15 +128,32 @@
       padding: 10px 12px;
     }
     .rangeTop{
-      display:flex; align-items:center; justify-content:space-between; gap: 10px;
-      margin-bottom: 6px; font-size: 12px; color: var(--muted);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .pill{
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: rgba(233,237,247,.92);
     }
 
     .actions{ display:flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
     .btn{
-      appearance:none; border:0; cursor:pointer;
-      border-radius: 16px; padding: 12px 14px;
-      font-weight: 700; font-size: 13px;
+      appearance:none;
+      border:0;
+      cursor:pointer;
+      border-radius: 16px;
+      padding: 12px 14px;
+      font-weight: 900;
+      font-size: 13px;
       color: #0a0b10;
       background: linear-gradient(135deg, var(--c), var(--b));
       box-shadow: 0 16px 40px rgba(0,0,0,.35);
@@ -136,40 +163,36 @@
       background: rgba(0,0,0,.22);
       border: 1px solid rgba(255,255,255,.14);
       box-shadow: none;
-      font-weight: 600;
+      font-weight: 800;
     }
     .btn:disabled{ opacity: .55; cursor:not-allowed; filter: grayscale(.2); }
 
     .status{ margin-top: 14px; display:grid; gap: 10px; }
     .bar{
-      height: 12px; border-radius: 999px;
+      height: 12px;
+      border-radius: 999px;
       background: rgba(255,255,255,.10);
       overflow:hidden;
       border: 1px solid rgba(255,255,255,.10);
-      position: relative;
     }
     .bar > i{
-      display:block; height:100%; width: 0%;
+      display:block;
+      height:100%;
+      width: 0%;
       border-radius: 999px;
       background: linear-gradient(90deg, rgba(138,92,255,1), rgba(0,215,255,1), rgba(0,255,154,1));
       box-shadow: 0 0 25px rgba(0,215,255,.18);
       transition: width .18s ease;
     }
-    .bar.loading:after{
-      content:"";
-      position:absolute; inset:0;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent);
-      transform: translateX(-60%);
-      animation: shimmer 1.05s infinite;
-      pointer-events:none;
-    }
-    @keyframes shimmer{ 0%{ transform: translateX(-60%); } 100%{ transform: translateX(60%); } }
-
     .statusLine{
-      display:flex; align-items:center; justify-content:space-between; gap: 12px;
-      color: var(--muted); font-size: 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 12px;
     }
-    .statusLine b{ color: rgba(233,237,247,.92); font-weight:700; }
+    .statusLine b{ color: rgba(233,237,247,.92); font-weight:900; }
 
     .player{ display:grid; gap: 12px; }
     .player .box{
@@ -183,34 +206,57 @@
     .hint{ margin-top: 12px; color: var(--muted); font-size: 12px; line-height: 1.35; }
     .foot{ margin-top: 14px; color: rgba(233,237,247,.55); font-size: 11px; text-align:center; }
 
-    /* ===== EQ LIVE (replica UI) ===== */
-    .eq-live{
+    /* ===== EQ LIVE PRO ===== */
+    .eq-shell{
       margin-top: 14px;
-      padding: 14px;
-      border-radius: 20px;
+      border-radius: 22px;
       border: 1px solid rgba(255,255,255,.10);
       background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.10));
       box-shadow: 0 18px 55px rgba(0,0,0,.45);
+      overflow:hidden;
     }
-    .eq-head{
-      display:flex; align-items:flex-start; justify-content:space-between;
-      gap:10px; padding: 4px 4px 10px;
+    .eq-top{
+      padding: 14px 14px 10px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
     }
-    .eq-head h3{ margin:0; font-size: 20px; letter-spacing:.2px; }
+    .eq-top h3{ margin:0; font-size: 20px; letter-spacing:.2px; }
     .eq-sub{ margin-top: 4px; color: rgba(233,237,247,.62); font-size: 13px; }
+
+    .chiprow{ display:flex; gap:8px; flex-wrap:wrap; margin-top: 8px; }
+    .chip{
+      font-size: 12px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: rgba(233,237,247,.90);
+      cursor:pointer;
+      user-select:none;
+      font-weight:800;
+    }
+    .chip.on{
+      border-color: rgba(0,215,255,.35);
+      box-shadow: 0 0 0 2px rgba(0,215,255,.12);
+    }
 
     .eq-graph-wrap{
       position: relative;
-      border-radius: 22px;
-      overflow: hidden;
-      border: 1px solid rgba(255,255,255,.08);
+      border-top: 1px solid rgba(255,255,255,.08);
+      border-bottom: 1px solid rgba(255,255,255,.08);
       background:
         radial-gradient(550px 320px at 30% 15%, rgba(138,92,255,.12), transparent 65%),
         radial-gradient(520px 320px at 70% 20%, rgba(0,215,255,.10), transparent 65%),
         linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,.40));
       aspect-ratio: 16/9;
+      overflow:hidden;
     }
-    .eq-graph-wrap svg{ width:100%; height:100%; display:block; opacity: .98; }
+    .eq-graph-wrap svg{
+      width:100%; height:100%; display:block; opacity: .98; position:relative; z-index:2;
+    }
     .eq-graph-wrap:before{
       content:"";
       position:absolute; inset:0;
@@ -220,24 +266,32 @@
       background-size: 10% 20%;
       opacity: .35;
       pointer-events:none;
+      z-index:1;
     }
     .eq-graph-wrap:after{
       content:"";
       position:absolute; inset:-2px;
-      border-radius: 22px;
       box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), inset 0 -40px 120px rgba(0,0,0,.55);
       pointer-events:none;
+      z-index:3;
+    }
+
+    #specCanvas{
+      position:absolute; inset:0; width:100%; height:100%;
+      z-index:1; opacity:.9; pointer-events:none; mix-blend-mode: screen;
     }
 
     .knobs-eq{
-      margin-top: 14px;
+      padding: 14px;
       display:grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 12px;
     }
-    @media (min-width: 720px){ .knobs-eq{ grid-template-columns: repeat(3, 1fr); } }
+    @media (min-width: 760px){
+      .knobs-eq{ grid-template-columns: repeat(4, 1fr); }
+    }
 
-    .knob.tile{
+    .tile{
       position: relative;
       padding: 14px 14px 12px;
       border-radius: 22px;
@@ -246,8 +300,7 @@
         radial-gradient(240px 180px at 30% 15%, rgba(255,255,255,.06), transparent 70%),
         linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.14));
       box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
-      opacity: .55;
-      min-height: 168px;
+      min-height: 176px;
       display:flex;
       flex-direction:column;
       align-items:center;
@@ -255,10 +308,10 @@
       gap: 10px;
       user-select:none;
     }
-    .knob.tile.on{ opacity: 1; }
 
     .dial{
-      width: 92px; height: 92px; border-radius: 999px; position: relative;
+      width: 96px; height: 96px; border-radius: 999px;
+      position: relative;
       background:
         radial-gradient(circle at 35% 30%, rgba(255,255,255,.10), rgba(255,255,255,0) 58%),
         radial-gradient(circle at 50% 60%, rgba(0,0,0,.35), rgba(0,0,0,.65));
@@ -267,35 +320,131 @@
         inset 0 -16px 30px rgba(0,0,0,.35),
         0 18px 40px rgba(0,0,0,.35);
     }
+    .dial:before{
+      content:"";
+      position:absolute; inset:-14px;
+      border-radius: 999px;
+      background:
+        repeating-conic-gradient(from 220deg,
+          rgba(255,255,255,.28) 0 2deg,
+          rgba(255,255,255,0) 2deg 10deg);
+      opacity:.45;
+      -webkit-mask: radial-gradient(circle, transparent 62%, #000 63%);
+              mask: radial-gradient(circle, transparent 62%, #000 63%);
+      pointer-events:none;
+    }
     .dial:after{
       content:"";
       position:absolute; inset: 10px;
       border-radius: 999px;
       box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
       opacity: .9;
+      pointer-events:none;
     }
+
     .needle{
-      position:absolute; left:50%; top:50%;
-      width: 44px; height: 6px;
+      position:absolute;
+      left:50%; top:50%;
+      width: 46px; height: 7px;
       transform-origin: 0% 50%;
       transform: translateY(-50%) rotate(-45deg);
       border-radius: 999px;
-      background: linear-gradient(90deg, rgba(0,215,255,.92), rgba(138,92,255,.92));
+      background: linear-gradient(90deg, rgba(0,215,255,.95), rgba(138,92,255,.95));
       box-shadow: 0 0 18px rgba(138,92,255,.22);
     }
-    .kmeta{ text-align:center; }
-    .kname{ font-weight: 800; letter-spacing: .8px; font-size: 14px; }
-    .kval{ margin-top: 6px; color: rgba(233,237,247,.85); font-size: 13px; }
 
-    .knob.tile input[type="range"]{
-      position:absolute; inset:0;
-      width:100%; height:100%;
+    .kmeta{ text-align:center; }
+    .kname{ font-weight: 950; letter-spacing: .8px; font-size: 14px; }
+    .kval{ margin-top: 6px; color: rgba(233,237,247,.88); font-size: 13px; }
+
+    .tile input[type="range"]{
+      position:absolute; inset:0; width:100%; height:100%;
       opacity:0; cursor: pointer;
       -webkit-appearance: none; appearance: none;
-      touch-action: pan-y;
+      touch-action: none;
     }
-    .knob.tile input[type="range"]::-webkit-slider-thumb{
+    .tile input[type="range"]::-webkit-slider-thumb{
       -webkit-appearance:none; appearance:none; width: 1px; height: 1px;
+    }
+
+    .eq-bottom{
+      padding: 12px 14px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      color: rgba(233,237,247,.65);
+      font-size: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* A/B PRO */
+    .ab{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap: wrap;
+    }
+    .ab .slider{
+      min-width: 210px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 8px 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.16);
+    }
+    .ab .lab{
+      font-size: 11px;
+      color: rgba(233,237,247,.70);
+      white-space: nowrap;
+      font-weight:800;
+    }
+
+    .btnGroup{ display:flex; gap:8px; flex-wrap:wrap; }
+    .btn.abbtn{
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-weight: 950;
+    }
+    .btn.abbtn.secondary{ font-weight: 950; }
+    .btn.abbtn.on{
+      box-shadow: 0 0 0 2px rgba(0,215,255,.14), 0 16px 40px rgba(0,0,0,.35);
+      outline: none;
+    }
+
+    /* Meters */
+    .meters{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .mcard{
+      padding: 8px 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.16);
+      min-width: 220px;
+    }
+    .mrow{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .mrow .t{ font-size: 11px; color: rgba(233,237,247,.70); font-weight:900; }
+    .mrow .v{ font-size: 12px; color: rgba(233,237,247,.92); font-weight:950; }
+    .mbar{
+      margin-top: 8px;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.10);
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .mbar i{
+      display:block; height:100%; width:0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(0,255,154,1), rgba(0,215,255,1), rgba(138,92,255,1));
+      box-shadow: 0 0 22px rgba(0,215,255,.16);
+      transition: width .10s linear;
     }
   </style>
 </head>
@@ -307,28 +456,26 @@
         <div class="logo" aria-hidden="true"></div>
         <div>
           <h1>WarMaster</h1>
-          <small>Masterización Online — EQ Live Preview (backend real)</small>
+          <small>Masterización Online — EQ Live PRO</small>
         </div>
       </div>
       <div class="nav">
-        <span class="pill" id="planPill">Plan: …</span>
         <a href="dashboard.html">Dashboard</a>
       </div>
     </header>
 
     <div class="grid">
-      <!-- Left -->
+      <!-- LEFT -->
       <section class="card">
         <h2>Nuevo master</h2>
         <p class="sub">
-          Sube tu track, elige preset y mueve perillas: escucharás <b>preview real (15s)</b> desde backend.
-          Si quieres el render final, presiona <b>Procesar</b>.
+          Perillas = <b>preview real</b> (WebAudio). A/B PRO con crossfade + momentary, autosync y meter pro.
         </p>
 
         <div class="drop" id="drop">
           <div>
             <strong id="fileName">Ningún archivo seleccionado</strong>
-            <span id="limitsLine">WAV / MP3 • límites: …</span>
+            <span>WAV / MP3 • Máx 100MB • Máx 6 min (PLUS/PRO) • FREE recorta a 30s</span>
           </div>
           <button class="btn secondary" id="pickBtn" type="button">Elegir archivo</button>
           <input id="file" type="file" accept="audio/*" hidden />
@@ -356,32 +503,41 @@
         </div>
 
         <div class="actions">
-          <button class="btn" id="processBtn" type="button" disabled>Procesar (Final)</button>
-          <button class="btn secondary" id="downloadBtn" type="button" disabled>Descargar</button>
+          <button class="btn" id="processBtn" type="button" disabled>Procesar</button>
+          <button class="btn secondary" id="downloadBtn" type="button" disabled>Descargar master</button>
         </div>
 
         <div class="status" id="status" style="display:none;">
-          <div class="bar" id="bar"><i id="barFill"></i></div>
+          <div class="bar"><i id="barFill"></i></div>
           <div class="statusLine">
-            <span id="statusText">Listo</span>
+            <span id="statusText">Listo para procesar</span>
             <span><b id="pct">0</b>%</span>
           </div>
         </div>
 
-        <p class="hint" id="hintLine">
-          Tip: el preview se re-genera mientras arrastras (throttle). Si suena con lag, es porque el backend renderiza 15s en cada cambio.
-        </p>
-
-        <section class="eq-live">
-          <div class="eq-head">
+        <!-- EQ LIVE -->
+        <section class="eq-shell" id="eqShell">
+          <div class="eq-top">
             <div>
               <h3>EQ Live</h3>
-              <div class="eq-sub">Preview real (15s) desde backend</div>
+              <div class="eq-sub">Preview real (mueve perillas y escucha al instante)</div>
+
+              <div class="chiprow">
+                <div class="chip on" id="chipBoth" title="Afecta original y master">Original + Master</div>
+                <div class="chip" id="chipOrig" title="Solo original">Solo Original</div>
+                <div class="chip" id="chipMaster" title="Solo master">Solo Master</div>
+              </div>
             </div>
-            <div class="pill" id="previewPill">Preview: —</div>
+
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <div class="pill" id="planPill">PLAN: …</div>
+              <div class="pill" id="syncPill">SYNC: —</div>
+            </div>
           </div>
 
           <div class="eq-graph-wrap">
+            <canvas id="specCanvas"></canvas>
+
             <svg id="eqSvg" viewBox="0 0 1000 420" preserveAspectRatio="none" aria-label="EQ curve preview">
               <defs>
                 <linearGradient id="eqGrad" x1="0" x2="1" y1="0" y2="0">
@@ -405,75 +561,110 @@
           </div>
 
           <div class="knobs-eq" id="knobs">
-            <div class="knob tile" data-k="low" data-unit="dB" data-min="-12" data-max="12">
+            <div class="tile" data-k="low" data-unit="dB" data-min="-12" data-max="12">
               <div class="dial" aria-hidden="true"><div class="needle"></div></div>
               <div class="kmeta"><div class="kname">LOW</div><div class="kval" data-val>+0.0 dB</div></div>
-              <input type="range" min="-12" max="12" value="0" step="0.1" disabled />
+              <input id="k_low" type="range" min="-12" max="12" value="0" step="0.1"/>
             </div>
 
-            <div class="knob tile" data-k="mid" data-unit="dB" data-min="-12" data-max="12">
+            <div class="tile" data-k="mid" data-unit="dB" data-min="-12" data-max="12">
               <div class="dial" aria-hidden="true"><div class="needle"></div></div>
               <div class="kmeta"><div class="kname">MID</div><div class="kval" data-val>+0.0 dB</div></div>
-              <input type="range" min="-12" max="12" value="0" step="0.1" disabled />
+              <input id="k_mid" type="range" min="-12" max="12" value="0" step="0.1"/>
             </div>
 
-            <div class="knob tile" data-k="pres" data-unit="dB" data-min="-12" data-max="12">
+            <div class="tile" data-k="pres" data-unit="dB" data-min="-12" data-max="12">
               <div class="dial" aria-hidden="true"><div class="needle"></div></div>
               <div class="kmeta"><div class="kname">PRESENCE</div><div class="kval" data-val>+0.0 dB</div></div>
-              <input type="range" min="-12" max="12" value="0" step="0.1" disabled />
+              <input id="k_pres" type="range" min="-12" max="12" value="0" step="0.1"/>
             </div>
 
-            <div class="knob tile" data-k="air" data-unit="dB" data-min="-12" data-max="12">
+            <div class="tile" data-k="air" data-unit="dB" data-min="-12" data-max="12">
               <div class="dial" aria-hidden="true"><div class="needle"></div></div>
               <div class="kmeta"><div class="kname">AIR</div><div class="kval" data-val>+0.0 dB</div></div>
-              <input type="range" min="-12" max="12" value="0" step="0.1" disabled />
+              <input id="k_air" type="range" min="-12" max="12" value="0" step="0.1"/>
             </div>
 
-            <div class="knob tile" data-k="glue" data-unit="%" data-min="0" data-max="100">
+            <div class="tile" data-k="glue" data-unit="%" data-min="0" data-max="100">
               <div class="dial" aria-hidden="true"><div class="needle"></div></div>
               <div class="kmeta"><div class="kname">GLUE</div><div class="kval" data-val>0 %</div></div>
-              <input type="range" min="0" max="100" value="0" step="1" disabled />
+              <input id="k_glue" type="range" min="0" max="100" value="0" step="1"/>
             </div>
 
-            <div class="knob tile" data-k="width" data-unit="%" data-min="50" data-max="150">
+            <div class="tile" data-k="width" data-unit="%" data-min="50" data-max="150">
               <div class="dial" aria-hidden="true"><div class="needle"></div></div>
               <div class="kmeta"><div class="kname">WIDTH</div><div class="kval" data-val>100 %</div></div>
-              <input type="range" min="50" max="150" value="100" step="1" disabled />
+              <input id="k_width" type="range" min="50" max="150" value="100" step="1"/>
             </div>
 
-            <!-- ✅ RESTAURADO: SAT -->
-            <div class="knob tile" data-k="sat" data-unit="%" data-min="0" data-max="100">
+            <div class="tile" data-k="sat" data-unit="%" data-min="0" data-max="100">
               <div class="dial" aria-hidden="true"><div class="needle"></div></div>
               <div class="kmeta"><div class="kname">SAT</div><div class="kval" data-val>0 %</div></div>
-              <input type="range" min="0" max="100" value="0" step="1" disabled />
+              <input id="k_sat" type="range" min="0" max="100" value="0" step="1"/>
             </div>
 
-            <!-- ✅ RESTAURADO: OUT -->
-            <div class="knob tile" data-k="out" data-unit="dB" data-min="-12" data-max="6">
+            <div class="tile" data-k="out" data-unit="dB" data-min="-12" data-max="6">
               <div class="dial" aria-hidden="true"><div class="needle"></div></div>
-              <div class="kmeta"><div class="kname">OUT</div><div class="kval" data-val>+0.0 dB</div></div>
-              <input type="range" min="-12" max="6" value="0" step="0.1" disabled />
+              <div class="kmeta"><div class="kname">OUTPUT</div><div class="kval" data-val>+0.0 dB</div></div>
+              <input id="k_out" type="range" min="-12" max="6" value="0" step="0.1"/>
+            </div>
+          </div>
+
+          <div class="eq-bottom">
+            <div class="ab">
+              <div class="btnGroup">
+                <button class="btn abbtn secondary on" id="btnA" type="button" title="Solo Original (A)">A</button>
+                <button class="btn abbtn secondary" id="btnB" type="button" title="Solo Master (B) — Mantener para momentary">B</button>
+                <button class="btn abbtn secondary" id="btnABPlay" type="button" title="Reproduce A y B sincronizados">A/B Play</button>
+              </div>
+
+              <div class="slider" title="0=Original, 100=Master">
+                <span class="lab">A</span>
+                <input id="xfade" type="range" min="0" max="100" value="50" step="1" />
+                <span class="lab">B</span>
+              </div>
+
+              <div class="pill" id="abLabel">Crossfade: 50%</div>
+            </div>
+
+            <div class="meters">
+              <div class="mcard">
+                <div class="mrow"><span class="t">RMS</span><span class="v" id="rmsTxt">— dB</span></div>
+                <div class="mbar"><i id="rmsBar"></i></div>
+              </div>
+              <div class="mcard">
+                <div class="mrow"><span class="t">PEAK</span><span class="v" id="peakTxt">— dB</span></div>
+                <div class="mbar"><i id="peakBar"></i></div>
+              </div>
+              <div class="mcard">
+                <div class="mrow"><span class="t">LOUD</span><span class="v" id="loudTxt">— LUFS*</span></div>
+                <div class="mbar"><i id="loudBar"></i></div>
+              </div>
             </div>
           </div>
         </section>
 
-        <div class="foot">© WarMaster — Preview real backend + perillas</div>
+        <p class="hint">
+          *LOUD = aproximación muy usable para UI (no certificación EBU, pero pro para feedback).
+        </p>
+
+        <div class="foot">© WarMaster — backend Render + FFmpeg</div>
       </section>
 
-      <!-- Right -->
+      <!-- RIGHT -->
       <aside class="card">
         <h2>Reproductores</h2>
-        <p class="sub">Original (local) vs Preview/Master (backend).</p>
+        <p class="sub">Original vs Master. A/B PRO mantiene ambos sincronizados.</p>
 
         <div class="player">
           <div class="box">
             <label>Original</label>
-            <audio id="origPlayer" controls></audio>
+            <audio id="origPlayer" controls crossorigin="anonymous"></audio>
           </div>
 
           <div class="box">
-            <label>Preview / Master</label>
-            <audio id="masterPlayer" controls></audio>
+            <label>Master</label>
+            <audio id="masterPlayer" controls crossorigin="anonymous"></audio>
           </div>
         </div>
       </aside>
@@ -487,16 +678,11 @@
     const qs = new URLSearchParams(location.search);
     const API_BASE = (qs.get("api") || "").trim() || location.origin;
 
-    // =========
-    // fetchWithTimeout
-    // =========
     async function fetchWithTimeout(url, options={}, timeoutMs=180000){
-      const hasSignal = !!options.signal;
-      const ctrl = hasSignal ? null : new AbortController();
-      const signal = options.signal || ctrl.signal;
-      const id = setTimeout(() => { try{ ctrl && ctrl.abort(); }catch(_){} }, timeoutMs);
+      const ctrl = new AbortController();
+      const id = setTimeout(() => ctrl.abort(), timeoutMs);
       try{
-        return await fetch(url, { ...options, signal });
+        return await fetch(url, { ...options, signal: ctrl.signal });
       } finally {
         clearTimeout(id);
       }
@@ -509,7 +695,6 @@
     const pickBtn = document.getElementById("pickBtn");
     const drop = document.getElementById("drop");
     const fileName = document.getElementById("fileName");
-    const limitsLine = document.getElementById("limitsLine");
 
     const preset = document.getElementById("preset");
     const intensity = document.getElementById("intensity");
@@ -520,134 +705,650 @@
 
     const status = document.getElementById("status");
     const statusText = document.getElementById("statusText");
-    const bar = document.getElementById("bar");
     const barFill = document.getElementById("barFill");
     const pctEl = document.getElementById("pct");
 
     const origPlayer = document.getElementById("origPlayer");
     const masterPlayer = document.getElementById("masterPlayer");
 
-    const knobWrap = document.getElementById("knobs");
-    const previewPill = document.getElementById("previewPill");
     const planPill = document.getElementById("planPill");
+    const syncPill = document.getElementById("syncPill");
 
-    // =========
-    // EQ curve refs
-    // =========
+    const knobWrap = document.getElementById("knobs");
     const eqPath = document.getElementById("eqPath");
     const eqPathGlow = document.getElementById("eqPathGlow");
     const eqPoints = document.getElementById("eqPoints");
 
+    const chipBoth = document.getElementById("chipBoth");
+    const chipOrig = document.getElementById("chipOrig");
+    const chipMaster = document.getElementById("chipMaster");
+
+    const btnA = document.getElementById("btnA");
+    const btnB = document.getElementById("btnB");
+    const btnABPlay = document.getElementById("btnABPlay");
+    const xfade = document.getElementById("xfade");
+    const abLabel = document.getElementById("abLabel");
+
+    const specCanvas = document.getElementById("specCanvas");
+    const specCtx = specCanvas.getContext("2d");
+
+    // meters
+    const rmsTxt = document.getElementById("rmsTxt");
+    const peakTxt = document.getElementById("peakTxt");
+    const loudTxt = document.getElementById("loudTxt");
+    const rmsBar = document.getElementById("rmsBar");
+    const peakBar = document.getElementById("peakBar");
+    const loudBar = document.getElementById("loudBar");
+
     // =========
     // State
     // =========
-    let USER_PLAN = "FREE";          // FREE/PLUS/PRO
+    let USER_PLAN = "FREE";
     let selectedFile = null;
-    let sourceId = null;
 
+    let masterBlob = null;
+    let masterUrl = null;
     let origUrl = null;
-    let previewUrl = null;
-    let finalUrl = null;
-    let lastBlobForDownload = null;
 
-    let uploadAbort = null;
-    let previewAbort = null;
-    let finalAbort = null;
-
-    const PREVIEW_SECONDS = 15;
-    const PREVIEW_THROTTLE_MS = 550;
-    const PREVIEW_TRAIL_MS = 260;
-
-    let previewTimer = null;
-    let lastPreviewStart = 0;
+    let progTimer = null;
+    let prog = 0;
 
     // =========
-    // Helpers UI
+    // WebAudio PRO
+    // =========
+    let AC = null;
+
+    let mixBus = null;
+    let analyser = null;
+    let specData = null;
+    let specRAF = null;
+
+    let meterAnalyser = null;
+    let meterData = null;
+    let meterRAF = null;
+
+    let graphOrig = null;
+    let graphMaster = null;
+
+    let previewTarget = "BOTH"; // BOTH | ORIG | MASTER
+
+    // A/B pro state
+    let lastMixBeforeMomentary = 50;
+    let momentaryActive = false;
+
+    // sync
+    let syncTimer = null;
+    let isSyncing = false;
+
+    function ensureAC(){
+      if (AC) return AC;
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return null;
+      AC = new Ctx();
+      return AC;
+    }
+
+    async function resumeAC(){
+      const ac = ensureAC();
+      if (!ac) return;
+      if (ac.state !== "running"){
+        try{ await ac.resume(); }catch(_){}
+      }
+    }
+
+    function ensureMixBus(){
+      const ac = ensureAC();
+      if (!ac) return;
+      if (!mixBus){
+        mixBus = ac.createGain();
+        mixBus.gain.value = 1.0;
+
+        analyser = ac.createAnalyser();
+        analyser.fftSize = 2048;
+        analyser.smoothingTimeConstant = 0.8;
+
+        // separate analyser for meters (time domain)
+        meterAnalyser = ac.createAnalyser();
+        meterAnalyser.fftSize = 2048;
+        meterAnalyser.smoothingTimeConstant = 0.4;
+
+        mixBus.connect(analyser);
+        mixBus.connect(meterAnalyser);
+
+        analyser.connect(ac.destination);
+
+        specData = new Uint8Array(analyser.frequencyBinCount);
+        meterData = new Float32Array(meterAnalyser.fftSize);
+      }
+    }
+
+    function makeSaturator(ac){
+      const ws = ac.createWaveShaper();
+      ws.oversample = "4x";
+
+      function setDrive(pct){
+        const p = Math.max(0, Math.min(100, Number(pct||0))) / 100;
+        const drive = 1 + p * 17;
+        const n = 2048;
+        const curve = new Float32Array(n);
+        for (let i=0; i<n; i++){
+          const x = (i/(n-1))*2 - 1;
+          curve[i] = Math.tanh(x * drive);
+        }
+        ws.curve = curve;
+      }
+      setDrive(0);
+
+      return { node: ws, setDrive };
+    }
+
+    function setWidthMatrix(widthNodes, widthPct){
+      const w = Math.max(50, Math.min(150, Number(widthPct||100)));
+      const k = w / 100.0;
+      const a = (1.0 + k) / 2.0;
+      const b = (1.0 - k) / 2.0;
+      widthNodes.gL0.gain.value = a;
+      widthNodes.gL1.gain.value = b;
+      widthNodes.gR0.gain.value = b;
+      widthNodes.gR1.gain.value = a;
+    }
+
+    function dbToGain(db){
+      return Math.pow(10, (Number(db||0))/20);
+    }
+
+    function buildGraphForPlayer(playerEl){
+      const ac = ensureAC();
+      if (!ac) return null;
+
+      ensureMixBus();
+
+      const src = ac.createMediaElementSource(playerEl);
+
+      const low = ac.createBiquadFilter();
+      low.type = "lowshelf";
+      low.frequency.value = 120;
+
+      const mid = ac.createBiquadFilter();
+      mid.type = "peaking";
+      mid.frequency.value = 630;
+      mid.Q.value = 0.85;
+
+      const pres = ac.createBiquadFilter();
+      pres.type = "peaking";
+      pres.frequency.value = 1760;
+      pres.Q.value = 0.90;
+
+      const air = ac.createBiquadFilter();
+      air.type = "highshelf";
+      air.frequency.value = 8500;
+
+      const comp = ac.createDynamicsCompressor();
+      comp.threshold.value = -24;
+      comp.ratio.value = 2;
+      comp.attack.value = 0.01;
+      comp.release.value = 0.20;
+
+      // Width matrix
+      const splitter = ac.createChannelSplitter(2);
+      const merger = ac.createChannelMerger(2);
+      const gL0 = ac.createGain();
+      const gL1 = ac.createGain();
+      const gR0 = ac.createGain();
+      const gR1 = ac.createGain();
+
+      const sat = makeSaturator(ac);
+
+      const out = ac.createGain();
+      out.gain.value = 1.0;
+
+      const mixGain = ac.createGain();
+      mixGain.gain.value = 1.0;
+
+      src.connect(low);
+      low.connect(mid);
+      mid.connect(pres);
+      pres.connect(air);
+      air.connect(comp);
+      comp.connect(splitter);
+
+      splitter.connect(gL0, 0);
+      splitter.connect(gL1, 1);
+      splitter.connect(gR0, 0);
+      splitter.connect(gR1, 1);
+
+      gL0.connect(merger, 0, 0);
+      gL1.connect(merger, 0, 0);
+      gR0.connect(merger, 0, 1);
+      gR1.connect(merger, 0, 1);
+
+      merger.connect(sat.node);
+      sat.node.connect(out);
+      out.connect(mixGain);
+      mixGain.connect(mixBus);
+
+      setWidthMatrix({gL0,gL1,gR0,gR1}, 100);
+
+      return {
+        src,
+        low, mid, pres, air,
+        comp,
+        width: {gL0,gL1,gR0,gR1},
+        sat,
+        out,
+        mixGain,
+      };
+    }
+
+    function applyParamsToGraph(graph, params){
+      if (!graph) return;
+
+      graph.low.gain.value = Number(params.low ?? 0);
+      graph.mid.gain.value = Number(params.mid ?? 0);
+      graph.pres.gain.value = Number(params.pres ?? 0);
+      graph.air.gain.value = Number(params.air ?? 0);
+
+      const glue = Math.max(0, Math.min(100, Number(params.glue ?? 0)));
+      const p = glue / 100;
+      graph.comp.threshold.value = -12 - p * 24;
+      graph.comp.ratio.value = 1.2 + p * 5.0;
+      graph.comp.attack.value = 0.003 + (1-p)*0.02;
+      graph.comp.release.value = 0.12 + p*0.18;
+
+      setWidthMatrix(graph.width, Number(params.width ?? 100));
+
+      graph.sat.setDrive(Number(params.sat ?? 0));
+
+      const outDb = Math.max(-12, Math.min(6, Number(params.out ?? 0)));
+      graph.out.gain.value = dbToGain(outDb);
+    }
+
+    function ensureGraphs(){
+      ensureAC();
+      ensureMixBus();
+
+      if (!graphOrig){
+        try{ graphOrig = buildGraphForPlayer(origPlayer); }catch(_){}
+      }
+      if (!graphMaster){
+        try{ graphMaster = buildGraphForPlayer(masterPlayer); }catch(_){}
+      }
+
+      applyPreview();
+      updateCrossfade();
+      startSpectrum();
+      startMeters();
+      startSyncLoop();
+    }
+
+    function getKnobValues(){
+      const get = (id)=> Number(document.getElementById(id)?.value ?? 0);
+      return {
+        low: get("k_low"),
+        mid: get("k_mid"),
+        pres: get("k_pres"),
+        air: get("k_air"),
+        glue: get("k_glue"),
+        width: get("k_width"),
+        sat: get("k_sat"),
+        out: get("k_out"),
+      };
+    }
+
+    function applyPreview(){
+      const params = getKnobValues();
+      if (previewTarget === "BOTH" || previewTarget === "ORIG") applyParamsToGraph(graphOrig, params);
+      if (previewTarget === "BOTH" || previewTarget === "MASTER") applyParamsToGraph(graphMaster, params);
+    }
+
+    function setChip(target){
+      previewTarget = target;
+      [chipBoth, chipOrig, chipMaster].forEach(c=> c.classList.remove("on"));
+      if (target === "BOTH") chipBoth.classList.add("on");
+      if (target === "ORIG") chipOrig.classList.add("on");
+      if (target === "MASTER") chipMaster.classList.add("on");
+      applyPreview();
+    }
+
+    // =========
+    // A/B PRO crossfade + buttons + momentary
+    // =========
+    function setABButtonsState(which){
+      btnA.classList.toggle("on", which === "A");
+      btnB.classList.toggle("on", which === "B");
+    }
+
+    function setCrossfadeValue(v){
+      const nv = Math.max(0, Math.min(100, Number(v)));
+      xfade.value = String(nv);
+      updateCrossfade();
+    }
+
+    function updateCrossfade(){
+      const v = Math.max(0, Math.min(100, Number(xfade.value||50)));
+      abLabel.textContent = `Crossfade: ${v}%`;
+
+      // equal-power crossfade
+      const t = v / 100;
+
+      if (graphOrig) graphOrig.mixGain.gain.value = Math.cos(t * Math.PI * 0.5);
+      if (graphMaster) graphMaster.mixGain.gain.value = Math.sin(t * Math.PI * 0.5);
+
+      // button state auto
+      if (v <= 0.5) setABButtonsState("A");
+      else if (v >= 99.5) setABButtonsState("B");
+      else { btnA.classList.remove("on"); btnB.classList.remove("on"); }
+    }
+
+    async function abPlay(){
+      await resumeAC();
+      ensureGraphs();
+
+      // si no hay master, play original
+      if (!masterPlayer.src){
+        origPlayer.play().catch(()=>{});
+        return;
+      }
+
+      // sync + play both
+      const t = Math.max(origPlayer.currentTime || 0, masterPlayer.currentTime || 0);
+      try{ origPlayer.currentTime = t; }catch(_){}
+      try{ masterPlayer.currentTime = t; }catch(_){}
+
+      origPlayer.play().catch(()=>{});
+      masterPlayer.play().catch(()=>{});
+    }
+
+    function momentaryBStart(){
+      if (momentaryActive) return;
+      momentaryActive = true;
+      lastMixBeforeMomentary = Number(xfade.value||50);
+      setCrossfadeValue(100);
+      setABButtonsState("B");
+    }
+    function momentaryBEnd(){
+      if (!momentaryActive) return;
+      momentaryActive = false;
+      setCrossfadeValue(lastMixBeforeMomentary);
+      updateCrossfade();
+    }
+
+    // =========
+    // Auto-sync PRO
+    // =========
+    function bothPlaying(){
+      return !origPlayer.paused && !masterPlayer.paused;
+    }
+
+    function setSyncPill(txt){
+      syncPill.textContent = "SYNC: " + txt;
+    }
+
+    function hardSyncTo(time){
+      // set both to same time (clamp)
+      try{ origPlayer.currentTime = time; }catch(_){}
+      try{ masterPlayer.currentTime = time; }catch(_){}
+    }
+
+    function startSyncLoop(){
+      if (syncTimer) return;
+      syncTimer = setInterval(()=>{
+        if (!masterPlayer.src) { setSyncPill("—"); return; }
+
+        const a = origPlayer, b = masterPlayer;
+
+        // if both paused, nothing
+        if (a.paused && b.paused){ setSyncPill("PAUSE"); return; }
+
+        // if one playing and other paused, follow
+        if (!a.paused && b.paused){
+          // try resume B
+          b.play().catch(()=>{});
+        } else if (a.paused && !b.paused){
+          a.play().catch(()=>{});
+        }
+
+        // drift correction
+        const ta = a.currentTime || 0;
+        const tb = b.currentTime || 0;
+        const drift = ta - tb;
+        const adrift = Math.abs(drift);
+
+        if (adrift < 0.03){
+          setSyncPill("LOCK");
+          return;
+        }
+
+        // If medium drift, gently correct by nudging the lagging one
+        if (adrift < 0.18){
+          setSyncPill("TRIM");
+          const target = (ta + tb) * 0.5;
+          hardSyncTo(target);
+          return;
+        }
+
+        // If big drift, hard lock to max time
+        setSyncPill("HARD");
+        hardSyncTo(Math.max(ta, tb));
+      }, 250);
+    }
+
+    function stopSyncLoop(){
+      if (syncTimer){
+        clearInterval(syncTimer);
+        syncTimer = null;
+      }
+    }
+
+    // On seeks: keep locked
+    function bindSeekSync(player){
+      player.addEventListener("seeking", ()=>{
+        if (!masterPlayer.src) return;
+        if (isSyncing) return;
+        isSyncing = true;
+        const t = player.currentTime || 0;
+        hardSyncTo(t);
+        setTimeout(()=>{ isSyncing=false; }, 80);
+      });
+    }
+
+    // =========
+    // Spectrum (real)
+    // =========
+    function resizeCanvasToDisplaySize(canvas){
+      const rect = canvas.getBoundingClientRect();
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      const w = Math.max(1, Math.floor(rect.width * dpr));
+      const h = Math.max(1, Math.floor(rect.height * dpr));
+      if (canvas.width !== w || canvas.height !== h){
+        canvas.width = w;
+        canvas.height = h;
+      }
+      return {w, h, dpr};
+    }
+
+    function startSpectrum(){
+      if (!analyser || !specCtx) return;
+      if (specRAF) return;
+
+      const draw = ()=>{
+        specRAF = requestAnimationFrame(draw);
+
+        const {w, h} = resizeCanvasToDisplaySize(specCanvas);
+        specCtx.clearRect(0,0,w,h);
+
+        analyser.getByteFrequencyData(specData);
+
+        const n = specData.length;
+        const bars = Math.min(120, n);
+        const step = Math.floor(n / bars);
+
+        const pad = Math.floor(w * 0.04);
+        const usableW = w - pad*2;
+        const baseY = h - Math.floor(h*0.12);
+
+        for (let i=0; i<bars; i++){
+          const v = specData[i*step] / 255;
+          const x = pad + (i/(bars-1)) * usableW;
+
+          const barH = Math.max(2, v * (h*0.65));
+          const y = baseY - barH;
+
+          const grad = specCtx.createLinearGradient(0, y, 0, baseY);
+          grad.addColorStop(0, "rgba(0,255,154,.55)");
+          grad.addColorStop(0.55, "rgba(138,92,255,.40)");
+          grad.addColorStop(1, "rgba(0,215,255,.18)");
+
+          specCtx.fillStyle = grad;
+          const bw = Math.max(2, usableW / bars * 0.55);
+          specCtx.fillRect(x - bw/2, y, bw, barH);
+        }
+
+        specCtx.globalAlpha = 0.22;
+        specCtx.fillStyle = "rgba(0,215,255,.35)";
+        specCtx.fillRect(0, baseY+1, w, 1);
+        specCtx.globalAlpha = 1;
+      };
+
+      draw();
+      window.addEventListener("resize", ()=>resizeCanvasToDisplaySize(specCanvas));
+    }
+
+    // =========
+    // Meter PRO (RMS/Peak/Loud approx) on MIX
+    // =========
+    function linToDb(x){
+      const v = Math.max(1e-9, x);
+      return 20 * Math.log10(v);
+    }
+
+    function clamp01(x){ return Math.max(0, Math.min(1, x)); }
+
+    function meterBarFromDb(db){
+      // map: -60..0 dB -> 0..1
+      const t = (db + 60) / 60;
+      return clamp01(t);
+    }
+
+    function startMeters(){
+      if (!meterAnalyser || !meterData) return;
+      if (meterRAF) return;
+
+      let peakHold = -120;
+      let lastHoldT = performance.now();
+
+      const draw = ()=>{
+        meterRAF = requestAnimationFrame(draw);
+
+        meterAnalyser.getFloatTimeDomainData(meterData);
+
+        let sumSq = 0;
+        let peak = 0;
+
+        for (let i=0; i<meterData.length; i++){
+          const s = meterData[i];
+          sumSq += s*s;
+          const a = Math.abs(s);
+          if (a > peak) peak = a;
+        }
+
+        const rms = Math.sqrt(sumSq / meterData.length);
+        const rmsDb = linToDb(rms);
+        const peakDb = linToDb(peak);
+
+        // pseudo loudness: RMS with mild offset (usable UI feedback)
+        // (No EBU gating, pero se siente "LUFS-like")
+        const loudApprox = rmsDb + 1.5; // tweak
+        const now = performance.now();
+
+        // peak hold (300ms)
+        if (peakDb > peakHold || (now - lastHoldT) > 300){
+          peakHold = peakDb;
+          lastHoldT = now;
+        } else {
+          peakHold = peakHold - 0.5; // decay
+        }
+
+        // UI
+        rmsTxt.textContent = `${rmsDb.toFixed(1)} dB`;
+        peakTxt.textContent = `${peakHold.toFixed(1)} dB`;
+        loudTxt.textContent = `${loudApprox.toFixed(1)} LUFS*`;
+
+        rmsBar.style.width = (meterBarFromDb(rmsDb) * 100).toFixed(0) + "%";
+        peakBar.style.width = (meterBarFromDb(peakHold) * 100).toFixed(0) + "%";
+        loudBar.style.width = (meterBarFromDb(loudApprox) * 100).toFixed(0) + "%";
+      };
+
+      draw();
+    }
+
+    // =========
+    // UI helpers
     // =========
     function setProgress(p){
-      const pp = Math.max(0, Math.min(100, Math.round(p)));
-      barFill.style.width = pp + "%";
-      pctEl.textContent = String(pp);
+      prog = Math.max(0, Math.min(100, Math.round(p)));
+      barFill.style.width = prog + "%";
+      pctEl.textContent = String(prog);
     }
-    function setStatus(msg){
+    function setStatus(msg){ statusText.textContent = msg; }
+
+    function stopProgressTimer(){
+      if (progTimer){
+        clearInterval(progTimer);
+        progTimer = null;
+      }
+    }
+    function startFakeProgress(){
+      stopProgressTimer();
+      setProgress(0);
       status.style.display = "block";
-      statusText.textContent = msg || "";
+      setStatus("Procesando...");
+      progTimer = setInterval(()=>{
+        const target = 92;
+        const step = Math.max(1, Math.round((target - prog) * 0.08));
+        setProgress(prog + step);
+        if (prog >= target) setProgress(target);
+      }, 180);
     }
-    function setLoading(on){
-      if (on) bar.classList.add("loading");
-      else bar.classList.remove("loading");
+    function finishProgressOk(){
+      stopProgressTimer();
+      setProgress(100);
+      setStatus("¡Listo! Master generado.");
     }
-    function setPreviewBadge(txt){ previewPill.textContent = txt; }
+    function finishProgressFail(msg){
+      stopProgressTimer();
+      setProgress(0);
+      status.style.display = "block";
+      setStatus(msg || "Error procesando el audio.");
+    }
 
-    function revokeUrl(u){ try{ if (u) URL.revokeObjectURL(u); }catch(_){} }
-
-    function resetAudioOutputs(){
-      lastBlobForDownload = null;
+    function resetMaster(){
+      masterBlob = null;
       downloadBtn.disabled = true;
-      revokeUrl(previewUrl); previewUrl = null;
-      revokeUrl(finalUrl); finalUrl = null;
+      if (masterUrl){
+        URL.revokeObjectURL(masterUrl);
+        masterUrl = null;
+      }
       masterPlayer.removeAttribute("src");
       masterPlayer.load();
     }
 
     function setOriginalPreview(file){
-      revokeUrl(origUrl); origUrl = null;
+      if (origUrl){
+        URL.revokeObjectURL(origUrl);
+        origUrl = null;
+      }
       origUrl = URL.createObjectURL(file);
       origPlayer.src = origUrl;
       origPlayer.load();
     }
 
-    function enableKnobs(){
-      [...knobWrap.querySelectorAll(".knob")].forEach(k=>{
-        k.classList.add("on");
-        k.querySelector("input").disabled = false;
-      });
-    }
-    function disableKnobs(){
-      [...knobWrap.querySelectorAll(".knob")].forEach(k=>{
-        k.classList.remove("on");
-        k.querySelector("input").disabled = true;
-      });
-    }
-
-    function updateButtons(){
-      processBtn.disabled = !sourceId;
+    function updateProcessEnabled(){
+      processBtn.disabled = !selectedFile;
     }
 
     // =========
-    // Plan from backend (/api/me)
-    // =========
-    async function loadPlan(){
-      try{
-        const r = await fetchWithTimeout(API_BASE + "/api/me", {}, 10000);
-        if (r.ok){
-          const j = await r.json();
-          const p = (j && j.plan) ? String(j.plan).toUpperCase() : "FREE";
-          USER_PLAN = (p === "PLUS" || p === "PRO") ? p : "FREE";
-        } else {
-          USER_PLAN = "FREE";
-        }
-      } catch(_){
-        USER_PLAN = "FREE";
-      }
-
-      planPill.textContent = "Plan: " + USER_PLAN;
-
-      // línea de límites (según lo que pediste)
-      if (USER_PLAN === "FREE"){
-        limitsLine.textContent = "WAV / MP3 • FREE: máx 100MB • descarga 30s";
-      } else {
-        limitsLine.textContent = "WAV / MP3 • PLUS/PRO: ilimitado • descarga completa";
-      }
-    }
-
-    function requestedQuality(){
-      // lo que mandamos al backend para enforcement
-      return USER_PLAN;
-    }
-
-    // =========
-    // EQ UI helpers
+    // EQ visual curve + needle
     // =========
     function fmtDb(v){
       const n = Number(v || 0);
@@ -663,8 +1364,6 @@
     }
 
     function updateEqCurve(low, mid, pres, air){
-      if (!eqPath) return;
-
       const mapY = (db)=>{
         const v = Math.max(-12, Math.min(12, Number(db||0)));
         const t = (v + 12) / 24;
@@ -688,44 +1387,30 @@
                  S ${pts[5].x-90} ${pts[5].y}, ${pts[5].x} ${pts[5].y}`;
 
       eqPath.setAttribute("d", d);
-      if (eqPathGlow) eqPathGlow.setAttribute("d", d);
+      eqPathGlow.setAttribute("d", d);
 
-      if (eqPoints){
-        eqPoints.innerHTML = "";
-        const handlePts = [pts[1], pts[2], pts[3], pts[4]];
-        handlePts.forEach((p)=>{
-          const c = document.createElementNS("http://www.w3.org/2000/svg","circle");
-          c.setAttribute("cx", String(p.x));
-          c.setAttribute("cy", String(p.y));
-          c.setAttribute("r", "10");
-          c.setAttribute("fill", "rgba(255,255,255,.88)");
-          c.setAttribute("opacity", ".9");
-
-          const inner = document.createElementNS("http://www.w3.org/2000/svg","circle");
-          inner.setAttribute("cx", String(p.x));
-          inner.setAttribute("cy", String(p.y));
-          inner.setAttribute("r", "4.6");
-          inner.setAttribute("fill", "rgba(10,12,20,1)");
-          inner.setAttribute("opacity", ".85");
-
-          eqPoints.appendChild(c);
-          eqPoints.appendChild(inner);
-        });
-      }
-    }
-
-    function getKnobValues(){
-      const vals = { low: 0, mid: 0, pres: 0, air: 0, glue: 0, width: 100, sat: 0, out: 0 };
-      [...knobWrap.querySelectorAll(".knob")].forEach(k=>{
-        const key = k.getAttribute("data-k");
-        const inp = k.querySelector("input");
-        if (key && inp) vals[key] = Number(inp.value);
+      eqPoints.innerHTML = "";
+      const handlePts = [pts[1], pts[2], pts[3], pts[4]];
+      handlePts.forEach((p)=>{
+        const c = document.createElementNS("http://www.w3.org/2000/svg","circle");
+        c.setAttribute("cx", String(p.x));
+        c.setAttribute("cy", String(p.y));
+        c.setAttribute("r", "10");
+        c.setAttribute("fill", "rgba(255,255,255,.88)");
+        c.setAttribute("opacity", ".9");
+        const inner = document.createElementNS("http://www.w3.org/2000/svg","circle");
+        inner.setAttribute("cx", String(p.x));
+        inner.setAttribute("cy", String(p.y));
+        inner.setAttribute("r", "4.6");
+        inner.setAttribute("fill", "rgba(10,12,20,1)");
+        inner.setAttribute("opacity", ".85");
+        eqPoints.appendChild(c);
+        eqPoints.appendChild(inner);
       });
-      return vals;
     }
 
     function updateEqUI(){
-      const tiles = [...knobWrap.querySelectorAll(".knob.tile")];
+      const tiles = [...knobWrap.querySelectorAll(".tile")];
       const vals = {};
       tiles.forEach(tile=>{
         const key = tile.getAttribute("data-k");
@@ -749,243 +1434,95 @@
       });
 
       updateEqCurve(vals.low ?? 0, vals.mid ?? 0, vals.pres ?? 0, vals.air ?? 0);
+      applyPreview();
+    }
+
+    // Drag tipo perilla
+    const DRAG_SENS = 0.15;
+    function attachKnobDrag(tile){
+      const input = tile.querySelector('input[type="range"]');
+      if (!input) return;
+
+      let dragging = false;
+      let startY = 0;
+      let startVal = 0;
+
+      const min = ()=> Number(input.min);
+      const max = ()=> Number(input.max);
+      const step = ()=> Number(input.step || 1);
+
+      const onDown = async (e)=>{
+        await resumeAC();
+        ensureGraphs();
+
+        dragging = true;
+        startY = (e.touches ? e.touches[0].clientY : e.clientY);
+        startVal = Number(input.value);
+        tile.setPointerCapture?.(e.pointerId);
+        e.preventDefault();
+      };
+
+      const onMove = (e)=>{
+        if (!dragging) return;
+        const y = (e.touches ? e.touches[0].clientY : e.clientY);
+        const dy = startY - y;
+        let next = startVal + dy * DRAG_SENS;
+
+        const st = step();
+        if (st > 0) next = Math.round(next / st) * st;
+
+        next = Math.max(min(), Math.min(max(), next));
+        input.value = String(next);
+        input.dispatchEvent(new Event("input", {bubbles:true}));
+      };
+
+      const onUp = ()=> { dragging = false; };
+
+      tile.addEventListener("pointerdown", onDown);
+      tile.addEventListener("pointermove", onMove);
+      tile.addEventListener("pointerup", onUp);
+      tile.addEventListener("pointercancel", onUp);
+
+      tile.addEventListener("touchstart", onDown, {passive:false});
+      tile.addEventListener("touchmove", onMove, {passive:false});
+      tile.addEventListener("touchend", onUp);
     }
 
     // =========
-    // Preview scheduling
+    // Plan load
     // =========
-    function schedulePreviewRender(){
-      if (!sourceId) return;
-
-      const now = Date.now();
-      const elapsed = now - lastPreviewStart;
-
-      if (elapsed >= PREVIEW_THROTTLE_MS){
-        runPreviewRender();
-        return;
-      }
-
-      if (previewTimer) clearTimeout(previewTimer);
-      previewTimer = setTimeout(()=> runPreviewRender(), PREVIEW_TRAIL_MS);
-    }
-
-    // =========
-    // Upload source (una sola vez)
-    // =========
-    async function uploadSource(file){
-      try{ uploadAbort && uploadAbort.abort(); }catch(_){}
-      uploadAbort = new AbortController();
-
-      setStatus("Subiendo audio…");
-      setLoading(true);
-      setProgress(12);
-      setPreviewBadge("Preview: subiendo…");
-
-      const fd = new FormData();
-      fd.append("file", file);
-      fd.append("requested_quality", requestedQuality());
-
-      const res = await fetchWithTimeout(API_BASE + "/api/source", {
-        method:"POST",
-        body: fd,
-        signal: uploadAbort.signal
-      }, 180000);
-
-      if (!res.ok){
-        let msg = "Error subiendo.";
-        try{ const j = await res.json(); if (j && j.detail) msg = String(j.detail); }catch(_){}
-        throw new Error(msg);
-      }
-
-      const j = await res.json();
-      if (!j || !j.source_id) throw new Error("Respuesta inválida del backend (source_id).");
-
-      setProgress(35);
-      setStatus("Audio cargado. Mueve perillas para generar preview real (15s).");
-      setPreviewBadge("Preview: listo");
-      return j.source_id;
-    }
-
-    // =========
-    // Preview render (backend real)
-    // =========
-    async function runPreviewRender(){
-      if (!sourceId) return;
-
-      try{ previewAbort && previewAbort.abort(); }catch(_){}
-      previewAbort = new AbortController();
-
-      lastPreviewStart = Date.now();
-      setPreviewBadge("Preview: renderizando…");
-      setStatus("Generando preview (15s)…");
-      setLoading(true);
-      setProgress(55);
-
-      const vals = getKnobValues();
-      const fd = new FormData();
-      fd.append("source_id", sourceId);
-      fd.append("seconds", String(PREVIEW_SECONDS));
-      fd.append("preset", preset.value);
-      fd.append("intensity", String(intensity.value));
-
-      fd.append("k_low", String(vals.low ?? 0));
-      fd.append("k_mid", String(vals.mid ?? 0));
-      fd.append("k_pres", String(vals.pres ?? 0));
-      fd.append("k_air", String(vals.air ?? 0));
-      fd.append("k_glue", String(vals.glue ?? 0));
-      fd.append("k_width", String(vals.width ?? 100));
-      fd.append("k_sat", String(vals.sat ?? 0));
-      fd.append("k_out", String(vals.out ?? 0));
-
-      const res = await fetchWithTimeout(API_BASE + "/api/preview_render", {
-        method:"POST",
-        body: fd,
-        signal: previewAbort.signal
-      }, 180000);
-
-      if (!res.ok){
-        let msg = "Error generando preview.";
-        try{ const j = await res.json(); if (j && j.detail) msg = String(j.detail); }catch(_){}
-        throw new Error(msg);
-      }
-
-      const blob = await res.blob();
-      if (!blob || blob.size < 1024) throw new Error("Preview vacío.");
-
-      revokeUrl(previewUrl);
-      previewUrl = URL.createObjectURL(blob);
-      masterPlayer.src = previewUrl;
-      masterPlayer.load();
-
-      lastBlobForDownload = blob;
-      downloadBtn.disabled = false;
-
-      setProgress(82);
-      setStatus("Preview listo. Sigue moviendo perillas para actualizar.");
-      setPreviewBadge("Preview: listo");
-    }
-
-    // =========
-    // Final render (/api/master) sin re-subir
-    // =========
-    async function runFinalRender(){
-      if (!sourceId) return;
-
-      try{ finalAbort && finalAbort.abort(); }catch(_){}
-      finalAbort = new AbortController();
-
-      setStatus("Procesando master final…");
-      setLoading(true);
-      setProgress(65);
-      setPreviewBadge("Preview: —");
-      processBtn.disabled = true;
-
-      const vals = getKnobValues();
-      const fd = new FormData();
-      fd.append("source_id", sourceId);
-      fd.append("preset", preset.value);
-      fd.append("intensity", String(intensity.value));
-
-      fd.append("k_low", String(vals.low ?? 0));
-      fd.append("k_mid", String(vals.mid ?? 0));
-      fd.append("k_pres", String(vals.pres ?? 0));
-      fd.append("k_air", String(vals.air ?? 0));
-      fd.append("k_glue", String(vals.glue ?? 0));
-      fd.append("k_width", String(vals.width ?? 100));
-      fd.append("k_sat", String(vals.sat ?? 0));
-      fd.append("k_out", String(vals.out ?? 0));
-
-      // enforcement backend (FREE => 30s, PLUS/PRO => full)
-      fd.append("requested_quality", requestedQuality());
-
-      const res = await fetchWithTimeout(API_BASE + "/api/master", {
-        method:"POST",
-        body: fd,
-        signal: finalAbort.signal
-      }, 240000);
-
-      if (!res.ok){
-        let msg = "Error procesando.";
-        try{ const j = await res.json(); if (j && j.detail) msg = String(j.detail); }catch(_){}
-        throw new Error(msg);
-      }
-
-      const blob = await res.blob();
-      if (!blob || blob.size < 1024) throw new Error("Master vacío.");
-
-      revokeUrl(finalUrl);
-      finalUrl = URL.createObjectURL(blob);
-      masterPlayer.src = finalUrl;
-      masterPlayer.load();
-
-      lastBlobForDownload = blob;
-      downloadBtn.disabled = false;
-
-      setProgress(100);
-      setStatus(USER_PLAN === "FREE" ? "¡Listo! Render final (FREE = 30s)." : "¡Listo! Master final completo.");
-    }
+    (async ()=>{
+      try{
+        const r = await fetch(API_BASE + "/api/me");
+        if (r.ok){
+          const j = await r.json();
+          if (j && j.plan) USER_PLAN = String(j.plan).toUpperCase();
+        }
+      }catch(_){}
+      planPill.textContent = "PLAN: " + USER_PLAN;
+    })();
 
     // =========
     // Events
     // =========
-    knobWrap.addEventListener("input", (e)=>{
-      if (e.target && e.target.matches('input[type="range"]')) {
-        updateEqUI();
-        schedulePreviewRender();
-      }
-    });
-
-    intensity.addEventListener("input", ()=>{
-      intVal.textContent = intensity.value;
-      schedulePreviewRender();
-    });
-
-    preset.addEventListener("change", ()=> schedulePreviewRender());
+    intensity.addEventListener("input", ()=> { intVal.textContent = intensity.value; });
 
     pickBtn.addEventListener("click", ()=> fileInput.click());
 
-    async function onPickedFile(f){
-      selectedFile = f;
-      fileName.textContent = f.name;
-
-      setOriginalPreview(f);
-      resetAudioOutputs();
-
-      sourceId = null;
-      updateButtons();
-      disableKnobs();
-
-      try{
-        await loadPlan(); // refresca plan antes de subir
-        const sid = await uploadSource(f);
-        sourceId = sid;
-
-        enableKnobs();
-        updateButtons();
-        setProgress(40);
-
-        // preview inicial
-        updateEqUI();
-        schedulePreviewRender();
-      } catch(err){
-        setStatus(err && err.message ? err.message : "Error subiendo.");
-        setProgress(0);
-        setLoading(false);
-        setPreviewBadge("Preview: error");
-        sourceId = null;
-        updateButtons();
-        disableKnobs();
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fileInput.addEventListener("change", ()=>{
+    fileInput.addEventListener("change", async ()=>{
       const f = fileInput.files && fileInput.files[0];
       if (!f) return;
-      onPickedFile(f);
+      selectedFile = f;
+      fileName.textContent = f.name;
+      setOriginalPreview(f);
+      resetMaster();
+      updateProcessEnabled();
+
+      await resumeAC();
+      ensureGraphs();
     });
 
+    // Drag & drop
     ["dragenter","dragover"].forEach(ev=>{
       drop.addEventListener(ev, (e)=>{
         e.preventDefault(); e.stopPropagation();
@@ -998,50 +1535,191 @@
         drop.style.borderColor = "rgba(255,255,255,.22)";
       });
     });
-    drop.addEventListener("drop", (e)=>{
+    drop.addEventListener("drop", async (e)=>{
       const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
       if (!f) return;
+      selectedFile = f;
       fileInput.value = "";
-      onPickedFile(f);
+      fileName.textContent = f.name;
+      setOriginalPreview(f);
+      resetMaster();
+      updateProcessEnabled();
+
+      await resumeAC();
+      ensureGraphs();
     });
 
-    downloadBtn.addEventListener("click", ()=>{
-      if (!lastBlobForDownload) return;
-      const url = URL.createObjectURL(lastBlobForDownload);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "warmaster_output.wav";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(()=> revokeUrl(url), 1500);
-    });
+    // Auto-sync binds
+    bindSeekSync(origPlayer);
+    bindSeekSync(masterPlayer);
 
-    processBtn.addEventListener("click", async ()=>{
-      try{
-        setLoading(true);
-        await runFinalRender();
-      } catch(err){
-        setStatus(err && err.message ? err.message : "Error de red.");
-        setProgress(0);
-      } finally {
-        setLoading(false);
-        processBtn.disabled = !sourceId;
+    // Chips target
+    chipBoth.addEventListener("click", async ()=>{ await resumeAC(); ensureGraphs(); setChip("BOTH"); });
+    chipOrig.addEventListener("click", async ()=>{ await resumeAC(); ensureGraphs(); setChip("ORIG"); });
+    chipMaster.addEventListener("click", async ()=>{ await resumeAC(); ensureGraphs(); setChip("MASTER"); });
+
+    // Knobs input -> preview + curve
+    knobWrap.addEventListener("input", async (e)=>{
+      if (e.target && e.target.matches('input[type="range"]')){
+        await resumeAC();
+        ensureGraphs();
+        updateEqUI();
+        if (!momentaryActive) updateCrossfade();
       }
     });
 
-    // =========
-    // Init
-    // =========
-    (async ()=>{
-      disableKnobs();
-      setProgress(0);
-      setStatus("Selecciona un archivo para comenzar.");
-      setPreviewBadge("Preview: —");
-      await loadPlan();
+    // Attach knob drag
+    [...knobWrap.querySelectorAll(".tile")].forEach(attachKnobDrag);
+
+    // A/B Play
+    btnABPlay.addEventListener("click", async ()=>{ await abPlay(); });
+
+    // A button = 0
+    btnA.addEventListener("click", async ()=>{
+      await resumeAC(); ensureGraphs();
+      momentaryActive = false;
+      setCrossfadeValue(0);
+      setABButtonsState("A");
+    });
+
+    // B button click = 100
+    btnB.addEventListener("click", async ()=>{
+      await resumeAC(); ensureGraphs();
+      momentaryActive = false;
+      setCrossfadeValue(100);
+      setABButtonsState("B");
+    });
+
+    // Momentary B (press/hold)
+    const startMomentary = async (e)=>{
+      e.preventDefault();
+      await resumeAC(); ensureGraphs();
+      momentaryBStart();
+      await abPlay();
+    };
+    const endMomentary = (e)=>{
+      e.preventDefault();
+      momentaryBEnd();
+    };
+
+    btnB.addEventListener("pointerdown", startMomentary);
+    btnB.addEventListener("pointerup", endMomentary);
+    btnB.addEventListener("pointercancel", endMomentary);
+    btnB.addEventListener("mouseleave", endMomentary);
+
+    btnB.addEventListener("touchstart", startMomentary, {passive:false});
+    btnB.addEventListener("touchend", endMomentary, {passive:false});
+    btnB.addEventListener("touchcancel", endMomentary, {passive:false});
+
+    // Crossfade slider
+    xfade.addEventListener("input", async ()=>{
+      await resumeAC(); ensureGraphs();
+      if (!momentaryActive){
+        updateCrossfade();
+      }
+    });
+
+    // When either plays, ensure graphs + sync
+    origPlayer.addEventListener("play", async ()=>{ await resumeAC(); ensureGraphs(); });
+    masterPlayer.addEventListener("play", async ()=>{ await resumeAC(); ensureGraphs(); });
+
+    window.addEventListener("load", ()=>{
       updateEqUI();
-      updateButtons();
-    })();
+      updateProcessEnabled();
+      updateCrossfade();
+    });
+
+    // Download
+    downloadBtn.addEventListener("click", ()=>{
+      if (!masterBlob) return;
+      const url = masterUrl || URL.createObjectURL(masterBlob);
+      masterUrl = url;
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "warmaster_master.wav";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    });
+
+    // Process
+    processBtn.addEventListener("click", async ()=>{
+      if (!selectedFile) return;
+
+      processBtn.disabled = true;
+      downloadBtn.disabled = true;
+      resetMaster();
+
+      startFakeProgress();
+
+      const vals = getKnobValues();
+
+      const fd = new FormData();
+      fd.append("file", selectedFile);
+      fd.append("preset", preset.value);
+      fd.append("intensity", String(intensity.value));
+
+      fd.append("k_low", String(vals.low ?? 0));
+      fd.append("k_mid", String(vals.mid ?? 0));
+      fd.append("k_pres", String(vals.pres ?? 0));
+      fd.append("k_air", String(vals.air ?? 0));
+      fd.append("k_glue", String(vals.glue ?? 0));
+      fd.append("k_width", String(vals.width ?? 100));
+      fd.append("k_sat", String(vals.sat ?? 0));
+      fd.append("k_out", String(vals.out ?? 0));
+
+      try{
+        const res = await fetchWithTimeout(API_BASE + "/api/master", {
+          method: "POST",
+          body: fd
+        }, 180000);
+
+        if (!res.ok){
+          let msg = "Error en el backend.";
+          try{
+            const j = await res.json();
+            if (j && j.detail) msg = String(j.detail);
+          }catch(_){}
+          finishProgressFail(msg);
+          processBtn.disabled = false;
+          return;
+        }
+
+        const blob = await res.blob();
+        if (!blob || blob.size < 1024){
+          finishProgressFail("Master vacío.");
+          processBtn.disabled = false;
+          return;
+        }
+
+        masterBlob = blob;
+
+        if (masterUrl){
+          URL.revokeObjectURL(masterUrl);
+          masterUrl = null;
+        }
+        masterUrl = URL.createObjectURL(blob);
+        masterPlayer.src = masterUrl;
+        masterPlayer.load();
+
+        finishProgressOk();
+        if (USER_PLAN === "FREE") setStatus("¡Listo! Preview 30s (FREE).");
+        downloadBtn.disabled = false;
+
+        await resumeAC();
+        ensureGraphs();
+        applyPreview();
+        updateCrossfade();
+      }catch(err){
+        const msg = (err && err.name === "AbortError") ? "Timeout (180s). Intenta de nuevo." : "Error de red.";
+        finishProgressFail(msg);
+      }finally{
+        processBtn.disabled = false;
+      }
+    });
+
+    // init
+    updateProcessEnabled();
   </script>
 </body>
 </html>
