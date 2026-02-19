@@ -13,11 +13,9 @@
   --text:#e9ecf3;
   --muted:#a8b0c3;
 
-  /* corporativo */
   --brand:#6d5efc;
   --brand2:#2dd4bf;
 
-  /* planes */
   --free:#ffffff;
   --plus:#f5c542;
   --pro:#4ea8ff;
@@ -144,7 +142,7 @@ body{
 .stat .k{color: var(--muted); font-size:12px}
 .stat .v{margin-top:6px; font-weight:900; font-size:18px}
 
-/* LIST: 2 columnas en desktop */
+/* LIST */
 .grid{
   display:grid;
   grid-template-columns: 1fr 1fr;
@@ -152,7 +150,7 @@ body{
 }
 @media (max-width: 980px){ .grid{grid-template-columns: 1fr;} }
 
-/* Item card */
+/* Item */
 .item{
   border:1px solid rgba(255,255,255,.06);
   border-radius: 18px;
@@ -346,8 +344,8 @@ body{
       <h2>Dashboard</h2>
       <span class="pill" id="countPill">0</span>
     </div>
-    <div class="body">
 
+    <div class="body">
       <div class="stats">
         <div class="stat"><div class="k">Masters disponibles</div><div class="v" id="stTotal">0</div></div>
         <div class="stat"><div class="k">FREE</div><div class="v" id="stFree">0</div></div>
@@ -381,32 +379,26 @@ body{
       </div>
 
       <div class="smallNote">
-        Puedes re-descargar el mismo master cuando quieras mientras esté disponible en el servidor. Si subes nuevamente el audio y haces un master nuevo, se considera un nuevo producto.
+        Puedes re-descargar el mismo master cuando quieras mientras esté disponible en el servidor.
       </div>
-
     </div>
   </div>
 </div>
 
 <script>
-  function getApiBase() {
-    const qs = new URLSearchParams(location.search);
-    const fromQS = qs.get("api");
-    if (fromQS) return fromQS.replace(/\/+$/,'');
-    const stored = localStorage.getItem("WM_API_BASE");
-    if (stored) return stored.replace(/\/+$/,'');
-    return "";
-  }
-  const API_BASE = getApiBase();
-  document.getElementById("apiPill").textContent = "API: " + (API_BASE || "mismo dominio");
+  // =========
+  // API BASE (QS > same domain)
+  // =========
+  const qs = new URLSearchParams(location.search);
+  const API_BASE = (qs.get("api") || "").trim() || location.origin;
+  document.getElementById("apiPill").textContent = "API: " + (qs.get("api") ? qs.get("api") : "mismo dominio");
 
   function qsCarry(path){
-    const qs = new URLSearchParams(location.search);
     const api = qs.get("api");
     return api ? (path + "?api=" + encodeURIComponent(api)) : path;
   }
-  document.getElementById("goHome").onclick = () => location.href = qsCarry("/index.html");
-  document.getElementById("goMaster").onclick = () => location.href = qsCarry("/master.html");
+  document.getElementById("goHome").onclick  = () => location.href = qsCarry("index.html");
+  document.getElementById("goMaster").onclick = () => location.href = qsCarry("master.html");
 
   async function fetchWithTimeout(url, options={}, timeoutMs=180000) {
     const ctrl = new AbortController();
@@ -424,7 +416,9 @@ body{
       .replaceAll("'","&#039;");
   }
 
-  // PLAN (por ahora fallback FREE si no existe /api/me)
+  // =========
+  // PLAN
+  // =========
   let currentPlan = "FREE";
   function applyPlanUI(){
     const pill = document.getElementById("planPill");
@@ -435,18 +429,20 @@ body{
   }
   async function loadPlan(){
     try{
-      const res = await fetchWithTimeout((API_BASE||"") + "/api/me", {}, 12000);
+      const res = await fetchWithTimeout(API_BASE + "/api/me", {}, 12000);
       if(!res.ok) throw new Error("no /api/me");
       const data = await res.json();
       currentPlan = (data.plan || "FREE").toUpperCase();
-      if(!["FREE","PLUS","PRO"].includes(currentPlan)) currentPlan="FREE";
-    }catch(e){
+      if(!["FREE","PLUS","PRO"].includes(currentPlan)) currentPlan = "FREE";
+    }catch(_){
       currentPlan = "FREE";
     }
     applyPlanUI();
   }
 
-  // Player
+  // =========
+  // PLAYER
+  // =========
   function fmtTime(sec){
     sec = Math.max(0, Math.floor(sec || 0));
     const m = Math.floor(sec/60);
@@ -496,10 +492,13 @@ body{
 
     vol.addEventListener("input", () => { audio.volume = Number(vol.value); });
     audio.volume = Number(vol.value);
+
     syncBtn();
   }
 
-  // Skeleton
+  // =========
+  // UI HELPERS
+  // =========
   function showSkeleton(){
     const list = document.getElementById("list");
     list.innerHTML = "";
@@ -515,7 +514,6 @@ body{
     }
   }
 
-  // Stats
   function setStats(items){
     document.getElementById("stTotal").textContent = String(items.length);
     document.getElementById("stFree").textContent  = String(items.filter(x => (x.quality||"").toUpperCase()==="FREE").length);
@@ -525,49 +523,48 @@ body{
 
   function badgeHTML(q){
     q = (q||"FREE").toUpperCase();
-    if(q === "PRO") return `<span class="badge pro">PRO</span>`;
-    if(q === "PLUS") return `<span class="badge plus">PLUS</span>`;
-    return `<span class="badge free">FREE</span>`;
+    const cls = (q==="PLUS") ? "plus" : (q==="PRO") ? "pro" : "free";
+    return `<span class="badge ${cls}">${escapeHtml(q)}</span>`;
   }
 
   function waveHTML(){
-    let s = `<div class="wave" aria-label="viz">`;
-    for(let i=0;i<12;i++){
-      const h = 8 + ((i*7) % 16);
-      s += `<span class="bar" style="height:${h}px"></span>`;
-    }
+    // 12 barritas
+    let s = `<div class="wave">`;
+    for(let i=0;i<12;i++) s += `<div class="bar"></div>`;
     s += `</div>`;
     return s;
   }
 
-  // Data + filtros
+  // =========
+  // DATA LOAD + RENDER
+  // =========
   let allItems = [];
 
   function applyFilters(){
-    const q = (document.getElementById("q").value || "").toLowerCase().trim();
+    const q = (document.getElementById("q").value || "").trim().toLowerCase();
     const f = document.getElementById("filterQ").value;
-    const s = document.getElementById("sortQ").value;
+    const sort = document.getElementById("sortQ").value;
 
     let items = [...allItems];
 
     if(f !== "ALL"){
-      items = items.filter(x => (x.quality||"").toUpperCase() === f);
+      items = items.filter(x => (x.quality || "FREE").toUpperCase() === f);
     }
 
     if(q){
       items = items.filter(x => {
-        const t = (x.title || "").toLowerCase();
-        const id = (x.id || "").toLowerCase();
-        return t.includes(q) || id.includes(q);
+        const id = String(x.id || "").toLowerCase();
+        const title = String(x.title || "").toLowerCase();
+        return id.includes(q) || title.includes(q);
       });
     }
 
-    if(s === "OLD"){
-      items.sort((a,b)=> String(a.created_at||"").localeCompare(String(b.created_at||"")));
-    } else if(s === "NAME"){
-      items.sort((a,b)=> String(a.title||"").localeCompare(String(b.title||"")));
-    } else {
+    if(sort === "NEW"){
       items.sort((a,b)=> String(b.created_at||"").localeCompare(String(a.created_at||"")));
+    }else if(sort === "OLD"){
+      items.sort((a,b)=> String(a.created_at||"").localeCompare(String(b.created_at||"")));
+    }else if(sort === "NAME"){
+      items.sort((a,b)=> String(a.title||"").localeCompare(String(b.title||"")));
     }
 
     render(items);
@@ -576,119 +573,103 @@ body{
   function render(items){
     const list = document.getElementById("list");
     const empty = document.getElementById("empty");
+    const countPill = document.getElementById("countPill");
+
+    countPill.textContent = String(items.length);
+
     list.innerHTML = "";
+    empty.style.display = items.length ? "none" : "block";
+    if(!items.length) return;
 
-    document.getElementById("countPill").textContent = String(items.length);
-    setStats(items);
+    items.forEach(m=>{
+      const q = (m.quality || "FREE").toUpperCase();
+      const cls = (q==="PLUS") ? "plus" : (q==="PRO") ? "pro" : "free";
 
-    if(!items.length){
-      empty.style.display = "";
-      return;
-    }
-    empty.style.display = "none";
+      const title = m.title || ("Master " + (m.id || ""));
+      const created = m.created_at ? new Date(m.created_at).toLocaleString() : "—";
+      const preset = m.preset || "clean";
+      const intensity = (m.intensity ?? 55);
 
-    items.forEach(it => {
-      const q = (it.quality||"FREE").toUpperCase();
+      const streamUrl = API_BASE + "/stream/" + encodeURIComponent(m.id);
+      const dlUrl = API_BASE + "/download/" + encodeURIComponent(m.id);
+
       const card = document.createElement("div");
-      card.className = "item " + (q === "PRO" ? "pro" : (q==="PLUS" ? "plus" : ""));
-
-      const title = escapeHtml(it.title || ("Master " + it.id));
-      const created = escapeHtml((it.created_at || "").slice(0,19).replace("T"," "));
-      const preset = escapeHtml(it.preset || "clean");
-      const intensity = escapeHtml(String(it.intensity ?? 55));
-      const id = escapeHtml(it.id);
-
-      const downloadLabel = (currentPlan === "FREE") ? "Descargar 30s" : "Descargar completo";
-
+      card.className = `item ${cls}`;
       card.innerHTML = `
         <div class="itemTop">
           <div>
-            <div class="title">${title}</div>
-            <div class="meta">${created || "—"} · Preset: ${preset} · Intensidad: ${intensity} · ID: ${id}</div>
+            <div class="title" title="${escapeHtml(title)}">${escapeHtml(title)}</div>
+            <div class="meta">
+              ID: <b>${escapeHtml(m.id)}</b> • ${escapeHtml(created)}<br/>
+              Preset: <b>${escapeHtml(preset)}</b> • Intensidad: <b>${escapeHtml(intensity)}</b>
+            </div>
           </div>
-          <div class="badges">${badgeHTML(q)}</div>
+          <div class="badges">
+            ${badgeHTML(q)}
+          </div>
         </div>
 
         ${waveHTML()}
 
         <div class="player">
-          <button class="pBtn" data-act="play" type="button">Play</button>
+          <button class="pBtn" data-act="play">Play</button>
           <div class="pMid">
             <div class="pTimeRow">
               <span data-k="cur">0:00</span>
-              <span>/</span>
+              <span> / </span>
               <span data-k="dur">0:00</span>
             </div>
-            <input class="pSeek" type="range" min="0" max="1000" value="0" data-act="seek"/>
+            <input class="pSeek" data-act="seek" type="range" min="0" max="1000" value="0"/>
           </div>
-          <input class="pVol" type="range" min="0" max="1" step="0.01" value="1" data-act="vol" aria-label="vol"/>
-          <audio preload="metadata"></audio>
+          <input class="pVol" data-act="vol" type="range" min="0" max="1" step="0.01" value="1"/>
+          <audio preload="metadata" src="${escapeHtml(streamUrl)}"></audio>
         </div>
 
         <div class="actions">
-          <button class="btn btnPrimary" type="button" data-act="download">${downloadLabel}</button>
-          <button class="btn" type="button" data-act="open">Abrir</button>
-          <button class="btn" type="button" data-act="copy">Copiar ID</button>
+          <a class="btn btnPrimary" href="${escapeHtml(dlUrl)}" download>Descargar</a>
+          <button class="btn" data-act="openMaster">Abrir Master</button>
         </div>
       `;
 
-      // Reproducir inline (sin descarga)
-      const audio = card.querySelector("audio");
-      audio.src = (API_BASE||"") + `/stream/${encodeURIComponent(it.id)}`;
-
-      // Descargar según plan
-      card.querySelector('[data-act="download"]').onclick = async () => {
-        if (currentPlan === "FREE") {
-          const url = (API_BASE||"") + `/api/master/preview?master_id=${encodeURIComponent(it.id)}&seconds=30`;
-          window.open(url, "_blank");
-          return;
-        }
-        const url = (API_BASE||"") + `/download/${encodeURIComponent(it.id)}`;
-        window.open(url, "_blank");
+      // Open master page with same api
+      card.querySelector('[data-act="openMaster"]').onclick = () => {
+        location.href = qsCarry("master.html");
       };
 
-      // Abrir (stream)
-      card.querySelector('[data-act="open"]').onclick = () => {
-        const url = (API_BASE||"") + `/stream/${encodeURIComponent(it.id)}`;
-        window.open(url, "_blank");
-      };
-
-      // Copiar ID
-      card.querySelector('[data-act="copy"]').onclick = async () => {
-        try{
-          await navigator.clipboard.writeText(it.id);
-          const b = card.querySelector('[data-act="copy"]');
-          b.textContent = "Copiado";
-          setTimeout(()=> b.textContent = "Copiar ID", 900);
-        }catch(e){
-          alert("No se pudo copiar.");
-        }
-      };
-
-      bindPlayer(card);
       list.appendChild(card);
+      bindPlayer(card);
     });
   }
 
   async function loadMasters(){
     showSkeleton();
-    const res = await fetchWithTimeout((API_BASE||"") + "/api/masters", {}, 180000);
-    if(!res.ok){
+
+    try{
+      const res = await fetchWithTimeout(API_BASE + "/api/masters", {}, 20000);
+      if(!res.ok) throw new Error("No /api/masters");
+      const data = await res.json();
+      allItems = Array.isArray(data) ? data : [];
+      setStats(allItems);
+      applyFilters();
+    }catch(e){
       allItems = [];
-      render([]);
-      return;
+      setStats([]);
+      document.getElementById("list").innerHTML = "";
+      document.getElementById("empty").style.display = "block";
+      document.getElementById("countPill").textContent = "0";
     }
-    const data = await res.json();
-    allItems = Array.isArray(data) ? data : [];
-    applyFilters();
   }
 
+  // =========
+  // EVENTS
+  // =========
   document.getElementById("btnRefresh").onclick = loadMasters;
   document.getElementById("q").addEventListener("input", applyFilters);
   document.getElementById("filterQ").addEventListener("change", applyFilters);
   document.getElementById("sortQ").addEventListener("change", applyFilters);
 
-  (async function init(){
+  // Init
+  (async ()=>{
     await loadPlan();
     await loadMasters();
   })();
