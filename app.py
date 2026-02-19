@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Query
-from fastapi.responses import FileResponse, RedirectResponse, JSONResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -167,6 +167,9 @@ def preset_chain(
         eq_base = "bass=g=-1:f=120,treble=g=4:f=8500"
     elif preset == "heavy":
         eq_base = "bass=g=5:f=90,treble=g=2:f=3500"
+    elif preset == "loud":
+        # ✅ agregado para que el preset del front exista realmente
+        eq_base = "bass=g=3:f=110,treble=g=3:f=7500"
     else:
         eq_base = "bass=g=2:f=120,treble=g=1:f=8000"
 
@@ -445,7 +448,6 @@ async def master(
 
     cleanup_files(in_path)
 
-    # Mantengo FileResponse (como tu front lo espera) + header master id
     return FileResponse(
         path=str(out_path),
         media_type="audio/wav",
