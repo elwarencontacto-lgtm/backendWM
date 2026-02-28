@@ -900,7 +900,7 @@
     // ========= State =========
     let USER_PLAN = "FREE";
     let selectedFile = null;
-
+let currentMasterId = null; // <-- ID del master en backend (viene en header X-Master-Id)
     let masterBlob = null;
     let masterUrl = null;
     let origUrl = null;
@@ -1926,18 +1926,86 @@
       updatePlayhead();
     });
 
-    downloadBtn.addEventListener("click", ()=>{
-      if (!masterBlob) return;
-      const url = masterUrl || URL.createObjectURL(masterBlob);
-      masterUrl = url;
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "warmaster_master.wav";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    });
+    downloadBtn.addEventListener("click", async ()=>{
+  // Si no hay master_id, cae al modo antiguo
+  if (!currentMasterId){
+    if (!masterBlob) return;
+    const url = masterUrl || URL.createObjectURL(masterBlob);
+    masterUrl = url;
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "warmaster_master.wav";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    return;
+  }
 
+  downloadBtn.disabled = true;
+  setStatus("Generando descarga con tus ajustes...");
+
+  // leer valores actuales de perillas
+  const vals = { low: 0, mid: 0, pres: 0, air: 0, glue: 0, width: 100, sat: 0, out: 0 };
+  [...knobWrap.querySelectorAll(".knob")].forEach(k=>{
+    const key = k.getAttribute("data-k");
+    const inp = k.querySelector("input");
+    if (key && inp) vals[key] = inp.value;
+  });
+
+  const fd = new FormData();
+  fd.append("k_low", String(vals.low ?? 0));
+  fd.append("k_mid", String(vals.mid ?? 0));
+  fd.append("k_pres", String(vals.pres ?? 0));
+  fd.append("k_air", String(vals.air ?? 0));
+  fd.append("k_glue", String(vals.glue ?? 0));
+  fd.append("k_width", String(vals.width ?? 100));
+  fd.append("k_sat", String(vals.sat ?? 0));
+  fd.append("k_out", String(vals.out ?? 0));
+
+  try{
+    // Render final en backend (este WAV SÍ incluye perillas)
+    const res = await fetchWithTimeout(
+      `${API_BASE}/api/masters/${encodeURIComponent(currentMasterId)}/render`,
+      { method: "POST", body: fd },
+      180000
+    );
+
+    if (!res.ok){
+      let msg = "Error generando descarga.";
+      try{
+        const j = await res.json();
+        if (j && j.detail) msg = String(j.detail);
+      }catch(_){}
+      finishProgressFail(msg);
+      return;
+    }
+
+    const blob = await res.blob();
+    if (!blob || blob.size < 1024){
+      finishProgressFail("Descarga vacía.");
+      return;
+    }
+
+    // descargar blob (con los ajustes)
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "warmaster_master.wav";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    // liberar URL
+    setTimeout(()=> URL.revokeObjectURL(url), 1500);
+
+    setStatus("Descarga lista ✅ (incluye tus ajustes).");
+  }catch(err){
+    const msg = (err && err.name === "AbortError") ? "Timeout (180s) generando descarga." : "Error de red generando descarga.";
+    finishProgressFail(msg);
+  }finally{
+    downloadBtn.disabled = false;
+  }
+});
     // Process -> backend master (real)
     processBtn.addEventListener("click", async ()=>{
       if (!selectedFile) return;
@@ -1976,7 +2044,8 @@
           processBtn.disabled = false;
           return;
         }
-
+// Guardar master_id del backend (header)
+currentMasterId = res.headers.get("X-Master-Id") || null;
         const blob = await res.blob();
         if (!blob || blob.size < 1024){
           finishProgressFail("Master vacío.");
