@@ -2007,104 +2007,91 @@ let currentMasterId = null; // <-- ID del master en backend (viene en header X-M
   }
 });
     // Process -> backend master (real)
+    
     processBtn.addEventListener("click", async ()=>{
-      if (!selectedFile) return;
+  if (!selectedFile) return;
 
-      processBtn.disabled = true;
-      downloadBtn.disabled = true;
-      resetMaster();
+  processBtn.disabled = true;
+  downloadBtn.disabled = true;
+  resetMaster();
+  startFakeProgress();
 
-      startFakeProgress();
+  const vals = getKnobValues();
+  const fd = new FormData();
 
-      const vals = getKnobValues();
-      const fd = new FormData();
-      fd.append("file", selectedFile);
-      fd.append("preset", preset.value);
-      fd.append("intensity", String(intensity.value));
+  fd.append("file", selectedFile);
+  fd.append("preset", preset.value);
+  fd.append("intensity", String(intensity.value));
 
-      fd.append("k_low", String(vals.low ?? 0));
-      fd.append("k_mid", String(vals.mid ?? 0));
-      fd.append("k_pres", String(vals.pres ?? 0));
-      fd.append("k_air", String(vals.air ?? 0));
-      fd.append("k_glue", String(vals.glue ?? 0));
-      fd.append("k_width", String(vals.width ?? 100));
-      fd.append("k_sat", String(vals.sat ?? 0));
-      fd.append("k_out", String(vals.out ?? 0));
+  fd.append("k_low", String(vals.low ?? 0));
+  fd.append("k_mid", String(vals.mid ?? 0));
+  fd.append("k_pres", String(vals.pres ?? 0));
+  fd.append("k_air", String(vals.air ?? 0));
+  fd.append("k_glue", String(vals.glue ?? 0));
+  fd.append("k_width", String(vals.width ?? 100));
+  fd.append("k_sat", String(vals.sat ?? 0));
+  fd.append("k_out", String(vals.out ?? 0));
 
+  try{
+    const res = await fetchWithTimeout(
+      API_BASE + "/api/master",
+      { method:"POST", body: fd },
+      180000
+    );
+
+    if (!res.ok){
+      let msg = "Error en el backend.";
       try{
-        const res = await fetchWithTimeout(API_BASE + "/api/master", { method:"POST", body: fd }, 180000);
-
-        if (!res.ok){
-          let msg = "Error en el backend.";
-          try{
-            const j = await res.json();
-            if (j && j.detail) msg = String(j.detail);
-          }catch(_){}
-          finishProgressFail(msg);
-          processBtn.disabled = false;
-          return;
-        }
-// Guardar master_id del backend (header)
-currentMasterId = res.headers.get("X-Master-Id") || null;
-        const blob = await res.blob();
-        if (!blob || blob.size < 1024){
-          finishProgressFail("Master vacío.");
-          processBtn.disabled = false;
-          return;
-        }
-
-        masterBlob = blob;
-
-        if (masterUrl){ cleanupObjectURL(masterUrl); masterUrl = null; }
-        masterUrl = URL.createObjectURL(blob);
-        masterPlayer.src = masterUrl;
-        masterPlayer.load();
-
-        finishProgressOk();
-        if (USER_PLAN === "FREE") setStatus("¡Listo! Preview 30s (FREE).");
-        downloadBtn.disabled = false;
-
-        await resumeAC();
-        ensureGraphs();
-        applyPreview();
-        updateCrossfade();
-
-        bufMaster = await decodeToBuffer(blob);
-        drawWaveform();
-        computeAndSetAutoLevel();
-
-      }catch(err){
-        const msg = (err && err.name === "AbortError") ? "Timeout (180s). Intenta de nuevo." : "Error de red.";
-        finishProgressFail(msg);
-      }finally{
-        processBtn.disabled = false;
-      }
-    });
-
-    // ========= Init =========
-    function updateProcessEnabled(){ processBtn.disabled = !selectedFile; }
-
-    function setProgress(p){
-      prog = clamp(Math.round(p), 0, 100);
-      barFill.style.width = prog + "%";
-      pctEl.textContent = String(prog);
+        const j = await res.json();
+        if (j && j.detail) msg = String(j.detail);
+      }catch(_){}
+      finishProgressFail(msg);
+      return;
     }
 
-    function setStatus(msg){ statusText.textContent = msg; }
+    // ✅ Ahora backend devuelve JSON con master_id
+    const j = await res.json();
 
-    // init visual
-    window.addEventListener("load", ()=>{
-      updateEqUI();
-      updateCrossfade();
-      drawWaveform();
-      updateProcessEnabled();
-    });
+    if (!j || !j.master_id){
+      finishProgressFail("No llegó master_id desde backend.");
+      return;
+    }
 
-    // ensure loops start once audio context is ready
-    window.addEventListener("pointerdown", async ()=>{
-      await resumeAC();
-      ensureGraphs();
-    }, { once:true });
+    currentMasterId = j.master_id;
+
+    // ✅ Cargar master desde stream (NO blob)
+    masterUrl = `${API_BASE}/api/masters/${encodeURIComponent(currentMasterId)}/stream`;
+    masterPlayer.src = masterUrl;
+    masterPlayer.load();
+
+    finishProgressOk();
+    if (USER_PLAN === "FREE") setStatus("¡Listo! Preview 30s (FREE).");
+
+    downloadBtn.disabled = false;
+
+    // 🔥 Mantener tu sistema PRO funcionando
+    await resumeAC();
+    ensureGraphs();
+    applyPreview();
+    updateCrossfade();
+
+    // 🔥 Si tu modo PRO necesita buffer, cargarlo desde URL
+    const arr = await fetch(masterUrl).then(r => r.arrayBuffer());
+    bufMaster = await decodeToBuffer(arr);
+
+    drawWaveform();
+    computeAndSetAutoLevel();
+
+  }catch(err){
+    const msg =
+      (err && err.name === "AbortError")
+        ? "Timeout (180s). Intenta de nuevo."
+        : "Error de red.";
+    finishProgressFail(msg);
+  }finally{
+    processBtn.disabled = false;
+  }
+});
 
   </script>
 </body>
