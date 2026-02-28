@@ -51,9 +51,10 @@ masters: Dict[str, Dict[str, Any]] = {}  # master_id -> metadata
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,          # ✅ clave
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-Master-Id"],   # ✅ clave
 )
 
 
