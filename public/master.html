@@ -2052,7 +2052,7 @@ currentMasterId = res.headers.get("X-Master-Id") || null;
           processBtn.disabled = false;
           return;
         }
-
+console.log("X-Master-Id =", currentMasterId);
         masterBlob = blob;
 
         if (masterUrl){ cleanupObjectURL(masterUrl); masterUrl = null; }
