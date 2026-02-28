@@ -2045,7 +2045,10 @@ let currentMasterId = null; // <-- ID del master en backend (viene en header X-M
           return;
         }
 // Guardar master_id del backend (header)
-currentMasterId = res.headers.get("X-Master-Id") || null;
+currentMasterId =
+  res.headers.get("X-Master-Id") ||
+  res.headers.get("x-master-id") ||
+  null;
         const blob = await res.blob();
         if (!blob || blob.size < 1024){
           finishProgressFail("Master vacío.");
